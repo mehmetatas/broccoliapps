@@ -1,5 +1,5 @@
 {
-  "name": "@framework/infra",
+  "name": "@apppotato/infra",
   "version": "0.0.0",
   "type": "module",
   "main": "dist/index.js",

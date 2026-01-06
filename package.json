@@ -5,7 +5,8 @@
   "type": "module",
   "workspaces": [
     "framework/*",
-    "apppotato.com/*"
+    "apppotato.com/*",
+    "expense-tracker/*"
   ],
   "engines": {
     "node": ">=22"

@@ -32,5 +32,12 @@ export class CertificateStack extends cdk.Stack {
         [`*.${altApexDomain}`]: appototoZone,
       }),
     });
+
+    // Export certificate ARN for use by other stacks (e.g., expense-tracker)
+    new cdk.CfnOutput(this, "certificate-arn", {
+      value: this.certificate.certificateArn,
+      exportName: "apppotato-cert-arn",
+      description: "Wildcard certificate ARN for *.apppotato.com",
+    });
   }
 }

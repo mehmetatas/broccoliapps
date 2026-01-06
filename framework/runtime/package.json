@@ -1,5 +1,5 @@
 {
-  "name": "@framework/runtime",
+  "name": "@apppotato/framework",
   "version": "0.0.0",
   "type": "module",
   "main": "dist/index.js",
