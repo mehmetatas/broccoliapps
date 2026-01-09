@@ -1,7 +1,7 @@
 // @framework/runtime
 // Reusable backend/SaaS runtime library for web/mobile apps on AWS
 
-export const VERSION = '0.0.0';
+export const VERSION = "0.0.0";
 
 // Planned exports:
 // - HTTP routing

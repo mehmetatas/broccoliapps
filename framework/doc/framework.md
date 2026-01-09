@@ -42,16 +42,16 @@ CDK constructs for deploying:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        CloudFront                            │
-│                    (CDN + Custom Domain)                     │
+│                        CloudFront                           │
+│                    (CDN + Custom Domain)                    │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                    Lambda Function URL                       │
-│                   (Single Entry Point)                       │
+│                    Lambda Function URL                      │
+│                   (Single Entry Point)                      │
 │  ┌───────────────────────────────────────────────────────┐  │
-│  │                  @framework/runtime                    │  │
+│  │                  @framework/runtime                   │  │
 │  │  ┌─────────┐  ┌──────┐  ┌──────┐  ┌────────────────┐  │  │
 │  │  │ Router  │→ │ Auth │→ │ Rate │→ │    Handler     │  │  │
 │  │  │         │  │      │  │Limit │  │                │  │  │

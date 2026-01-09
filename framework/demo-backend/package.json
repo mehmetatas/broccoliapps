@@ -1,0 +1,38 @@
+{
+  "name": "@apppotato/demo-backend",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "dist/src/handler.js",
+  "types": "dist/src/handler.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc && cp src/package.json dist/src/",
+    "clean": "rm -rf dist *.tsbuildinfo cdk.out",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src",
+    "deploy": "rm -rf dist cdk.out && npm run build && cdk deploy --all --require-approval never --profile appi"
+  },
+  "dependencies": {
+    "@apppotato/framework": "*"
+  },
+  "devDependencies": {
+    "@apppotato/infra": "*",
+    "@types/aws-lambda": "^8.10.147",
+    "@types/node": "^22.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.22.0",
+    "@typescript-eslint/parser": "^8.22.0",
+    "aws-cdk": "^2.233.0",
+    "aws-cdk-lib": "^2.233.0",
+    "constructs": "^10.4.0",
+    "eslint": "^9.19.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.0.0"
+  }
+}
