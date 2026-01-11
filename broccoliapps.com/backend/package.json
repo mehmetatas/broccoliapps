@@ -1,0 +1,40 @@
+{
+  "name": "@broccoliapps/backend",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "local": "tsx watch dev/server.ts",
+    "build": "tsc --noEmit",
+    "build:lambda": "tsx scripts/build.ts",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "cdk": "cdk",
+    "deploy": "npm run build:lambda && cdk deploy --profile appi --require-approval never",
+    "invalidate": "aws cloudfront create-invalidation --distribution-id E37HWDLRRXVPYN --paths \"/*\" --profile appi --no-cli-pager"
+  },
+  "devDependencies": {
+    "@broccoliapps/infra": "file:../../framework/infra",
+    "@hono/node-server": "^1.19.7",
+    "@types/aws-lambda": "^8.10.159",
+    "@types/node": "^25.0.3",
+    "aws-cdk-lib": "^2.234.0",
+    "constructs": "^10.4.4",
+    "esbuild": "^0.27.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@hono/valibot-validator": "^0.6.1",
+    "hono": "^4.11.3",
+    "preact": "^10.28.2",
+    "preact-render-to-string": "^6.6.5",
+    "valibot": "^1.2.0"
+  }
+}

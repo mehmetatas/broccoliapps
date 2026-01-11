@@ -1,11 +1,11 @@
 {
-  "name": "apppotato",
+  "name": "broccoliapps",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "workspaces": [
     "framework/*",
-    "apppotato.com/*",
+    "broccoliapps.com/*",
     "expense-tracker/*"
   ],
   "engines": {

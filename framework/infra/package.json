@@ -1,5 +1,5 @@
 {
-  "name": "@apppotato/infra",
+  "name": "@broccoliapps/infra",
   "version": "0.0.0",
   "type": "module",
   "main": "dist/index.js",
@@ -17,8 +17,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "tsc",
-    "clean": "rm -rf dist *.tsbuildinfo"
+    "build": "npm run clean && tsc",
+    "clean": "rm -rf dist/"
   },
   "dependencies": {
     "aws-cdk-lib": "^2.233.0",

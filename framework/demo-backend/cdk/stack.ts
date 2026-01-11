@@ -1,4 +1,4 @@
-import { sslCert } from "@apppotato/infra";
+import { sslCert } from "@broccoliapps/infra";
 import * as cdk from "aws-cdk-lib";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
@@ -18,15 +18,15 @@ export class DemoStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const domain = "demo.apppotato.com";
-    const apexDomain = "apppotato.com";
+    const domain = "demo.broccoliapps.com";
+    const apexDomain = "broccoliapps.com";
 
     // Lookup existing hosted zone
-    const hostedZone = route53.HostedZone.fromLookup(this, "apppotato-zone", {
+    const hostedZone = route53.HostedZone.fromLookup(this, "broccoliapps-zone", {
       domainName: apexDomain,
     });
 
-    // Wildcard certificate for *.apppotato.com
+    // Wildcard certificate for *.broccoliapps.com
     const certificate = sslCert(this);
 
     // S3 bucket for static website content

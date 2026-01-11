@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "outDir": "dist",
+    "rootDir": ".",
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "noPropertyAccessFromIndexSignature": false
+  },
+  "include": ["src", "dev", "scripts", "cdk"],
+  "exclude": ["node_modules", "dist"]
+}

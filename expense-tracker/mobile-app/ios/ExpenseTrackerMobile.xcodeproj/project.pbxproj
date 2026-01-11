@@ -276,7 +276,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.apppotato.spendish;
+				PRODUCT_BUNDLE_IDENTIFIER = com.broccoliapps.spendish;
 				PRODUCT_NAME = ExpenseTrackerMobile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -306,7 +306,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.apppotato.spendish;
+				PRODUCT_BUNDLE_IDENTIFIER = com.broccoliapps.spendish;
 				PRODUCT_NAME = ExpenseTrackerMobile;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

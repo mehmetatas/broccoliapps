@@ -1,5 +1,5 @@
 {
-  "name": "@apppotato/framework",
+  "name": "@broccoliapps/framework",
   "version": "0.0.0",
   "type": "module",
   "main": "dist/index.js",

@@ -1,5 +1,5 @@
 {
-  "name": "@apppotato/expense-tracker-backend",
+  "name": "@broccoliapps/expense-tracker-backend",
   "version": "0.0.0",
   "type": "module",
   "main": "dist/src/handler.js",
@@ -19,10 +19,10 @@
     "deploy": "rm -rf dist cdk.out && npm run build && cdk deploy --all --require-approval never --profile appi"
   },
   "dependencies": {
-    "@apppotato/framework": "*"
+    "@broccoliapps/framework": "*"
   },
   "devDependencies": {
-    "@apppotato/infra": "*",
+    "@broccoliapps/infra": "*",
     "@types/aws-lambda": "^8.10.147",
     "@types/node": "^22.10.0",
     "@typescript-eslint/eslint-plugin": "^8.22.0",

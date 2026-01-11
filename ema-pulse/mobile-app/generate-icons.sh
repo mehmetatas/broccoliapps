@@ -1,7 +1,7 @@
 #!/bin/bash
-SOURCE="/Users/mehmet/Documents/github/apppotato/ema-pulse/assets/ema-pulse-logo-1024.png"
-IOS_DEST="/Users/mehmet/Documents/github/apppotato/ema-pulse/mobile-app/ios/MobileApp/Images.xcassets/AppIcon.appiconset"
-ANDROID_RES="/Users/mehmet/Documents/github/apppotato/ema-pulse/mobile-app/android/app/src/main/res"
+SOURCE="/Users/mehmet/Documents/github/broccoliapps/ema-pulse/assets/ema-pulse-logo-1024.png"
+IOS_DEST="/Users/mehmet/Documents/github/broccoliapps/ema-pulse/mobile-app/ios/MobileApp/Images.xcassets/AppIcon.appiconset"
+ANDROID_RES="/Users/mehmet/Documents/github/broccoliapps/ema-pulse/mobile-app/android/app/src/main/res"
 
 # iOS icons
 sips -z 40 40 "$SOURCE" --out "$IOS_DEST/icon-20@2x.png"
