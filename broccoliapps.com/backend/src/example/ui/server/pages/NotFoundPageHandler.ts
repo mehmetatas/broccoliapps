@@ -1,4 +1,4 @@
-import { app } from "../../../app";
+import { page } from "../lambda";
 import { NotFound } from "./NotFoundPage";
 
-app.notFound(NotFound);
+page.notFound(NotFound);

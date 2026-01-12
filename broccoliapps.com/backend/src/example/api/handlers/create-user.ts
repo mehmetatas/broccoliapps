@@ -1,7 +1,7 @@
-import { app } from "../../app";
+import { api } from "../lambda";
 import { createUser } from "../../shared/api-contracts";
 
-app.api(createUser, async (req, res) => {
+api.register(createUser, async (req, res) => {
   // TODO: actual implementation
   return res.created({
     id: 1,

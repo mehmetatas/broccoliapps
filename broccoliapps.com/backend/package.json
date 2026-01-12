@@ -12,11 +12,9 @@
   },
   "scripts": {
     "local": "tsx watch dev/server.ts",
-    "build": "tsc --noEmit",
-    "build:lambda": "tsx scripts/build.ts",
-    "clean": "rm -rf dist *.tsbuildinfo",
-    "cdk": "cdk",
-    "deploy": "npm run build:lambda && cdk deploy --profile appi --require-approval never",
+    "typecheck": "tsc --noEmit",
+    "build:lambda": "rm -rf dist cdk.out && tsx scripts/build.ts",
+    "deploy": "npm run build:lambda && npx cdk deploy --profile appi --require-approval never",
     "invalidate": "aws cloudfront create-invalidation --distribution-id E37HWDLRRXVPYN --paths \"/*\" --profile appi --no-cli-pager"
   },
   "devDependencies": {

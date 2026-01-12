@@ -1,6 +1,6 @@
 import * as v from "valibot";
-import { page } from "../../../framework/backend/http";
-import { HomePage, ListUsersPage, UserDetailPage } from "./pages";
+import { HomePage, ListUsersPage, UserDetailPage } from ".";
+import { page } from "../../../../framework/backend/http/page";
 
 export const homePage = page(HomePage, "/").build();
 

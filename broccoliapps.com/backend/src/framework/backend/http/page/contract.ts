@@ -1,7 +1,7 @@
 import * as v from "valibot";
-import { emptySchema, type EmptyRequest } from "../../shared/contract";
-import type { Schema } from "../../shared/types";
-import type { PageComponent } from "./page-types";
+import { emptySchema, type EmptyRequest } from "../../../shared/contract";
+import type { Schema } from "../../../shared/types";
+import type { PageComponent } from "./types";
 
 // Page contract - includes component for SSR
 export class PageContract<TReq extends Record<string, unknown>, TProps> {

@@ -1,7 +1,7 @@
-import { app } from "../../../app";
-import { userDetailPage } from "../contracts";
+import { page } from "../lambda";
+import { userDetailPage } from "./contracts";
 
-app.page(userDetailPage, async (req, res) => {
+page.register(userDetailPage, async (req, res) => {
   // TODO: fetch from database
   return res.render({
     id: req.id,

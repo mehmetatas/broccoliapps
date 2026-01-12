@@ -17,9 +17,8 @@ export class ApiError extends Error {
 export const emptySchema = v.object({});
 export type EmptyRequest = v.InferOutput<typeof emptySchema>;
 
-// Full contract - just data, no impl/invoke methods
-// Use impl() from backend and invoke() from frontend
-export class FullContract<TReq extends Record<string, unknown>, TRes> {
+// API contract - just data, no impl/invoke methods
+export class ApiContract<TReq extends Record<string, unknown>, TRes> {
   readonly _response!: TRes; // phantom type for type inference
 
   constructor(
@@ -30,14 +29,14 @@ export class FullContract<TReq extends Record<string, unknown>, TRes> {
 }
 
 // Builder: after .withRequest() - IS a contract (defaults to void), can add .withResponse<T>()
-export class ContractWithRequest<TReq extends Record<string, unknown>> extends FullContract<TReq, void> {
-  withResponse<TRes>(): FullContract<TReq, TRes> {
-    return new FullContract<TReq, TRes>(this.method, this.path, this.schema);
+export class ContractWithRequest<TReq extends Record<string, unknown>> extends ApiContract<TReq, void> {
+  withResponse<TRes>(): ApiContract<TReq, TRes> {
+    return new ApiContract<TReq, TRes>(this.method, this.path, this.schema);
   }
 }
 
 // Builder: initial state - IS a contract (defaults to void), can add .withRequest() or .withResponse<T>()
-export class ContractBuilder extends FullContract<EmptyRequest, void> {
+export class ContractBuilder extends ApiContract<EmptyRequest, void> {
   constructor(method: HttpMethod, path: string) {
     super(method, path, emptySchema);
   }
@@ -49,8 +48,8 @@ export class ContractBuilder extends FullContract<EmptyRequest, void> {
     return new ContractWithRequest<v.InferOutput<v.ObjectSchema<TReq, undefined>>>(this.method, this.path, schema);
   }
 
-  withResponse<TRes>(): FullContract<EmptyRequest, TRes> {
-    return new FullContract<EmptyRequest, TRes>(this.method, this.path, emptySchema);
+  withResponse<TRes>(): ApiContract<EmptyRequest, TRes> {
+    return new ApiContract<EmptyRequest, TRes>(this.method, this.path, emptySchema);
   }
 }
 

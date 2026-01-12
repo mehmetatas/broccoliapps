@@ -1,4 +1,0 @@
-{
-  "description": "This file is required for lambda to recognize ES modules.",
-  "type": "module"
-}

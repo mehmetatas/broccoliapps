@@ -1,6 +1,6 @@
-import { app } from "../../app";
+import { api } from "../lambda";
 import { ping } from "../../shared/api-contracts";
 
-app.api(ping, async (_req, res) => {
+api.register(ping, async (_req, res) => {
   return res.noContent();
 });

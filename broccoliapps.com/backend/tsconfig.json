@@ -3,11 +3,11 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "noUncheckedSideEffectImports": true,
     "outDir": "dist",
     "rootDir": ".",
     "jsx": "react-jsx",
-    "jsxImportSource": "preact",
-    "noPropertyAccessFromIndexSignature": false
+    "jsxImportSource": "preact"
   },
   "include": ["src", "dev", "scripts", "cdk"],
   "exclude": ["node_modules", "dist"]

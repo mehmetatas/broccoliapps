@@ -1,7 +1,7 @@
-import { app } from "../../app";
+import { api } from "../lambda";
 import { listUsers } from "../../shared/api-contracts";
 
-app.api(listUsers, async (_req, res) => {
+api.register(listUsers, async (_req, res) => {
   // TODO: actual implementation
   return res.ok({
     users: [

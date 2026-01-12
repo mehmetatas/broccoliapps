@@ -2,8 +2,6 @@ import * as v from "valibot";
 import { coerceNumber } from "../../framework/shared/coerce";
 import { api } from "../../framework/shared/contract";
 
-// TODO: This will become contracts/ folder
-
 export const createUser = api("POST", "/users")
   .withRequest({
     name: v.pipe(v.string(), v.minLength(2)),
@@ -25,7 +23,7 @@ export const ping = api("POST", "/health/ping");
 export const createValidationTest = api("POST", "/validation-test")
   .withRequest({
     // String validations
-    name: v.pipe(v.string(), v.minLength(2), v.maxLength(50)),
+    name: v.pipe(v.string(), v.trim(), v.minLength(2), v.maxLength(50)),
     email: v.pipe(v.string(), v.email()),
     phone: v.pipe(v.string(), v.regex(/^\+?[1-9]\d{1,14}$/)),
     slug: v.pipe(v.string(), v.regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)),
@@ -71,11 +69,7 @@ export const createValidationTest = api("POST", "/validation-test")
     }),
 
     // Array validations
-    tags: v.pipe(
-      v.array(v.pipe(v.string(), v.minLength(1))),
-      v.minLength(1),
-      v.maxLength(10)
-    ),
+    tags: v.pipe(v.array(v.pipe(v.string(), v.minLength(1))), v.minLength(1), v.maxLength(10)),
 
     items: v.pipe(
       v.array(

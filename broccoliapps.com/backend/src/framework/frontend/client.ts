@@ -1,4 +1,4 @@
-import { ApiError, type FullContract } from "../shared";
+import { ApiError, type ApiContract } from "../shared";
 
 // Extract path param names from path (e.g., "/users/:id" -> ["id"])
 const extractPathParams = (path: string): string[] => {
@@ -21,7 +21,7 @@ type InvokeOptions = {
  * }, { baseUrl: "https://api.example.com" });
  */
 export const invoke = async <TReq extends Record<string, unknown>, TRes>(
-  contract: FullContract<TReq, TRes>,
+  contract: ApiContract<TReq, TRes>,
   request: TReq,
   options?: InvokeOptions
 ): Promise<TRes> => {

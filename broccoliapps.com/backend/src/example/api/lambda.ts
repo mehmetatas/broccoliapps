@@ -1,4 +1,8 @@
-import { app } from "../app";
-import "./handlers";
+import { ApiRouter } from "../../framework/backend/http/api";
 
-export const handler = app.lambdaHandler();
+export const api = new ApiRouter();
+
+// Lazily import handlers - they self-register to api
+import("./handlers");
+
+export const handler = api.lambdaHandler();

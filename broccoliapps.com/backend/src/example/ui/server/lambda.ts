@@ -1,4 +1,8 @@
-import { app } from "../../app"; // init app
-import "./handlers"; // register handlers to app
+import { PageRouter } from "../../../framework/backend/http/page";
 
-export const handler = app.lambdaHandler();
+export const page = new PageRouter();
+
+// Lazily import handlers - they self-register to page
+import("./pages/handlers");
+
+export const handler = page.lambdaHandler();

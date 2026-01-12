@@ -1,7 +1,7 @@
-import { app } from "../../app";
+import { api } from "../lambda";
 import { deleteUser } from "../../shared/api-contracts";
 
-app.api(deleteUser, async (_req, res) => {
+api.register(deleteUser, async (_req, res) => {
   // TODO: actual implementation
   return res.noContent();
 });

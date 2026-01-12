@@ -3,24 +3,11 @@ import * as v from "valibot";
 import type { HttpMethod } from "../../shared";
 
 /**
- * Extract path parameter names from a route path
- * "/users/:id/posts/:postId" → ["id", "postId"]
- */
-export const extractPathParamNames = (path: string): string[] => {
-  const matches = path.match(/:(\w+)/g);
-  if (!matches) {return [];}
-  return matches.map((m) => m.slice(1));
-};
-
-/**
  * Merge request data from appropriate sources based on HTTP method.
  * - GET/DELETE: query params + path params (path takes precedence)
  * - POST/PUT/PATCH: body + path params (path takes precedence)
  */
-export const mergeRequestData = async (
-  c: Context,
-  method: HttpMethod
-): Promise<Record<string, unknown>> => {
+const mergeRequestData = async (c: Context, method: HttpMethod): Promise<Record<string, unknown>> => {
   const pathParams = c.req.param() as Record<string, string>;
 
   if (method === "GET" || method === "DELETE") {
