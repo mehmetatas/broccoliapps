@@ -1,9 +1,6 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "noUncheckedSideEffectImports": true,
     "outDir": "dist",
     "rootDir": ".",
     "jsx": "react-jsx",

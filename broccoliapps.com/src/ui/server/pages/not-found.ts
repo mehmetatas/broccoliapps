@@ -1,4 +1,4 @@
+import { NotFound } from "../../client/pages/NotFoundPage";
 import { page } from "../lambda";
-import { NotFound } from "./NotFoundPage";
 
 page.notFound(NotFound);

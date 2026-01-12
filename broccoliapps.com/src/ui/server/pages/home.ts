@@ -1,7 +1,7 @@
+import { HomePage } from "../../client";
 import { page } from "../lambda";
-import { homePage } from "./contracts";
 
-page.register(homePage, async (_req, res) => {
+page.route("/", HomePage).handler(async (_req, res) => {
   return res.render(
     {
       title: "Welcome to BroccoliApps",

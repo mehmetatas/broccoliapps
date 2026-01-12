@@ -1,7 +1,7 @@
+import { ListUsersPage } from "../../client";
 import { page } from "../lambda";
-import { listUsersPage } from "./contracts";
 
-page.register(listUsersPage, async (_req, res) => {
+page.route("/users", ListUsersPage).handler(async (_req, res) => {
   // TODO: fetch from database
   return res.render({
     users: [

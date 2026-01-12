@@ -8,20 +8,23 @@ export default tseslint.config(
     files: ["**/*.ts", "**/*.tsx"],
     rules: {
       // Enforce double quotes
-      "quotes": ["error", "double", { avoidEscape: true }],
+      quotes: ["error", "double", { avoidEscape: true }],
 
       // Enforce arrow functions for callbacks
       "prefer-arrow-callback": "error",
 
       // Require braces for all control statements
-      "curly": ["error", "all"],
+      curly: ["error", "all"],
 
       // No unused variables (use TypeScript version)
       "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": ["error", {
-        argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_",
-      }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
     },
   },
   {
