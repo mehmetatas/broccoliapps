@@ -281,28 +281,28 @@ class AppBuilder {
     }
 
     // Create Cognito prefix domain (for testing - switch to custom domain later)
-    const domainPrefix = this.resourceName().replace(/\./g, "-"); // broccoliapps-com
-    new cognito.UserPoolDomain(this.stack, this.resourceName("user-pool-domain"), {
-      userPool,
-      cognitoDomain: {
-        domainPrefix,
-      },
-    });
-
-    // TODO: Switch back to custom domain once prefix domain works
-    // const authDomain = `${this.subdomain("auth")}.${this.domain}`;
-    // const userPoolDomain = new cognito.UserPoolDomain(this.stack, this.resourceName("user-pool-domain"), {
+    // const domainPrefix = this.resourceName().replace(/\./g, "-"); // broccoliapps-com
+    // new cognito.UserPoolDomain(this.stack, this.resourceName("user-pool-domain"), {
     //   userPool,
-    //   customDomain: {
-    //     domainName: authDomain,
-    //     certificate: this.getSslCert(),
+    //   cognitoDomain: {
+    //     domainPrefix,
     //   },
     // });
-    // new route53.ARecord(this.stack, this.resourceName("auth-alias-record"), {
-    //   zone: this.getHostedZone(),
-    //   recordName: "auth",
-    //   target: route53.RecordTarget.fromAlias(new route53targets.UserPoolDomainTarget(userPoolDomain)),
-    // });
+
+    // Custom cognito domain
+    const authDomain = `${this.subdomain("auth")}.${this.domain}`;
+    const userPoolDomain = new cognito.UserPoolDomain(this.stack, this.resourceName("user-pool-domain"), {
+      userPool,
+      customDomain: {
+        domainName: authDomain,
+        certificate: this.getSslCert(),
+      },
+    });
+    new route53.ARecord(this.stack, this.resourceName("auth-alias-record"), {
+      zone: this.getHostedZone(),
+      recordName: "auth",
+      target: route53.RecordTarget.fromAlias(new route53targets.UserPoolDomainTarget(userPoolDomain)),
+    });
 
     return {
       userPoolId: userPool.userPoolId,
@@ -348,7 +348,7 @@ class AppBuilder {
     return this;
   }
 
-  private configureStaticBucket(isDefaultOrigin = false): s3.Bucket {
+  private configureStaticBucket(isDefaultOrigin = false) {
     const bucket = new s3.Bucket(this.stack, this.resourceName("static-bucket"), {
       bucketName: this.resourceName("static"),
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -359,14 +359,14 @@ class AppBuilder {
     // Deploy static files to S3
     // If this is the default origin (static-only site), deploy to root
     // Otherwise, deploy under /static/ prefix
-    new s3deploy.BucketDeployment(this.stack, this.resourceName("static-deploy"), {
+    const deployment = new s3deploy.BucketDeployment(this.stack, this.resourceName("static-deploy"), {
       sources: [s3deploy.Source.asset(this.staticPath!)],
       destinationBucket: bucket,
       destinationKeyPrefix: isDefaultOrigin ? undefined : "static",
       cacheControl: [s3deploy.CacheControl.maxAge(cdk.Duration.days(365))],
     });
 
-    return bucket;
+    return { bucket, deployment };
   }
 
   private configureLambda(
@@ -668,7 +668,12 @@ class AppBuilder {
     let staticBucket: s3.Bucket | undefined;
     if (this.staticPath) {
       const isDefaultOrigin = !this.ssrLambdaDef;
-      staticBucket = this.configureStaticBucket(isDefaultOrigin);
+      const bucketConfig = this.configureStaticBucket(isDefaultOrigin);
+      staticBucket = bucketConfig.bucket;
+
+      // Make sure static asset deployment happens before ssrlambda is updated
+      // Otherwise ssrlambda can start referencing app.<newbuildid>.css which is not uploaded yet
+      ssrLambda?.node.addDependency(bucketConfig.deployment);
     }
 
     const distribution = this.configureCloudFront({ ssrLambda, apiLambda, staticBucket });

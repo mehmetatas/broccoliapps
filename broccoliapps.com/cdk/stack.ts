@@ -8,7 +8,7 @@ const AWS_ACCOUNT_ID = "155305329201";
 const AWS_REGION = "us-west-2";
 const DOMAIN = "broccoliapps.com";
 const SSL_CERT_ARN = "arn:aws:acm:us-east-1:155305329201:certificate/9887f1e9-b8f8-4b9e-9135-3c35d35e7ae1"; // *.broccoliapps.com
-const GOOGLE_CLIENT_ID = "492757555603-e4jds09s87mrbaaod3br2be2rbpr9mqo.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "841028661003-o4qd27u4euae7bg7cs1imnssj54i32f1.apps.googleusercontent.com";
 
 await app("broccoliapps-com")
   .in(AWS_ACCOUNT_ID, AWS_REGION)
