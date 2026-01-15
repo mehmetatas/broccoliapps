@@ -1,10 +1,10 @@
 import type { ApiContract, HttpMethod, HttpResponse, Schema } from "@broccoliapps/shared";
 import type { Context } from "hono";
-import { RequestContext } from "../context";
-import { deserializeRequest } from "../deserializer";
-import { handleError, HttpRouter, setCookies } from "../router";
-import { HttpHandler } from "../types";
+import { RequestContext } from "./context";
+import { deserializeRequest } from "./deserializer";
+import { handleError, HttpRouter, setCookies } from "./http-router";
 import { createApiResponse, type ApiResponse } from "./response";
+import { HttpHandler } from "./types";
 
 export class ApiRouter extends HttpRouter {
   /**

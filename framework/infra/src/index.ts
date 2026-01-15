@@ -151,165 +151,6 @@ class AppBuilder {
     return table;
   }
 
-  private async configureCognito(): Promise<{ userPoolId: string; userPoolClientId: string }> {
-    if (!this.signinConfig) {
-      throw new Error("SigninConfig is required for Cognito");
-    }
-    if (!this.domain) {
-      throw new Error("Domain must be set before configuring Cognito");
-    }
-
-    // Create User Pool (social sign-in only, no email/password)
-    const userPool = new cognito.UserPool(this.stack, this.resourceName("user-pool"), {
-      userPoolName: this.resourceName("user-pool"),
-      selfSignUpEnabled: false, // Only social sign-in
-      signInAliases: { email: true }, // Email from social providers
-      autoVerify: { email: false },
-      passwordPolicy: {
-        minLength: 8,
-        requireLowercase: true,
-        requireUppercase: true,
-        requireDigits: true,
-        requireSymbols: false,
-      },
-      customAttributes: {
-        name: new cognito.StringAttribute({ mutable: true }),
-      },
-      removalPolicy: this.isProd() ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
-    });
-
-    // Create identity providers
-    const identityProviders: cognito.UserPoolClientIdentityProvider[] = [];
-    const idpDependencies: cdk.Resource[] = [];
-
-    // Google IdP
-    if (this.signinConfig.google) {
-      const clientId = this.signinConfig.google.clientId;
-      const clientSecret = await this.getSsmParam(this.signinConfig.google.clientSecretSsmParam);
-      const googleIdp = new cognito.UserPoolIdentityProviderGoogle(this.stack, this.resourceName("google-idp"), {
-        userPool,
-        clientId,
-        clientSecretValue: cdk.SecretValue.unsafePlainText(clientSecret),
-        scopes: ["email", "profile", "openid"],
-        attributeMapping: {
-          email: cognito.ProviderAttribute.GOOGLE_EMAIL,
-          fullname: cognito.ProviderAttribute.GOOGLE_NAME,
-        },
-      });
-      identityProviders.push(cognito.UserPoolClientIdentityProvider.GOOGLE);
-      idpDependencies.push(googleIdp);
-    }
-
-    // Apple IdP
-    if (this.signinConfig.apple) {
-      const servicesId = this.signinConfig.apple.servicesId;
-      const teamId = this.signinConfig.apple.teamId;
-      const keyId = this.signinConfig.apple.keyId;
-      const privateKey = await this.getSsmParam(this.signinConfig.apple.privateKeySsmParam);
-      const appleIdp = new cognito.UserPoolIdentityProviderApple(this.stack, this.resourceName("apple-idp"), {
-        userPool,
-        clientId: servicesId,
-        teamId,
-        keyId,
-        privateKey,
-        scopes: ["email", "name"],
-        attributeMapping: {
-          email: cognito.ProviderAttribute.APPLE_EMAIL,
-          fullname: cognito.ProviderAttribute.APPLE_NAME,
-        },
-      });
-      identityProviders.push(cognito.UserPoolClientIdentityProvider.APPLE);
-      idpDependencies.push(appleIdp);
-    }
-
-    // Facebook IdP
-    if (this.signinConfig.facebook) {
-      const appId = this.signinConfig.facebook.appId;
-      const appSecret = await this.getSsmParam(this.signinConfig.facebook.appSecretSsmParam);
-      const facebookIdp = new cognito.UserPoolIdentityProviderFacebook(this.stack, this.resourceName("facebook-idp"), {
-        userPool,
-        clientId: appId,
-        clientSecret: appSecret,
-        scopes: ["email", "public_profile"],
-        attributeMapping: {
-          email: cognito.ProviderAttribute.FACEBOOK_EMAIL,
-          fullname: cognito.ProviderAttribute.FACEBOOK_NAME,
-        },
-      });
-      identityProviders.push(cognito.UserPoolClientIdentityProvider.FACEBOOK);
-      idpDependencies.push(facebookIdp);
-    }
-
-    if (identityProviders.length === 0) {
-      throw new Error("At least one identity provider must be configured");
-    }
-
-    // Build callback/logout URLs
-    const primarySubdomain = this.subdomains?.[0] ?? "";
-    const appDomain = primarySubdomain === "" ? this.domain : `${primarySubdomain}.${this.domain}`;
-    const callbackUrls = [
-      ...(!this.isProd() ? ["http://localhost:8080/auth/callback"] : []),
-      `https://${appDomain}/auth/callback`,
-    ];
-    const logoutUrls = [
-      ...(!this.isProd() ? ["http://localhost:8080/auth/signout"] : []),
-      `https://${appDomain}/auth/signout`,
-    ];
-
-    // Create User Pool Client
-    const userPoolClient = new cognito.UserPoolClient(this.stack, this.resourceName("user-pool-client"), {
-      userPool,
-      userPoolClientName: this.resourceName("user-pool-client"),
-      generateSecret: true,
-      supportedIdentityProviders: identityProviders,
-      accessTokenValidity: this.isProd() ? cdk.Duration.days(1) : cdk.Duration.minutes(5),
-      idTokenValidity: this.isProd() ? cdk.Duration.days(1) : cdk.Duration.minutes(5),
-      refreshTokenValidity: this.isProd() ? cdk.Duration.days(365) : cdk.Duration.days(7),
-      oAuth: {
-        flows: {
-          authorizationCodeGrant: true,
-        },
-        callbackUrls,
-        logoutUrls,
-        scopes: [cognito.OAuthScope.EMAIL, cognito.OAuthScope.OPENID, cognito.OAuthScope.PROFILE],
-      },
-    });
-
-    // Add dependencies on IdPs
-    for (const idp of idpDependencies) {
-      userPoolClient.node.addDependency(idp);
-    }
-
-    // Create Cognito prefix domain (for testing - switch to custom domain later)
-    // const domainPrefix = this.resourceName().replace(/\./g, "-"); // broccoliapps-com
-    // new cognito.UserPoolDomain(this.stack, this.resourceName("user-pool-domain"), {
-    //   userPool,
-    //   cognitoDomain: {
-    //     domainPrefix,
-    //   },
-    // });
-
-    // Custom cognito domain
-    const authDomain = `${this.subdomain("auth")}.${this.domain}`;
-    const userPoolDomain = new cognito.UserPoolDomain(this.stack, this.resourceName("user-pool-domain"), {
-      userPool,
-      customDomain: {
-        domainName: authDomain,
-        certificate: this.getSslCert(),
-      },
-    });
-    new route53.ARecord(this.stack, this.resourceName("auth-alias-record"), {
-      zone: this.getHostedZone(),
-      recordName: "auth",
-      target: route53.RecordTarget.fromAlias(new route53targets.UserPoolDomainTarget(userPoolDomain)),
-    });
-
-    return {
-      userPoolId: userPool.userPoolId,
-      userPoolClientId: userPoolClient.userPoolClientId,
-    };
-  }
-
   public withDomain(domain: string, subdomains: string[], sslCertArn: string) {
     if (subdomains.length === 0) {
       throw new Error("At least 1 subdomain must be specified");
@@ -621,6 +462,150 @@ class AppBuilder {
         target: route53.RecordTarget.fromAlias(new route53targets.CloudFrontTarget(distribution)),
       });
     }
+  }
+
+  private async configureCognito(): Promise<{ userPoolId: string; userPoolClientId: string }> {
+    if (!this.signinConfig) {
+      throw new Error("SigninConfig is required for Cognito");
+    }
+    if (!this.domain) {
+      throw new Error("Domain must be set before configuring Cognito");
+    }
+
+    // Create User Pool (social sign-in only, no email/password)
+    const userPool = new cognito.UserPool(this.stack, this.resourceName("user-pool"), {
+      userPoolName: this.resourceName("user-pool"),
+      selfSignUpEnabled: false, // Only social sign-in
+      signInAliases: { email: true }, // Email from social providers
+      autoVerify: { email: false },
+      passwordPolicy: {
+        minLength: 8,
+        requireLowercase: true,
+        requireUppercase: true,
+        requireDigits: true,
+        requireSymbols: false,
+      },
+      customAttributes: {
+        name: new cognito.StringAttribute({ mutable: true }),
+      },
+      removalPolicy: this.isProd() ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
+    });
+
+    // Create identity providers
+    const identityProviders: cognito.UserPoolClientIdentityProvider[] = [];
+    const idpDependencies: cdk.Resource[] = [];
+
+    // Google IdP
+    if (this.signinConfig.google) {
+      const clientId = this.signinConfig.google.clientId;
+      const clientSecret = await this.getSsmParam(this.signinConfig.google.clientSecretSsmParam);
+      const googleIdp = new cognito.UserPoolIdentityProviderGoogle(this.stack, this.resourceName("google-idp"), {
+        userPool,
+        clientId,
+        clientSecretValue: cdk.SecretValue.unsafePlainText(clientSecret),
+        scopes: ["email", "profile", "openid"],
+        attributeMapping: {
+          email: cognito.ProviderAttribute.GOOGLE_EMAIL,
+          fullname: cognito.ProviderAttribute.GOOGLE_NAME,
+        },
+      });
+      identityProviders.push(cognito.UserPoolClientIdentityProvider.GOOGLE);
+      idpDependencies.push(googleIdp);
+    }
+
+    // Apple IdP
+    if (this.signinConfig.apple) {
+      const servicesId = this.signinConfig.apple.servicesId;
+      const teamId = this.signinConfig.apple.teamId;
+      const keyId = this.signinConfig.apple.keyId;
+      const privateKey = await this.getSsmParam(this.signinConfig.apple.privateKeySsmParam);
+      const appleIdp = new cognito.UserPoolIdentityProviderApple(this.stack, this.resourceName("apple-idp"), {
+        userPool,
+        clientId: servicesId,
+        teamId,
+        keyId,
+        privateKey,
+        scopes: ["email", "name"],
+        attributeMapping: {
+          email: cognito.ProviderAttribute.APPLE_EMAIL,
+          fullname: cognito.ProviderAttribute.APPLE_NAME,
+        },
+      });
+      identityProviders.push(cognito.UserPoolClientIdentityProvider.APPLE);
+      idpDependencies.push(appleIdp);
+    }
+
+    // Facebook IdP
+    if (this.signinConfig.facebook) {
+      const appId = this.signinConfig.facebook.appId;
+      const appSecret = await this.getSsmParam(this.signinConfig.facebook.appSecretSsmParam);
+      const facebookIdp = new cognito.UserPoolIdentityProviderFacebook(this.stack, this.resourceName("facebook-idp"), {
+        userPool,
+        clientId: appId,
+        clientSecret: appSecret,
+        scopes: ["email", "public_profile"],
+        attributeMapping: {
+          email: cognito.ProviderAttribute.FACEBOOK_EMAIL,
+          fullname: cognito.ProviderAttribute.FACEBOOK_NAME,
+        },
+      });
+      identityProviders.push(cognito.UserPoolClientIdentityProvider.FACEBOOK);
+      idpDependencies.push(facebookIdp);
+    }
+
+    if (identityProviders.length === 0) {
+      throw new Error("At least one identity provider must be configured");
+    }
+
+    // Build callback/logout URLs
+    const primarySubdomain = this.subdomains?.[0] ?? "";
+    const appDomain = primarySubdomain === "" ? this.domain : `${primarySubdomain}.${this.domain}`;
+    const callbackUrls = ["http://localhost:8080/auth/callback", `https://${appDomain}/auth/callback`];
+    const logoutUrls = ["http://localhost:8080/auth/signout", `https://${appDomain}/auth/signout`];
+
+    // Create User Pool Client
+    const userPoolClient = new cognito.UserPoolClient(this.stack, this.resourceName("user-pool-client"), {
+      userPool,
+      userPoolClientName: this.resourceName("user-pool-client"),
+      generateSecret: true,
+      supportedIdentityProviders: identityProviders,
+      accessTokenValidity: this.isProd() ? cdk.Duration.days(1) : cdk.Duration.minutes(5),
+      idTokenValidity: this.isProd() ? cdk.Duration.days(1) : cdk.Duration.minutes(5),
+      refreshTokenValidity: this.isProd() ? cdk.Duration.days(365) : cdk.Duration.days(7),
+      oAuth: {
+        flows: {
+          authorizationCodeGrant: true,
+        },
+        callbackUrls,
+        logoutUrls,
+        scopes: [cognito.OAuthScope.EMAIL, cognito.OAuthScope.OPENID, cognito.OAuthScope.PROFILE],
+      },
+    });
+
+    // Add dependencies on IdPs
+    for (const idp of idpDependencies) {
+      userPoolClient.node.addDependency(idp);
+    }
+
+    // Custom cognito domain
+    const authDomain = `${this.subdomain("auth")}.${this.domain}`;
+    const userPoolDomain = new cognito.UserPoolDomain(this.stack, this.resourceName("user-pool-domain"), {
+      userPool,
+      customDomain: {
+        domainName: authDomain,
+        certificate: this.getSslCert(),
+      },
+    });
+    new route53.ARecord(this.stack, this.resourceName("auth-alias-record"), {
+      zone: this.getHostedZone(),
+      recordName: "auth",
+      target: route53.RecordTarget.fromAlias(new route53targets.UserPoolDomainTarget(userPoolDomain)),
+    });
+
+    return {
+      userPoolId: userPool.userPoolId,
+      userPoolClientId: userPoolClient.userPoolClientId,
+    };
   }
 
   public async build() {

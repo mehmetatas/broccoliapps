@@ -1,3 +1,5 @@
+import { db, ttl } from "@broccoliapps/backend";
+import { random } from "@broccoliapps/shared";
 import * as v from "valibot";
 import { verifyAuthorizationCode } from "../../../auth/cognito-server";
 import { page } from "../lambda";
@@ -29,16 +31,16 @@ page
       };
     }
 
-    // Print the ID token payload to console
-    console.log("ID Token received:", result.idToken);
-    console.log("User info:", {
-      userId: result.userId,
+    await db.broccoliapps.authCodes.put({
+      code: random.token(),
       email: result.email,
       name: result.name,
       provider: result.provider,
+      userId: result.userId,
+      ttl: ttl(1, "min"),
     });
 
-    // Clean up PKCE cookie and redirect to home
+    // Clean up PKCE cookie and redirect to app
     return {
       status: 302,
       data: "",
@@ -46,6 +48,14 @@ page
       cookies: [
         {
           name: "pkce_code_verifier",
+          value: "",
+          maxAge: 0,
+          path: "/",
+          sameSite: "Lax",
+          secure: true,
+        },
+        {
+          name: "app",
           value: "",
           maxAge: 0,
           path: "/",

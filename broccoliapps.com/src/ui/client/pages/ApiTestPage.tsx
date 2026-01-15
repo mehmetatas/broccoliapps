@@ -1,4 +1,4 @@
-import { ApiError } from "@broccoliapps/shared/contract";
+import { ApiError } from "@broccoliapps/shared";
 import { useState } from "preact/hooks";
 import { createValidationTest } from "../../../shared/api-contracts";
 

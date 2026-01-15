@@ -12,7 +12,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "dev": "concurrently -n ssr,vite -c blue,magenta \"npm run dev:server\" \"npm run dev:client\"",
+    "dev": "export AWS_PROFILE=appi && export TABLE_NAME=broccoliapps-com && concurrently -n ssr,vite -c blue,magenta \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "NODE_ENV=development tsx watch scripts/dev-server/main.ts",
     "dev:client": "vite",
     "build:lambda": "rm -rf dist cdk.out && npm run typecheck && tsx scripts/build/main.ts",

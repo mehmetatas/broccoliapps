@@ -1,17 +1,20 @@
 import { cookies } from "./cookies";
 
-export type CognitoConfig = {
-  domain: string;
-  userPoolClientId: string;
-  baseUrl: string;
-};
-
 export type CognitoIdentityProvider = "google" | "facebook" | "apple";
 
 const IdentityProviderMap: Record<CognitoIdentityProvider, string> = {
   google: "Google",
   facebook: "Facebook",
   apple: "SignInWithApple",
+};
+
+const getConfig = () => {
+  const isDev = window.location.hostname === "localhost";
+  return {
+    domain: "auth.broccoliapps.com",
+    userPoolClientId: "43it6h2h4d6sml8ks7199redv2",
+    baseUrl: isDev ? "http://localhost:8080" : "https://www.broccoliapps.com",
+  };
 };
 
 const generateChallengeCode = (): string => {
@@ -36,7 +39,8 @@ const generateChallengeHash = async (code: string): Promise<string> => {
     .replace(/=/g, "");
 };
 
-const signInWith = async (provider: CognitoIdentityProvider, config: CognitoConfig): Promise<void> => {
+const signInWith = async (provider: CognitoIdentityProvider, app: string): Promise<void> => {
+  const config = getConfig();
   const code = generateChallengeCode();
   const hash = await generateChallengeHash(code);
 
@@ -53,6 +57,13 @@ const signInWith = async (provider: CognitoIdentityProvider, config: CognitoConf
   const authUrl = `https://${config.domain}/oauth2/authorize?${params.toString()}`;
 
   cookies.set("pkce_code_verifier", code, {
+    maxAge: 300, // 5 minutes
+    path: "/",
+    sameSite: "Lax",
+    secure: true,
+  });
+
+  cookies.set("auth_app", app, {
     maxAge: 300, // 5 minutes
     path: "/",
     sameSite: "Lax",

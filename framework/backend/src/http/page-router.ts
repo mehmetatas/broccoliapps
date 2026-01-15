@@ -1,40 +1,15 @@
-import type { Cookie, Schema } from "@broccoliapps/shared";
-import { emptySchema, type EmptyRequest } from "@broccoliapps/shared/contract";
+import { emptySchema, type EmptyRequest, type Schema } from "@broccoliapps/shared";
 import type { Context } from "hono";
 import * as v from "valibot";
-import { RequestContext } from "../context";
-import { deserializeRequest } from "../deserializer";
-import { handleError, HttpRouter, setCookies } from "../router";
-
-/**
- * Response from page handler - router just returns this as html
- */
-export type PageResponse = {
-  status: number;
-  data: string;
-  cookies?: Cookie[];
-  headers?: Record<string, string>;
-};
+import { RequestContext } from "./context";
+import { deserializeRequest } from "./deserializer";
+import { handleError, HttpRouter, setCookies } from "./http-router";
+import { PageResponse } from "./response";
 
 /**
  * Handler function type
  */
 export type PageHandlerFn<TRequest> = (request: TRequest, ctx: RequestContext) => Promise<PageResponse>;
-
-/**
- * Builder with request schema - provides typed handle()
- */
-class PageRouteWithRequest<TReq extends Record<string, unknown>> {
-  constructor(
-    private router: PageRouter,
-    private schema: Schema<TReq>
-  ) {}
-
-  handle(path: string, fn: PageHandlerFn<TReq>): PageRouter {
-    this.router["registerRoute"](path, this.schema, fn);
-    return this.router;
-  }
-}
 
 /**
  * Router for page routes.
@@ -99,5 +74,20 @@ export class PageRouter extends HttpRouter {
         return handleError(c, error);
       }
     });
+  }
+}
+
+/**
+ * Builder with request schema - provides typed handle()
+ */
+class PageRouteWithRequest<TReq extends Record<string, unknown>> {
+  constructor(
+    private router: PageRouter,
+    private schema: Schema<TReq>
+  ) {}
+
+  handle(path: string, fn: PageHandlerFn<TReq>): PageRouter {
+    this.router["registerRoute"](path, this.schema, fn);
+    return this.router;
   }
 }

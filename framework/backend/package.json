@@ -2,31 +2,13 @@
   "name": "@broccoliapps/backend",
   "version": "0.0.1",
   "type": "module",
-  "main": "dist/http/index.js",
-  "types": "dist/http/index.d.ts",
-  "exports": {
-    "./http": {
-      "types": "./dist/http/index.d.ts",
-      "import": "./dist/http/index.js"
-    },
-    "./http/api": {
-      "types": "./dist/http/api/index.d.ts",
-      "import": "./dist/http/api/index.js"
-    },
-    "./http/page": {
-      "types": "./dist/http/page/index.d.ts",
-      "import": "./dist/http/page/index.js"
-    },
-    "./secrets": {
-      "types": "./dist/secrets.d.ts",
-      "import": "./dist/secrets.js"
-    }
-  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "npm run clean && tsc --noEmit",
+    "build": "npm run clean && tsc",
     "clean": "rm -rf dist/",
     "test": "npm run build && vitest run",
     "test:watch": "vitest"

@@ -23,6 +23,6 @@ const get = async (name: string): Promise<string> => {
   return response.Parameter.Value;
 };
 
-export const secrets = {
+export const params = {
   get,
 };

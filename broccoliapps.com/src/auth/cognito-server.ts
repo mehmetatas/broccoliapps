@@ -1,4 +1,4 @@
-import { secrets } from "@broccoliapps/backend/secrets";
+import { params } from "@broccoliapps/backend";
 import { config } from "../shared/config";
 
 type CognitoTokenData = {
@@ -71,7 +71,7 @@ export const verifyAuthorizationCode = async (
   code: string,
   codeVerifier: string
 ): Promise<AuthorizationCodeResponse> => {
-  const clientSecret = await secrets.get(config.cognito.userPoolClientSecretName);
+  const clientSecret = await params.get(config.cognito.userPoolClientSecretName);
 
   const tokenData = await callTokenEndpoint({
     code,

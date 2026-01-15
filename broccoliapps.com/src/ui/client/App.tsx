@@ -1,7 +1,7 @@
 import type { ComponentType } from "preact";
 import Router, { type RoutableProps } from "preact-router";
 import { Layout } from "./layout/Layout";
-import { ApiTestPage, HomePage, NotFoundPage, UserDetailPage, UsersListPage } from "./pages";
+import { ApiTestPage, AuthPage, HomePage, NotFoundPage, UserDetailPage, UsersListPage } from "./pages";
 
 type AppProps = {
   pageProps: Record<string, unknown>;
@@ -18,7 +18,7 @@ const routesWithLayout: Record<string, ComponentType<any>> = {
 
 // Routes without Layout
 const routesWithoutLayout: Record<string, ComponentType<any>> = {
-  // Add pages like landing, auth, etc. here
+  "/auth": AuthPage,
 };
 
 // Route component that wraps page with Layout based on withLayout prop
