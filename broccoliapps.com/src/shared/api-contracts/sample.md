@@ -1,30 +1,7 @@
-import { JwtData } from "@broccoliapps/backend/dist/auth/jwt";
-import { api, coerceNumber } from "@broccoliapps/shared";
 
-import * as v from "valibot";
+Complex validation test API
 
-export const createUser = api("POST", "/users")
-  .withRequest({
-    name: v.pipe(v.string(), v.minLength(2)),
-    email: v.pipe(v.string(), v.email()),
-  })
-  .withResponse<{ id: number; name: string; email: string }>();
-
-export const listUsers = api("GET", "/users").withResponse<{
-  users: { id: number; name: string }[];
-}>();
-
-export const getUser = api("GET", "/users/:id")
-  .withRequest({ id: v.string() })
-  .withResponse<{ id: string; name: string; email: string }>();
-
-export const deleteUser = api("DELETE", "/users/:id").withRequest({
-  id: coerceNumber(),
-});
-
-export const ping = api("POST", "/health/ping");
-
-// Complex validation test API
+```
 export const createValidationTest = api("POST", "/validation-test")
   .withRequest({
     // String validations
@@ -33,20 +10,16 @@ export const createValidationTest = api("POST", "/validation-test")
     phone: v.pipe(v.string(), v.regex(/^\+?[1-9]\d{1,14}$/)),
     slug: v.pipe(v.string(), v.regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)),
     bio: v.optional(v.pipe(v.string(), v.maxLength(500))),
-
     // Number validations
     age: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(150)),
     price: v.pipe(v.number(), v.minValue(0)),
     quantity: v.pipe(v.number(), v.integer(), v.minValue(1)),
-
     // Enum validations
     status: v.picklist(["draft", "active", "archived"]),
     priority: v.picklist(["low", "medium", "high"]),
-
     // Date validations
     startDate: v.pipe(v.string(), v.isoDate()),
     endDate: v.optional(v.pipe(v.string(), v.isoDate())),
-
     // Nested objects
     address: v.object({
       street: v.pipe(v.string(), v.minLength(1)),
@@ -60,7 +33,6 @@ export const createValidationTest = api("POST", "/validation-test")
         })
       ),
     }),
-
     settings: v.object({
       notifications: v.object({
         email: v.boolean(),
@@ -72,10 +44,8 @@ export const createValidationTest = api("POST", "/validation-test")
         language: v.pipe(v.string(), v.length(2)),
       }),
     }),
-
     // Array validations
     tags: v.pipe(v.array(v.pipe(v.string(), v.minLength(1))), v.minLength(1), v.maxLength(10)),
-
     items: v.pipe(
       v.array(
         v.object({
@@ -91,7 +61,6 @@ export const createValidationTest = api("POST", "/validation-test")
       ),
       v.minLength(1)
     ),
-
     // Union type (discriminated)
     paymentMethod: v.variant("type", [
       v.object({
@@ -108,13 +77,4 @@ export const createValidationTest = api("POST", "/validation-test")
     received: Record<string, unknown>;
     validatedAt: string;
   }>();
-
-// Real APIs
-
-export const verifyAuthToken = api("POST", "/v1/auth/verify")
-  .withRequest({
-    app: v.pipe(v.string(), v.picklist(["expense-tracker"])),
-    code: v.pipe(v.string(), v.maxLength(64)),
-    signature: v.pipe(v.string(), v.maxLength(256)),
-  })
-  .withResponse<JwtData>();
+```

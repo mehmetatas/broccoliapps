@@ -8,7 +8,6 @@ export const config = {
   isProd: env === "prod",
   baseUrl: isDev ? "http://localhost:8080" : "https://www.broccoliapps.com",
   cognito: {
-    // These are public values (not secrets)
     domain: "auth.broccoliapps.com",
     userPoolId: "us-west-2_sYFFH9lyT",
     userPoolClientId: "43it6h2h4d6sml8ks7199redv2",
