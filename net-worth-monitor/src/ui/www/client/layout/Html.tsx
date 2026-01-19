@@ -30,12 +30,12 @@ export const Html = ({
 
   // CSS is always loaded (built by PostCSS for Tailwind 4)
   // In dev mode, Vite serves JS with HMR; in prod, load from static path
-  const cssFile = buildId ? `/static/app.${buildId}.css` : "/static/app.css";
+  const cssFile = buildId ? `/static/www.${buildId}.css` : "/static/www.css";
   const jsFile = isDevMode
     ? "http://localhost:5174/src/ui/www/client/index.tsx"
     : buildId
-      ? `/static/app.${buildId}.js`
-      : "/static/app.js";
+      ? `/static/www.${buildId}.js`
+      : "/static/www.js";
 
   return (
     <html lang="en">

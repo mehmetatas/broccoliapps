@@ -21,7 +21,7 @@ await app("broccoliapps-com")
     },
   })
   .withCloudFrontFn(path.join(__dirname, "cloudfront-fn.js"))
-  .withApi(path.join(__dirname, "../dist/api"))
-  .withSsr(path.join(__dirname, "../dist/ssr"))
-  .withStatic(path.join(__dirname, "../dist/static"))
+  .withLambdaOrigin("/*", path.join(__dirname, "../dist/ssr")) // SSR (default)
+  .withLambdaOrigin("/api/*", path.join(__dirname, "../dist/api")) // API
+  .withS3Origin("/static/*", path.join(__dirname, "../dist/static")) // Static assets
   .build();

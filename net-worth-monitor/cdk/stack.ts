@@ -14,7 +14,8 @@ await app("networthmonitor")
   .in(AWS_ACCOUNT_ID, AWS_REGION)
   .env("prod")
   .withDomain(DOMAIN, ["www", ""], SSL_CERT_ARN)
-  .withApi(path.join(__dirname, "../dist/api"))
-  .withSsr(path.join(__dirname, "../dist/ssr"))
-  .withStatic(path.join(__dirname, "../dist/static"))
+  .withLambdaOrigin("/*", path.join(__dirname, "../dist/www")) // SSR (default)
+  .withLambdaOrigin("/api/*", path.join(__dirname, "../dist/api")) // API
+  .withLambdaOrigin("/app/*", path.join(__dirname, "../dist/app")) // SPA
+  .withS3Origin("/static/*", path.join(__dirname, "../dist/static")) // Static assets
   .build();

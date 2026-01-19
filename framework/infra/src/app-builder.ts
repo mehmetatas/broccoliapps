@@ -44,6 +44,17 @@ type LambdaDef = {
   config?: LambdaConfig;
 };
 
+type LambdaOriginDef = {
+  pathPattern: string; // e.g., "/*", "/api/*", "/app/*"
+  distPath: string;
+  config?: LambdaConfig;
+};
+
+type S3OriginDef = {
+  pathPattern: string; // e.g., "/static/*"
+  distPath: string;
+};
+
 export type SigninConfig = {
   google?: {
     clientId: string;
@@ -67,10 +78,9 @@ class AppBuilder {
   private domain?: string;
   private subdomains?: string[];
   private sslCertArn?: string;
-  private ssrLambdaDef?: LambdaDef;
-  private apiLambdaDef?: LambdaDef;
+  private lambdaOrigins: LambdaOriginDef[] = [];
+  private s3Origins: S3OriginDef[] = [];
   private cloudfrontFnPath?: string;
-  private staticPath?: string;
   private signinConfig?: SigninConfig;
 
   constructor(
@@ -78,7 +88,7 @@ class AppBuilder {
     private readonly account: string,
     private readonly region: string,
     private readonly env: Env
-  ) {}
+  ) { }
 
   private isProd() {
     return this.env === "prod";
@@ -132,9 +142,9 @@ class AppBuilder {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
       pointInTimeRecoverySpecification: this.isProd()
         ? {
-            pointInTimeRecoveryEnabled: true,
-            recoveryPeriodInDays: 7,
-          }
+          pointInTimeRecoveryEnabled: true,
+          recoveryPeriodInDays: 7,
+        }
         : undefined,
     });
 
@@ -164,13 +174,13 @@ class AppBuilder {
     return this;
   }
 
-  public withApi(path: string, config?: LambdaConfig) {
-    this.apiLambdaDef = { path, config };
+  public withLambdaOrigin(pathPattern: string, distPath: string, config?: LambdaConfig) {
+    this.lambdaOrigins.push({ pathPattern, distPath, config });
     return this;
   }
 
-  public withSsr(path: string, config?: LambdaConfig) {
-    this.ssrLambdaDef = { path, config };
+  public withS3Origin(pathPattern: string, distPath: string) {
+    this.s3Origins.push({ pathPattern, distPath });
     return this;
   }
 
@@ -179,9 +189,11 @@ class AppBuilder {
     return this;
   }
 
-  public withStatic(path: string) {
-    this.staticPath = path;
-    return this;
+  // Derive resource name from path pattern: "/api/*" -> "api", "/*" -> "default"
+  private nameFromPath(pathPattern: string): string {
+    if (pathPattern === "/*") return "default";
+    const match = pathPattern.match(/^\/([^/*]+)/);
+    return match?.[1] ?? "origin";
   }
 
   public withSignIn(config: SigninConfig) {
@@ -189,9 +201,12 @@ class AppBuilder {
     return this;
   }
 
-  private configureStaticBucket(isDefaultOrigin = false) {
-    const bucket = new s3.Bucket(this.stack, this.resourceName("static-bucket"), {
-      bucketName: this.resourceName("static"),
+  private configureStaticBucket(pathPattern: string, distPath: string) {
+    const name = this.nameFromPath(pathPattern);
+    const isDefaultOrigin = pathPattern === "/*";
+
+    const bucket = new s3.Bucket(this.stack, this.resourceName(`${name}-bucket`), {
+      bucketName: this.resourceName(name),
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: this.isProd() ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: !this.isProd(),
@@ -199,15 +214,16 @@ class AppBuilder {
 
     // Deploy static files to S3
     // If this is the default origin (static-only site), deploy to root
-    // Otherwise, deploy under /static/ prefix
-    const deployment = new s3deploy.BucketDeployment(this.stack, this.resourceName("static-deploy"), {
-      sources: [s3deploy.Source.asset(this.staticPath!)],
+    // Otherwise, deploy under prefix stripped from pathPattern
+    const prefix = isDefaultOrigin ? undefined : pathPattern.replace(/^\//, "").replace(/\/\*$/, "");
+    const deployment = new s3deploy.BucketDeployment(this.stack, this.resourceName(`${name}-deploy`), {
+      sources: [s3deploy.Source.asset(distPath)],
       destinationBucket: bucket,
-      destinationKeyPrefix: isDefaultOrigin ? undefined : "static",
+      destinationKeyPrefix: prefix,
       cacheControl: [s3deploy.CacheControl.maxAge(cdk.Duration.days(365))],
     });
 
-    return { bucket, deployment };
+    return { bucket, deployment, pathPattern };
   }
 
   private configureLambda(
@@ -272,15 +288,13 @@ class AppBuilder {
   }
 
   private configureCloudFront({
-    ssrLambda,
-    apiLambda,
-    staticBucket,
+    lambdas,
+    s3Buckets,
   }: {
-    ssrLambda?: lambda.Function;
-    apiLambda?: lambda.Function;
-    staticBucket?: s3.Bucket;
+    lambdas: Array<{ pathPattern: string; fn: lambda.Function }>;
+    s3Buckets: Array<{ pathPattern: string; bucket: s3.Bucket }>;
   }) {
-    if (!ssrLambda && !staticBucket && !apiLambda) {
+    if (lambdas.length === 0 && s3Buckets.length === 0) {
       // no need to create cloudfront
       return;
     }
@@ -305,12 +319,21 @@ class AppBuilder {
       ];
     }
 
-    // OAC for Lambda origins
+    // OAC and cache policy for Lambda origins
     let cfnOacLambda: cloudfront.FunctionUrlOriginAccessControl | undefined;
-    if (ssrLambda || apiLambda) {
+    let lambdaCachePolicy: cloudfront.CachePolicy | undefined;
+    if (lambdas.length > 0) {
       cfnOacLambda = new cloudfront.FunctionUrlOriginAccessControl(this.stack, this.resourceName("oac"), {
         originAccessControlName: this.resourceName("oac"),
         signing: new cloudfront.Signing(cloudfront.SigningProtocol.SIGV4, cloudfront.SigningBehavior.ALWAYS),
+      });
+      lambdaCachePolicy = new cloudfront.CachePolicy(this.stack, this.resourceName("lambda-cache-policy"), {
+        cachePolicyName: this.resourceName("lambda-cache-policy"),
+        defaultTtl: cdk.Duration.seconds(0),
+        minTtl: cdk.Duration.seconds(0),
+        maxTtl: cdk.Duration.days(365),
+        enableAcceptEncodingGzip: true,
+        enableAcceptEncodingBrotli: true,
       });
     }
 
@@ -318,27 +341,20 @@ class AppBuilder {
     type BehaviorConfig = { path: string; origin: cloudfront.IOrigin; options: cloudfront.AddBehaviorOptions };
     const behaviors: BehaviorConfig[] = [];
 
-    if (ssrLambda) {
-      const ssrFunctionUrl = ssrLambda.addFunctionUrl({ authType: lambda.FunctionUrlAuthType.AWS_IAM });
-      // SSR pages can be cached
-      const ssrCachePolicy = new cloudfront.CachePolicy(this.stack, this.resourceName("www-cache-policy"), {
-        cachePolicyName: this.resourceName("www-cache-policy"),
-        comment: "Cache policy for SSR endpoints",
-        defaultTtl: cdk.Duration.seconds(0),
-        minTtl: cdk.Duration.seconds(0),
-        maxTtl: cdk.Duration.days(365),
-        enableAcceptEncodingGzip: true,
-        enableAcceptEncodingBrotli: true,
-      });
+    // Lambda origins
+    for (const { pathPattern, fn } of lambdas) {
+      const name = this.nameFromPath(pathPattern);
+      const functionUrl = fn.addFunctionUrl({ authType: lambda.FunctionUrlAuthType.AWS_IAM });
+
       behaviors.push({
-        path: "/*",
-        origin: new origins.FunctionUrlOrigin(ssrFunctionUrl, {
+        path: pathPattern,
+        origin: new origins.FunctionUrlOrigin(functionUrl, {
           originAccessControlId: cfnOacLambda!.originAccessControlId,
-          originId: this.resourceName("ssr-origin"),
+          originId: this.resourceName(`${name}-origin`),
         }),
         options: {
           compress: true,
-          cachePolicy: ssrCachePolicy,
+          cachePolicy: lambdaCachePolicy!,
           cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -348,30 +364,13 @@ class AppBuilder {
       });
     }
 
-    if (apiLambda) {
-      const apiFunctionUrl = apiLambda.addFunctionUrl({ authType: lambda.FunctionUrlAuthType.AWS_IAM });
+    // S3 origins
+    for (const { pathPattern, bucket } of s3Buckets) {
+      const name = this.nameFromPath(pathPattern);
       behaviors.push({
-        path: "/api/*",
-        origin: new origins.FunctionUrlOrigin(apiFunctionUrl, {
-          originAccessControlId: cfnOacLambda!.originAccessControlId,
-          originId: this.resourceName("api-origin"),
-        }),
-        options: {
-          compress: true,
-          cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
-          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
-          functionAssociations,
-        },
-      });
-    }
-
-    if (staticBucket) {
-      behaviors.push({
-        path: "/static/*",
-        origin: origins.S3BucketOrigin.withOriginAccessControl(staticBucket, {
-          originId: this.resourceName("static-origin"),
+        path: pathPattern,
+        origin: origins.S3BucketOrigin.withOriginAccessControl(bucket, {
+          originId: this.resourceName(`${name}-origin`),
         }),
         options: {
           compress: true,
@@ -382,12 +381,13 @@ class AppBuilder {
       });
     }
 
-    // Pop first as default, rest as additional
-    const [defaultBehavior, ...additionalBehaviors] = behaviors;
-
-    if (!defaultBehavior) {
-      throw new Error("No behaviour found!"); // this should never happen, just added to make compiler happy
+    // Find default behavior (path = "/*")
+    const defaultIndex = behaviors.findIndex((b) => b.path === "/*");
+    if (defaultIndex === -1) {
+      throw new Error("No default origin specified. One origin must have path '/*'");
     }
+    const defaultBehavior = behaviors.splice(defaultIndex, 1)[0]!;
+    const additionalBehaviors = behaviors;
 
     const distribution = new cloudfront.Distribution(this.stack, this.resourceName("distribution"), {
       defaultBehavior: {
@@ -407,17 +407,15 @@ class AppBuilder {
     });
 
     // Grant Lambda invokes
-    if (ssrLambda) {
-      this.grantLambdaInvoke(distribution, "ssr", ssrLambda);
-    }
-    if (apiLambda) {
-      this.grantLambdaInvoke(distribution, "api", apiLambda);
+    for (const { pathPattern, fn } of lambdas) {
+      const name = this.nameFromPath(pathPattern);
+      this.grantLambdaInvoke(distribution, name, fn);
     }
 
     return distribution;
   }
 
-  private grantLambdaInvoke(distribution: cloudfront.Distribution, name: "api" | "ssr", lambdaFn: lambda.Function) {
+  private grantLambdaInvoke(distribution: cloudfront.Distribution, name: string, lambdaFn: lambda.Function) {
     new lambda.CfnPermission(this.stack, this.resourceName(`cf-${name}-invoke-url-perm`), {
       action: "lambda:InvokeFunctionUrl",
       functionName: lambdaFn.functionName,
@@ -617,8 +615,13 @@ class AppBuilder {
     if (!this.domain) {
       throw new Error("domain not set");
     }
-    if (!this.ssrLambdaDef && !this.staticPath) {
-      throw new Error("At least one of SSR Lambda or static path must be set");
+
+    // Validate at least one origin with "/*" exists
+    const hasDefaultOrigin =
+      this.lambdaOrigins.some((o) => o.pathPattern === "/*") ||
+      this.s3Origins.some((o) => o.pathPattern === "/*");
+    if (!hasDefaultOrigin) {
+      throw new Error("At least one origin must have path '/*' (default behavior)");
     }
 
     const app = new cdk.App();
@@ -635,38 +638,38 @@ class AppBuilder {
       cognitoConfig = await this.configureCognito();
     }
 
-    // Only create table if we have lambdas that need it
+    // Create table if we have any lambda origins
     let table: dynamodb.Table | undefined;
-    if (this.ssrLambdaDef || this.apiLambdaDef) {
+    if (this.lambdaOrigins.length > 0) {
       table = this.configureDdb();
     }
 
-    // Configure SSR lambda if provided
-    let ssrLambda: lambda.Function | undefined;
-    if (this.ssrLambdaDef) {
-      ssrLambda = this.configureLambda("ssr", this.ssrLambdaDef, { table, cognitoConfig });
+    // Configure all Lambda origins
+    const lambdas: Array<{ pathPattern: string; fn: lambda.Function }> = [];
+    for (const origin of this.lambdaOrigins) {
+      const name = this.nameFromPath(origin.pathPattern);
+      const fn = this.configureLambda(name, { path: origin.distPath, config: origin.config }, { table, cognitoConfig });
+      lambdas.push({ pathPattern: origin.pathPattern, fn });
     }
 
-    // Configure API lambda if provided
-    let apiLambda: lambda.Function | undefined;
-    if (this.apiLambdaDef) {
-      apiLambda = this.configureLambda("api", this.apiLambdaDef, { table, cognitoConfig });
+    // Configure all S3 origins
+    const s3Buckets: Array<{ pathPattern: string; bucket: s3.Bucket; deployment: s3deploy.BucketDeployment }> = [];
+    for (const origin of this.s3Origins) {
+      const { bucket, deployment, pathPattern } = this.configureStaticBucket(origin.pathPattern, origin.distPath);
+      s3Buckets.push({ pathPattern, bucket, deployment });
     }
 
-    // Configure static bucket
-    // isDefaultOrigin=true when no SSR lambda (static-only site)
-    let staticBucket: s3.Bucket | undefined;
-    if (this.staticPath) {
-      const isDefaultOrigin = !this.ssrLambdaDef;
-      const bucketConfig = this.configureStaticBucket(isDefaultOrigin);
-      staticBucket = bucketConfig.bucket;
-
-      // Make sure static asset deployment happens before ssrlambda is updated
-      // Otherwise ssrlambda can start referencing app.<newbuildid>.css which is not uploaded yet
-      ssrLambda?.node.addDependency(bucketConfig.deployment);
+    // Add dependencies: Lambda origins depend on S3 deployments
+    for (const { fn } of lambdas) {
+      for (const { deployment } of s3Buckets) {
+        fn.node.addDependency(deployment);
+      }
     }
 
-    const distribution = this.configureCloudFront({ ssrLambda, apiLambda, staticBucket });
+    const distribution = this.configureCloudFront({
+      lambdas,
+      s3Buckets: s3Buckets.map(({ pathPattern, bucket }) => ({ pathPattern, bucket })),
+    });
 
     if (distribution) {
       this.configureRoute53(distribution);

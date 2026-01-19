@@ -44,7 +44,7 @@ page
     // Clean up PKCE cookie and redirect to app
     return {
       status: 302,
-      headers: { Location: globalConfig.apps[app as AppId].baseUrl + "/auth/callback?code=" + authCode.code },
+      headers: { Location: globalConfig.apps[app as AppId].baseUrl + "/app/auth/callback?code=" + authCode.code },
       cookies: [
         Cookie.delete("pkce_code_verifier", {
           path: "/",

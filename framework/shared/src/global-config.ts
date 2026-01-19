@@ -1,4 +1,4 @@
-const isDev = typeof window === "undefined" ? !process.env.LAMBDA_TASK_ROOT : window.location.host === "localhost";
+const isDev = typeof window === "undefined" ? !process.env.LAMBDA_TASK_ROOT : window.location.hostname === "localhost";
 
 export const globalConfig = {
   apps: {

@@ -1,10 +1,11 @@
-import type { ComponentType } from "preact";
+import { cache } from "@broccoliapps/browser";
+import type { AnchorHTMLAttributes, ComponentType } from "preact";
 import Router, { type RoutableProps } from "preact-router";
 import { Layout } from "./layout/Layout";
-import { HomePage } from "./pages";
+import { AuthCallback, HomePage } from "./pages";
 
 // Route component that wraps page with Layout based on withLayout prop
-const Route = ({
+const AppRoute = ({
   page: Page,
   ...routeParams
 }: RoutableProps & {
@@ -15,10 +16,32 @@ const Route = ({
   </Layout>
 );
 
+const APP_BASE = "/app";
+const ROUTES: Record<string, ComponentType<any>> = {
+  "/": HomePage,
+  "/auth/callback": AuthCallback,
+};
+
+const appPath = (path: string) => APP_BASE + (path === "/" ? "" : path);
+
+export const AppLink = ({ href, ...rest }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => {
+  return (
+    <a {...rest} href={appPath(href)} />
+  );
+}
+
 export const App = () => {
+  const isAuthCallback = window.location.pathname === appPath("/auth/callback");
+  if (!isAuthCallback && !cache.get("refreshToken")) {
+    window.location.href = "/";
+    return null;
+  }
+
   return (
     <Router>
-      <Route path="/app" page={HomePage} />
+      {Object.entries(ROUTES).map(([path, page]) => (
+        <AppRoute key={appPath(path)} path={appPath(path)} page={page} />
+      ))}
     </Router>
   );
 };

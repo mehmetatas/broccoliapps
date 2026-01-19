@@ -9,23 +9,19 @@ if (import.meta.env.DEV) {
 }
 
 const renderApp = () => {
-  console.log("renderApp");
   const appElement = document.getElementById("app");
   if (!appElement) {
     console.error("App element not found");
     return;
   }
 
-  console.log("rendering...");
   // Hydrate the app
   render(<App />, appElement);
 };
 
 // Wait for DOM if still loading
 if (document.readyState === "loading") {
-  console.log("ready state");
   document.addEventListener("DOMContentLoaded", renderApp);
 } else {
-  console.log("else");
   renderApp();
 }

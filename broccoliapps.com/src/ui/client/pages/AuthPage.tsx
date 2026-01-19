@@ -13,7 +13,7 @@ export const AuthPage = ({ app, provider }: AuthPageProps) => {
 
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-      <p>Redirecting to {provider.charAt(0).toUpperCase() + provider.substring(1)}...</p>
+      <p>Signing in with {provider.charAt(0).toUpperCase() + provider.substring(1)}...</p>
     </div>
   );
 };

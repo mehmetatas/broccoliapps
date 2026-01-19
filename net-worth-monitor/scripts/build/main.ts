@@ -19,7 +19,8 @@ interface LambdaConfig {
 
 const lambdas: LambdaConfig[] = [
   { entry: "src/api", outdir: "dist/api", forbiddenDeps: ["preact", "preact-render-to-string"] },
-  { entry: "src/ui/server", outdir: "dist/ssr" },
+  { entry: "src/ui/www/server", outdir: "dist/www" },
+  { entry: "src/ui/app/server", outdir: "dist/app" },
 ];
 
 const sharedConfig: esbuild.BuildOptions = {
@@ -43,19 +44,22 @@ const ssrDefines = {
 };
 
 const buildLambda = async ({ entry, outdir }: LambdaConfig) => {
-  const entryFile = path.join(entry, "lambda.ts");
+  // Support both .ts and .tsx lambda files
+  const tsFile = path.join(rootDir, entry, "lambda.ts");
+  const tsxFile = path.join(rootDir, entry, "lambda.tsx");
+  const entryFile = fs.existsSync(tsFile) ? path.join(entry, "lambda.ts") : path.join(entry, "lambda.tsx");
   const outFile = path.join(outdir, "index.js");
 
   console.log(`  ${entryFile} → ${outFile}`);
 
-  // Add defines for SSR build
-  const isSSR = entry === "src/ui/server";
+  // Both www and app need BUILD_ID for static asset references
+  const needsBuildId = entry.startsWith("src/ui/");
 
   await esbuild.build({
     ...sharedConfig,
     entryPoints: [path.join(rootDir, entryFile)],
     outfile: path.join(rootDir, outFile),
-    define: isSSR ? ssrDefines : undefined,
+    define: needsBuildId ? ssrDefines : undefined,
   });
 
   // Write package.json for ESM support
@@ -63,19 +67,28 @@ const buildLambda = async ({ entry, outdir }: LambdaConfig) => {
   fs.writeFileSync(path.join(rootDir, outdir, "package.json"), JSON.stringify({ type: "module" }, null, 2));
 };
 
-const buildClient = async () => {
-  const jsFileName = buildId ? `app.${buildId}.js` : "app.js";
-  const cssFileName = buildId ? `app.${buildId}.css` : "app.css";
+interface ClientConfig {
+  name: string;
+  entry: string;
+  cssEntry: string;
+}
+
+const clients: ClientConfig[] = [
+  { name: "www", entry: "src/ui/www/client/index.tsx", cssEntry: "src/ui/www/client/app.css" },
+  { name: "app", entry: "src/ui/app/client/index.tsx", cssEntry: "src/ui/app/client/app.css" },
+];
+
+const buildClient = async ({ name, entry, cssEntry }: ClientConfig) => {
+  const jsFileName = buildId ? `${name}.${buildId}.js` : `${name}.js`;
+  const cssFileName = buildId ? `${name}.${buildId}.css` : `${name}.css`;
   const outDir = path.join(rootDir, "dist/static");
 
-  // Ensure output directory exists
   fs.mkdirSync(outDir, { recursive: true });
 
-  console.log(`  src/ui/client/index.tsx → dist/static/${jsFileName}`);
+  console.log(`  ${entry} → dist/static/${jsFileName}`);
 
-  // Build client JS bundle (CSS is built separately by PostCSS)
   await esbuild.build({
-    entryPoints: [path.join(rootDir, "src/ui/client/index.tsx")],
+    entryPoints: [path.join(rootDir, entry)],
     bundle: true,
     minify: !isDevBuild,
     platform: "browser",
@@ -92,17 +105,14 @@ const buildClient = async () => {
     },
   });
 
-  // Build CSS with PostCSS (Tailwind 4)
-  console.log(`  src/ui/client/app.css → dist/static/${cssFileName}`);
-
-  // In monorepo, postcss binary is in root node_modules
+  // Build CSS with PostCSS
+  console.log(`  ${cssEntry} → dist/static/${cssFileName}`);
   const monorepoRoot = path.join(rootDir, "..");
   const postcssPath = path.join(monorepoRoot, "node_modules/.bin/postcss");
-  const cssInput = path.join(rootDir, "src/ui/client/app.css");
-  const cssOutput = path.join(outDir, cssFileName);
-  execSync(`"${postcssPath}" "${cssInput}" -o "${cssOutput}"`, { stdio: "inherit", cwd: rootDir });
-
-  console.log(`\n  Build ID: ${buildId || "(dev)"}`);
+  execSync(`"${postcssPath}" "${path.join(rootDir, cssEntry)}" -o "${path.join(outDir, cssFileName)}"`, {
+    stdio: "inherit",
+    cwd: rootDir,
+  });
 };
 
 const build = async () => {
@@ -112,8 +122,11 @@ const build = async () => {
     await buildLambda(lambda);
   }
 
-  console.log("\nBuilding client bundle...\n");
-  await buildClient();
+  console.log("\nBuilding client bundles...\n");
+  for (const client of clients) {
+    await buildClient(client);
+  }
+  console.log(`\n  Build ID: ${buildId || "(dev)"}`);
 
   console.log("\nDone!");
 };
