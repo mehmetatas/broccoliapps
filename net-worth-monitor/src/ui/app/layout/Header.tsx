@@ -7,13 +7,6 @@ export const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleSignOut = () => {
-    cache.remove("accessToken");
-    cache.remove("refreshToken");
-    cache.remove("user");
-    window.location.href = "/";
-  };
-
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -29,7 +22,7 @@ export const Header = () => {
 
   return (
     <header class="py-4 px-4 bg-white/50 dark:bg-neutral-800/50 border-b border-neutral-200 dark:border-neutral-700">
-      <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="max-w-3xl mx-auto flex items-center justify-between">
         <a href="/app" class="text-xl font-semibold text-neutral-800 dark:text-neutral-100">
           Net Worth Monitor
         </a>
@@ -61,18 +54,29 @@ export const Header = () => {
                     <p class="text-xs text-neutral-500 dark:text-neutral-400">{user.email}</p>
                   </div>
                   <a
+                    href="/app/import"
+                    class="block px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                  >
+                    Import
+                  </a>
+                  <a
+                    href="/app/buckets"
+                    class="block px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                  >
+                    Buckets
+                  </a>
+                  <a
+                    href="/app/closed-debts"
+                    class="block px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                  >
+                    Closed Debts
+                  </a>
+                  <a
                     href="/app/settings"
                     class="block px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700"
                   >
                     Settings
                   </a>
-                  <button
-                    type="button"
-                    onClick={handleSignOut}
-                    class="w-full text-left px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700"
-                  >
-                    Sign out
-                  </button>
                 </div>
               )}
             </div>

@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import { getCurrencySymbol } from "../currency";
 
 ChartJS.register(
   CategoryScale,
@@ -26,6 +27,7 @@ ChartJS.register(
 type ValueChartProps = {
   data: Record<string, number | undefined>;
   variant?: "default" | "negative";
+  currency?: string;
 };
 
 const formatMonthLabel = (key: string): string => {
@@ -34,6 +36,21 @@ const formatMonthLabel = (key: string): string => {
   const month = parts[1] ?? "01";
   const date = new Date(parseInt(year, 10), parseInt(month, 10) - 1);
   return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+};
+
+const formatCompactNumber = (value: number, currencySymbol: string): string => {
+  const absValue = Math.abs(value);
+  const sign = value < 0 ? "-" : "";
+  if (absValue >= 1_000_000_000) {
+    return sign + currencySymbol + (absValue / 1_000_000_000).toFixed(absValue % 1_000_000_000 === 0 ? 0 : 1) + "B";
+  }
+  if (absValue >= 1_000_000) {
+    return sign + currencySymbol + (absValue / 1_000_000).toFixed(absValue % 1_000_000 === 0 ? 0 : 1) + "M";
+  }
+  if (absValue >= 1_000) {
+    return sign + currencySymbol + (absValue / 1_000).toFixed(absValue % 1_000 === 0 ? 0 : 1) + "K";
+  }
+  return sign + currencySymbol + absValue;
 };
 
 const createGradient = (
@@ -65,15 +82,40 @@ const createGradient = (
   return gradient;
 };
 
-export const ValueChart = ({ data, variant = "default" }: ValueChartProps) => {
+export const ValueChart = ({ data, variant = "default", currency = "USD" }: ValueChartProps) => {
+  const currencySymbol = getCurrencySymbol(currency);
   // Filter to only entries with defined values and sort by date
   const entries = Object.entries(data)
     .filter((entry): entry is [string, number] => entry[1] !== undefined)
     .sort(([a], [b]) => a.localeCompare(b));
 
-  // No data points - don't show chart
+  // No data points - show empty state with subtle chart background
   if (entries.length === 0) {
-    return null;
+    return (
+      <div class="h-64 mb-6 bg-white dark:bg-black rounded-lg p-3 flex items-center justify-center relative overflow-hidden">
+        <svg
+          class="absolute inset-0 w-full h-full opacity-[0.07] dark:opacity-[0.1]"
+          viewBox="0 0 400 200"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0,150 Q50,140 80,120 T160,100 T240,80 T320,90 T400,60"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            class="text-neutral-400"
+          />
+          <path
+            d="M0,150 Q50,140 80,120 T160,100 T240,80 T320,90 T400,60 L400,200 L0,200 Z"
+            fill="currentColor"
+            class="text-neutral-400"
+          />
+        </svg>
+        <span class="text-4xl font-bold text-neutral-200 dark:text-neutral-700 select-none relative z-10">
+          No data
+        </span>
+      </div>
+    );
   }
 
   let labels: string[];
@@ -136,7 +178,7 @@ export const ValueChart = ({ data, variant = "default" }: ValueChartProps) => {
         callbacks: {
           label: (context: { parsed: { y: number | null } }) => {
             const value = context.parsed.y;
-            return value != null ? "$" + value.toLocaleString() : "";
+            return value != null ? currencySymbol + value.toLocaleString() : "";
           },
         },
       },
@@ -154,7 +196,7 @@ export const ValueChart = ({ data, variant = "default" }: ValueChartProps) => {
         ticks: {
           color: isDark ? "#94a3b8" : "#64748b",
           maxTicksLimit: 4,
-          callback: (value: string | number) => "$" + Number(value).toLocaleString(),
+          callback: (value: string | number) => formatCompactNumber(Number(value), currencySymbol),
         },
       },
     },

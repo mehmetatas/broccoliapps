@@ -15,7 +15,7 @@ export const Layout = ({ children, skip = false }: LayoutProps) => {
   return (
     <div class="flex flex-col min-h-screen bg-linear-to-br from-neutral-50 to-neutral-200 dark:from-neutral-900 dark:to-neutral-800">
       <Header />
-      <main class="flex-1 py-8 px-4 max-w-6xl mx-auto w-full">{children}</main>
+      <main class="flex-1 py-8 px-2 max-w-3xl mx-auto w-full">{children}</main>
       <Footer />
     </div>
   );

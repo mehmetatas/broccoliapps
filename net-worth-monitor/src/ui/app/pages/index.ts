@@ -1,6 +1,9 @@
 export { AccountDetailPage } from "./AccountDetailPage";
 export { AuthCallback } from "./AuthCallback";
+export { BucketsPage } from "./BucketsPage";
+export { ClosedDebtsPage } from "./ClosedDebtsPage";
 export { HomePage } from "./HomePage";
+export { ImportPage } from "./ImportPage";
 export { NewAccountPage } from "./NewAccountPage";
 export { OnboardingPage } from "./OnboardingPage";
 export { SettingsPage } from "./SettingsPage";

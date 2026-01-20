@@ -1,5 +1,7 @@
 import { table } from "@broccoliapps/backend/dist/db/table";
 
+export type UpdateFrequency = "monthly" | "quarterly" | "biannually" | "yearly";
+
 export type Account = {
   userId: string;
   id: string;
@@ -7,6 +9,9 @@ export type Account = {
   type: "asset" | "debt";
   currency: string;
   createdAt: number;
+  closedAt?: number;
+  bucketIds?: string[];
+  updateFrequency?: UpdateFrequency;
 };
 
 

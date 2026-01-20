@@ -1,6 +1,7 @@
 import { api } from "@broccoliapps/shared";
 import * as v from "valibot";
 import type { Account, HistoryItem } from "../../db/accounts";
+import type { Bucket } from "../../db/buckets";
 
 // POST /accounts - create account with history items
 export const postAccount = api("POST", "/accounts")
@@ -8,6 +9,7 @@ export const postAccount = api("POST", "/accounts")
     name: v.pipe(v.string(), v.minLength(1), v.maxLength(100)),
     type: v.picklist(["asset", "debt"]),
     currency: v.pipe(v.string(), v.minLength(1), v.maxLength(10)),
+    updateFrequency: v.optional(v.picklist(["monthly", "quarterly", "biannually", "yearly"])),
     historyItems: v.pipe(
       v.array(
         v.object({
@@ -39,7 +41,8 @@ export const deleteAccount = api("DELETE", "/accounts/:id").withRequest({
 export const patchAccount = api("PATCH", "/accounts/:id")
   .withRequest({
     id: v.string(),
-    name: v.pipe(v.string(), v.minLength(1), v.maxLength(100)),
+    name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(100))),
+    closedAt: v.optional(v.union([v.number(), v.null_()])),
   })
   .withResponse<Account>();
 
@@ -62,3 +65,17 @@ export const putAccountHistory = api("PUT", "/accounts/:id/history")
     ),
   })
   .withResponse<Pick<HistoryItem, "month" | "value">[]>();
+
+// GET /accounts/:id/buckets - get buckets for an account
+export const getAccountBuckets = api("GET", "/accounts/:id/buckets")
+  .withRequest({
+    id: v.string(),
+  })
+  .withResponse<Bucket[]>();
+
+// PUT /accounts/:id/buckets - set buckets for an account
+export const putAccountBuckets = api("PUT", "/accounts/:id/buckets")
+  .withRequest({
+    id: v.string(),
+    bucketIds: v.array(v.string()),
+  });

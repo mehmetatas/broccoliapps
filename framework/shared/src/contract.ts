@@ -20,6 +20,7 @@ export type EmptyRequest = v.InferOutput<typeof emptySchema>;
 // Invoke options
 export type InvokeOptions = {
   baseUrl?: string;
+  skipAuth?: boolean;
 };
 
 // Global base URL for invoke
@@ -71,7 +72,7 @@ export class ApiContract<TReq extends Record<string, unknown>, TRes> {
    *   email: "john@example.com"
    * });
    */
-  async invoke(request: TReq, options?: InvokeOptions): Promise<TRes> {
+  async invoke(request?: TReq, options?: InvokeOptions): Promise<TRes> {
     const pathParams = extractPathParams(this.path);
     let url = (options?.baseUrl ?? globalBaseUrl) + this.path;
     const remaining = { ...request };
@@ -99,10 +100,12 @@ export class ApiContract<TReq extends Record<string, unknown>, TRes> {
     const headers: Record<string, string> = {};
     let body: string | undefined;
 
-    // Add access token if available
-    const accessToken = await tokenProvider.get();
-    if (accessToken) {
-      headers["x-access-token"] = accessToken;
+    // Add access token if available (skip for auth endpoints like refresh)
+    if (!options?.skipAuth) {
+      const accessToken = await tokenProvider.get();
+      if (accessToken) {
+        headers["x-access-token"] = accessToken;
+      }
     }
 
     if (hasBody) {

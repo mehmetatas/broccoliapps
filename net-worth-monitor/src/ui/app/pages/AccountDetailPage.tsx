@@ -2,8 +2,9 @@ import { ArrowLeft, Check, CreditCard, Loader2, Pencil, TrendingUp, X } from "lu
 import { route } from "preact-router";
 import { useEffect, useState } from "preact/hooks";
 import type { Account, HistoryItem } from "../../../db/accounts";
-import { deleteAccount, getAccount, getAccountHistory, patchAccount, putAccountHistory } from "../../../shared/api-contracts";
-import { Button, HistoryEditor, Modal, PageHeader, ValueChart } from "../components";
+import { deleteAccount, getAccount, getAccountBuckets, getAccountHistory, patchAccount, putAccountBuckets, putAccountHistory } from "../../../shared/api-contracts";
+import { BucketPicker, Button, HistoryEditor, Modal, PageHeader, ValueChartFilled } from "../components";
+import { getCurrencySymbol } from "../currency";
 import { AppLink } from "../SpaApp";
 
 type AccountDetailPageProps = {
@@ -30,18 +31,25 @@ export const AccountDetailPage = ({ id }: AccountDetailPageProps) => {
   const [importError, setImportError] = useState<string | null>(null);
   const [parsedImportData, setParsedImportData] = useState<{ month: string; value: number }[]>([]);
   const [importing, setImporting] = useState(false);
+  const [accountBucketIds, setAccountBucketIds] = useState<Set<string>>(new Set());
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const [showReopenModal, setShowReopenModal] = useState(false);
+  const [reopening, setReopening] = useState(false);
 
   useEffect(() => {
     if (!id) return;
 
     const fetchData = async () => {
       try {
-        const [accountResult, historyResult] = await Promise.all([
+        const [accountResult, historyResult, accountBucketsResult] = await Promise.all([
           getAccount.invoke({ id }),
           getAccountHistory.invoke({ id }),
+          getAccountBuckets.invoke({ id }),
         ]);
         setAccount(accountResult);
         setHistoryItems(historyResult);
+        setAccountBucketIds(new Set(accountBucketsResult.map((b) => b.id)));
 
         // Convert history items to a map for editing
         const historyMap: Record<string, number> = {};
@@ -286,11 +294,120 @@ export const AccountDetailPage = ({ id }: AccountDetailPageProps) => {
     setParsedImportData([]);
   };
 
+  const handleCloseDebt = async () => {
+    if (!account) return;
+
+    setClosing(true);
+    try {
+      // Get the current month
+      const now = new Date();
+      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+      // Set current month value to 0
+      const updatedHistory = { ...editedHistory, [currentMonth]: 0 };
+      const items: { month: string; value: number }[] = [];
+      for (const [month, value] of Object.entries(updatedHistory)) {
+        if (value !== undefined) {
+          items.push({ month, value });
+        }
+      }
+
+      const updatedItems = await putAccountHistory.invoke({
+        id: account.id,
+        items,
+      });
+
+      // Update history state
+      const historyMap: Record<string, number> = {};
+      for (const item of updatedItems) {
+        historyMap[item.month] = item.value;
+      }
+      setOriginalHistory(historyMap);
+      setEditedHistory({ ...historyMap });
+      setHistoryItems(updatedItems);
+
+      // Mark as closed
+      const updated = await patchAccount.invoke({ id: account.id, closedAt: Date.now() });
+      setAccount(updated);
+      setShowCloseModal(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to close debt");
+    } finally {
+      setClosing(false);
+    }
+  };
+
+  const handleReopenDebt = async () => {
+    if (!account) return;
+
+    setReopening(true);
+    try {
+      const updated = await patchAccount.invoke({ id: account.id, closedAt: null });
+      setAccount(updated);
+      setShowReopenModal(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to reopen debt");
+    } finally {
+      setReopening(false);
+    }
+  };
+
+  const handleBucketsChange = async (newBucketIds: Set<string>) => {
+    if (!account) return;
+
+    const previousBucketIds = accountBucketIds;
+    setAccountBucketIds(newBucketIds);
+
+    try {
+      await putAccountBuckets.invoke({ id: account.id, bucketIds: Array.from(newBucketIds) });
+    } catch (err) {
+      setAccountBucketIds(previousBucketIds);
+      setError(err instanceof Error ? err.message : "Failed to update buckets");
+    }
+  };
+
   if (loading) {
     return (
-      <div>
-        <PageHeader title="Loading..." backHref="/" />
-        <p class="text-neutral-500 dark:text-neutral-400">Loading...</p>
+      <div class="animate-pulse">
+        {/* Header Skeleton */}
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-9 h-9 bg-neutral-200 dark:bg-neutral-700 rounded-lg" />
+          <div class="w-10 h-10 bg-neutral-200 dark:bg-neutral-700 rounded-lg" />
+          <div class="h-8 w-48 bg-neutral-200 dark:bg-neutral-700 rounded" />
+        </div>
+
+        <div class="space-y-6">
+          {/* Value Skeleton */}
+          <div class="mb-4">
+            <div class="h-10 w-36 bg-neutral-200 dark:bg-neutral-700 rounded" />
+          </div>
+
+          {/* Chart Skeleton */}
+          <div class="h-48 bg-neutral-200 dark:bg-neutral-700 rounded-lg" />
+
+          {/* Value History Header Skeleton */}
+          <div class="flex items-center justify-between mb-4">
+            <div class="h-6 w-28 bg-neutral-200 dark:bg-neutral-700 rounded" />
+            <div class="h-5 w-16 bg-neutral-200 dark:bg-neutral-700 rounded" />
+          </div>
+
+          {/* History Editor Skeleton */}
+          <div class="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4 space-y-3">
+            <div class="h-10 bg-neutral-200 dark:bg-neutral-700 rounded-lg" />
+            <div class="h-10 bg-neutral-200 dark:bg-neutral-700 rounded-lg" />
+            <div class="h-10 bg-neutral-200 dark:bg-neutral-700 rounded-lg" />
+            <div class="h-10 bg-neutral-200 dark:bg-neutral-700 rounded-lg" />
+          </div>
+
+          {/* Bucket Picker Skeleton */}
+          <div>
+            <div class="h-5 w-20 bg-neutral-200 dark:bg-neutral-700 rounded mb-2" />
+            <div class="flex gap-2">
+              <div class="h-8 w-24 bg-neutral-200 dark:bg-neutral-700 rounded-full" />
+              <div class="h-8 w-20 bg-neutral-200 dark:bg-neutral-700 rounded-full" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -376,37 +493,80 @@ export const AccountDetailPage = ({ id }: AccountDetailPageProps) => {
             const latestMonth = Object.entries(editedHistory)
               .filter(([, v]) => v !== undefined)
               .sort(([a], [b]) => b.localeCompare(a))[0];
-            const latestValue = latestMonth?.[1];
-            return latestValue !== undefined ? (
-              <div class="mb-4">
-                <span class="text-4xl font-bold text-neutral-900 dark:text-neutral-100">
-                  ${latestValue.toLocaleString()}
-                </span>
-              </div>
-            ) : null;
-          })()}
-          <ValueChart data={editedHistory} variant={account.type === "debt" ? "negative" : "default"} />
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-              Value History
-            </h2>
-            <button
-              onClick={() => setShowImportModal(true)}
-              class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline"
-            >
-              Import
-            </button>
-          </div>
+            const latestValue = latestMonth?.[1] ?? 0;
+            const isClosed = !!account.closedAt;
+            const isDebt = account.type === "debt";
+            const canClose = isDebt && !isClosed;
+            const canReopen = isDebt && isClosed;
+            return (
+              <>
+                <div class="mb-4">
+                  <span class="text-4xl font-bold text-neutral-900 dark:text-neutral-100">
+                    {getCurrencySymbol(account.currency)}{latestValue.toLocaleString()}
+                  </span>
+                  <span class="ml-2 text-lg text-neutral-500 dark:text-neutral-400">
+                    {account.currency}
+                  </span>
+                </div>
+                {isClosed && (
+                  <div class="mb-4 px-4 py-3 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
+                    <p class="text-sm text-green-800 dark:text-green-200">
+                      This debt was closed on {new Date(account.closedAt!).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+                <ValueChartFilled data={editedHistory} variant={account.type === "debt" ? "negative" : "default"} currency={account.currency} />
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                    Value History
+                  </h2>
+                  <div class="flex items-center gap-3">
+                    {canClose && (
+                      <button
+                        onClick={() => setShowCloseModal(true)}
+                        class="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:underline"
+                      >
+                        Close Debt
+                      </button>
+                    )}
+                    {canReopen && (
+                      <button
+                        onClick={() => setShowReopenModal(true)}
+                        class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline"
+                      >
+                        Reopen Debt
+                      </button>
+                    )}
+                    {!isClosed && (
+                      <button
+                        onClick={() => setShowImportModal(true)}
+                        class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline"
+                      >
+                        Import
+                      </button>
+                    )}
+                  </div>
+                </div>
 
-          <HistoryEditor
-            history={editedHistory}
-            onChange={handleHistoryChange}
-            onBlur={handleBlur}
-            currency={account.currency}
-            savingMonths={savingMonths}
-            savedMonths={savedMonths}
-          />
+                <HistoryEditor
+                  history={editedHistory}
+                  onChange={handleHistoryChange}
+                  onBlur={handleBlur}
+                  currency={account.currency}
+                  savingMonths={savingMonths}
+                  savedMonths={savedMonths}
+                  disabled={isClosed}
+                  updateFrequency={account.updateFrequency}
+                />
+              </>
+            );
+          })()}
         </div>
+
+        <BucketPicker
+          selectedBucketIds={accountBucketIds}
+          onChange={handleBucketsChange}
+        />
 
         <div class="pt-12 text-center">
           <button
@@ -419,29 +579,44 @@ export const AccountDetailPage = ({ id }: AccountDetailPageProps) => {
       </div>
 
       <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
-        <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-          Delete {account.type === "asset" ? "Asset" : "Debt"}
-        </h3>
-        <p class="text-neutral-600 dark:text-neutral-400 mb-6">
-          Are you sure you want to delete this {account.type === "asset" ? "asset" : "debt"}? This action cannot be undone.
-        </p>
-        <div class="flex gap-3">
-          <Button
-            variant="secondary"
-            onClick={() => setShowDeleteModal(false)}
-            class="flex-1"
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="danger"
-            onClick={handleDelete}
-            disabled={deleting}
-            class="flex-1"
-          >
-            {deleting ? "Deleting..." : "Delete"}
-          </Button>
-        </div>
+        {(() => {
+          const isDebt = account.type === "debt";
+          return (
+            <>
+              <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+                Delete {account.type === "asset" ? "Asset" : "Debt"}
+              </h3>
+              {isDebt && (
+                <p class="text-neutral-600 dark:text-neutral-400 mb-4">
+                  If you've paid off this debt, use "Close Debt" instead to hide it while preserving the history for net worth calculations.
+                </p>
+              )}
+              <p class="text-neutral-600 dark:text-neutral-400 mb-4">
+                <strong>Warning:</strong> Deleting will remove all value history, which affects your historical net worth calculations.
+              </p>
+              <p class="text-neutral-600 dark:text-neutral-400 mb-6">
+                Are you sure you want to delete this {account.type === "asset" ? "asset" : "debt"}? This action cannot be undone.
+              </p>
+              <div class="flex gap-3">
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowDeleteModal(false)}
+                  class="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  class="flex-1"
+                >
+                  {deleting ? "Deleting..." : "Delete"}
+                </Button>
+              </div>
+            </>
+          );
+        })()}
       </Modal>
 
       <Modal open={showImportModal} onClose={handleCloseImportModal}>
@@ -498,6 +673,51 @@ export const AccountDetailPage = ({ id }: AccountDetailPageProps) => {
           </Button>
           <Button onClick={handleConfirmImport} disabled={importing} class="flex-1">
             {importing ? "Importing..." : "Confirm"}
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal open={showCloseModal} onClose={() => setShowCloseModal(false)}>
+        <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+          Close Debt
+        </h3>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-4">
+          Congratulations on paying off this debt!
+        </p>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">
+          This will set the current month's value to $0 and hide this debt from your home page and buckets while preserving all history for net worth calculations. You can reopen it anytime.
+        </p>
+        <div class="flex gap-3">
+          <Button
+            variant="secondary"
+            onClick={() => setShowCloseModal(false)}
+            class="flex-1"
+          >
+            Cancel
+          </Button>
+          <Button onClick={handleCloseDebt} disabled={closing} class="flex-1">
+            {closing ? "Closing..." : "Close Debt"}
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal open={showReopenModal} onClose={() => setShowReopenModal(false)}>
+        <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+          Reopen Debt
+        </h3>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">
+          This will make the debt visible again on your home page and in buckets.
+        </p>
+        <div class="flex gap-3">
+          <Button
+            variant="secondary"
+            onClick={() => setShowReopenModal(false)}
+            class="flex-1"
+          >
+            Cancel
+          </Button>
+          <Button onClick={handleReopenDebt} disabled={reopening} class="flex-1">
+            {reopening ? "Reopening..." : "Reopen Debt"}
           </Button>
         </div>
       </Modal>

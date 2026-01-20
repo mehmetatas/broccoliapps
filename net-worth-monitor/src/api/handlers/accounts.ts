@@ -1,13 +1,16 @@
 import { HttpError } from "@broccoliapps/backend";
 import { random } from "@broccoliapps/shared";
 import { accounts, historyItems } from "../../db/accounts";
+import { buckets } from "../../db/buckets";
 import {
   deleteAccount,
   getAccount,
+  getAccountBuckets,
   getAccountHistory,
   getAccounts,
   patchAccount,
   postAccount,
+  putAccountBuckets,
   putAccountHistory,
 } from "../../shared/api-contracts";
 import { api } from "../lambda";
@@ -64,6 +67,79 @@ api.register(putAccountHistory, async (req, res, ctx) => {
   return res.ok(items);
 });
 
+// GET /accounts/:id/buckets - get buckets for an account
+api.register(getAccountBuckets, async (req, res, ctx) => {
+  const { userId } = await ctx.getUser();
+  const account = await accounts.get({ userId }, { id: req.id });
+
+  if (!account) {
+    throw new HttpError(404, "Account not found");
+  }
+
+  const bucketIds = account.bucketIds ?? [];
+
+  if (bucketIds.length === 0) {
+    return res.ok([]);
+  }
+
+  // Fetch all buckets for the user and filter by bucketIds
+  const allBuckets = await buckets.query({ userId }).all();
+  const filteredBuckets = allBuckets.filter((bucket) => bucketIds.includes(bucket.id));
+
+  return res.ok(filteredBuckets);
+});
+
+// PUT /accounts/:id/buckets - set buckets for an account
+api.register(putAccountBuckets, async (req, res, ctx) => {
+  const { userId } = await ctx.getUser();
+  const account = await accounts.get({ userId }, { id: req.id });
+
+  if (!account) {
+    throw new HttpError(404, "Account not found");
+  }
+
+  const existingBucketIds = new Set(account.bucketIds ?? []);
+  const newBucketIds = new Set(req.bucketIds);
+
+  // Calculate which buckets were added and removed
+  const addedBucketIds = req.bucketIds.filter((id) => !existingBucketIds.has(id));
+  const removedBucketIds = [...existingBucketIds].filter((id) => !newBucketIds.has(id));
+
+  // Update the account's bucketIds
+  await accounts.put({
+    ...account,
+    bucketIds: req.bucketIds,
+  });
+
+  // Update each added bucket's accountIds (add this account)
+  for (const bucketId of addedBucketIds) {
+    const bucket = await buckets.get({ userId }, { id: bucketId });
+    if (bucket) {
+      const accountIds = bucket.accountIds ?? [];
+      if (!accountIds.includes(req.id)) {
+        await buckets.put({
+          ...bucket,
+          accountIds: [...accountIds, req.id],
+        });
+      }
+    }
+  }
+
+  // Update each removed bucket's accountIds (remove this account)
+  for (const bucketId of removedBucketIds) {
+    const bucket = await buckets.get({ userId }, { id: bucketId });
+    if (bucket) {
+      const accountIds = bucket.accountIds ?? [];
+      await buckets.put({
+        ...bucket,
+        accountIds: accountIds.filter((id) => id !== req.id),
+      });
+    }
+  }
+
+  return res.noContent();
+});
+
 // GET /accounts/:id - get single account
 api.register(getAccount, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
@@ -85,10 +161,21 @@ api.register(patchAccount, async (req, res, ctx) => {
     throw new HttpError(404, "Account not found");
   }
 
-  const updated = await accounts.put({
-    ...account,
-    name: req.name,
-  });
+  const updatedAccount = { ...account };
+
+  if (req.name !== undefined) {
+    updatedAccount.name = req.name;
+  }
+
+  if (req.closedAt !== undefined) {
+    if (req.closedAt === null) {
+      delete updatedAccount.closedAt;
+    } else {
+      updatedAccount.closedAt = req.closedAt;
+    }
+  }
+
+  const updated = await accounts.put(updatedAccount);
 
   return res.ok(updated);
 });
@@ -113,6 +200,19 @@ api.register(deleteAccount, async (req, res, ctx) => {
     );
   }
 
+  // Remove this account ID from all associated buckets' accountIds
+  const bucketIds = account.bucketIds ?? [];
+  for (const bucketId of bucketIds) {
+    const bucket = await buckets.get({ userId }, { id: bucketId });
+    if (bucket) {
+      const accountIds = bucket.accountIds ?? [];
+      await buckets.put({
+        ...bucket,
+        accountIds: accountIds.filter((id) => id !== req.id),
+      });
+    }
+  }
+
   await accounts.delete({ userId }, { id: req.id });
   return res.noContent();
 });
@@ -129,6 +229,7 @@ api.register(postAccount, async (req, res, ctx) => {
     type: req.type,
     currency: req.currency,
     createdAt: Date.now(),
+    ...(req.updateFrequency && { updateFrequency: req.updateFrequency }),
   });
 
   // Create history items

@@ -29,14 +29,16 @@ export const AccountCard = ({ account, latestValue, onClick }: AccountCardProps)
         {account.type === "asset" ? <TrendingUp size={24} /> : <CreditCard size={24} />}
       </div>
       <div class="flex-1 min-w-0">
-        <span class="font-medium text-neutral-900 dark:text-neutral-100 truncate block">
-          {account.name}
-        </span>
-        {latestValue !== undefined && (
-          <p class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mt-1">
-            {formatCurrency(latestValue)}
-          </p>
-        )}
+        <div class="flex items-baseline justify-between gap-2">
+          <span class="font-medium text-neutral-900 dark:text-neutral-100 truncate">
+            {account.name}
+          </span>
+          {latestValue !== undefined && (
+            <span class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 shrink-0">
+              {formatCurrency(latestValue)}
+            </span>
+          )}
+        </div>
       </div>
       <div class="text-neutral-400 dark:text-neutral-500">
         <ChevronRight size={20} />

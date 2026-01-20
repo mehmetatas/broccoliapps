@@ -56,10 +56,17 @@ export const SettingsPage = () => {
     }
   };
 
+  const handleSignOut = () => {
+    cache.remove("accessToken");
+    cache.remove("refreshToken");
+    cache.remove("user");
+    window.location.href = "/";
+  };
+
   return (
     <div>
       <PageHeader title="Settings" backHref="/" />
-      <div class="max-w-xl mx-auto bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6 space-y-6">
+      <div class="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6 space-y-6">
         <div>
           <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
             Theme
@@ -71,8 +78,8 @@ export const SettingsPage = () => {
                 type="button"
                 onClick={() => handleThemeChange(option)}
                 class={`px-4 py-2 text-sm rounded-md border ${theme === option
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-600"
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-600"
                   }`}
               >
                 {option.charAt(0).toUpperCase() + option.slice(1)}
@@ -92,6 +99,16 @@ export const SettingsPage = () => {
             Your net worth will be displayed in this currency.
           </p>
         </div>
+      </div>
+
+      <div class="mt-8 pt-8 border-t border-neutral-200 dark:border-neutral-700">
+        <button
+          type="button"
+          onClick={handleSignOut}
+          class="w-full px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+        >
+          Sign out
+        </button>
       </div>
     </div>
   );

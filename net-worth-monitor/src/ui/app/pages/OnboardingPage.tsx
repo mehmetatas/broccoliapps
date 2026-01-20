@@ -32,7 +32,7 @@ export const OnboardingPage = () => {
 
   return (
     <div class="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center p-4">
-      <div class="w-full max-w-lg bg-white dark:bg-neutral-800 rounded-2xl shadow-xl p-8">
+      <div class="max-w-2xl w-full bg-white dark:bg-neutral-800 rounded-2xl shadow-xl p-8">
         <h1 class="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
           Welcome, {firstName}!
         </h1>

@@ -1,8 +1,10 @@
 export { AccountCard } from "./AccountCard";
 export { AccountList } from "./AccountList";
+export { BucketPicker } from "./BucketPicker";
 export { Button } from "./Button";
 export { CurrencyPicker } from "./CurrencyPicker";
 export { CurrencySelect } from "./CurrencySelect";
+export { FrequencyPicker } from "./FrequencyPicker";
 export { HistoryEditor } from "./HistoryEditor";
 export { Input } from "./Input";
 export { Modal } from "./Modal";
@@ -11,3 +13,4 @@ export { NewAccountForm } from "./NewAccountForm";
 export { PageHeader } from "./PageHeader";
 export { TypeToggle } from "./TypeToggle";
 export { ValueChart } from "./ValueChart";
+export { ValueChartFilled } from "./ValueChartFilled";
