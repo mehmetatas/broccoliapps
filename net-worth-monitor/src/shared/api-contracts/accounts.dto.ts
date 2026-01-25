@@ -8,7 +8,7 @@ export const postAccountRequest = {
   name: v.pipe(v.string(), v.minLength(1), v.maxLength(100)),
   type: v.picklist(["asset", "debt"]),
   currency: v.pipe(v.string(), v.minLength(1), v.maxLength(10)),
-  updateFrequency: v.optional(updateFrequencySchema),
+  updateFrequency: updateFrequencySchema,
   history: v.pipe(historySchema, v.minEntries(1)),
 };
 export type PostAccountRequest = v.InferOutput<v.ObjectSchema<typeof postAccountRequest, undefined>>;

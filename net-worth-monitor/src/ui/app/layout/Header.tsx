@@ -1,12 +1,12 @@
 import { Bell } from "lucide-preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import type { AccountDto } from "../../../shared/api-contracts/dto";
-import { getDashboard, getUserSync } from "../api";
+import type { AccountDto, AuthUserDto } from "../../../shared/api-contracts/dto";
+import { getDashboard, getUser, getUserSync } from "../api";
 import { useClickOutside } from "../hooks";
 import { hasMissedUpdate } from "../utils/dateUtils";
 
 export const Header = () => {
-  const user = getUserSync();
+  const [user, setUser] = useState<AuthUserDto | undefined>(getUserSync());
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [accountsNeedingUpdate, setAccountsNeedingUpdate] = useState<AccountDto[]>([]);
@@ -19,6 +19,13 @@ export const Header = () => {
   useClickOutside(notificationsRef, closeNotifications, notificationsOpen);
 
   useEffect(() => {
+    // Fetch user if not in cache
+    if (!user) {
+      getUser().then(setUser).catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
     if (!user) return;
     getDashboard().then((data) => {
       const needsUpdate = data.accounts.filter(
@@ -26,7 +33,7 @@ export const Header = () => {
       );
       setAccountsNeedingUpdate(needsUpdate);
     });
-  }, []);
+  }, [user]);
 
   return (
     <header class="py-4 px-4 bg-white/50 dark:bg-neutral-800/50 border-b border-neutral-200 dark:border-neutral-700">
