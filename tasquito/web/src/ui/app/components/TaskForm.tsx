@@ -11,7 +11,7 @@ type TaskFormData = {
 };
 
 type TaskFormProps = {
-  onSubmit: (data: TaskFormData) => Promise<unknown>;
+  onSubmit: (data: TaskFormData) => void;
   placeholder?: string;
 };
 
@@ -22,42 +22,32 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
   const [subtasks, setSubtasks] = useState<string[]>([]);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const subtaskInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = async (e?: Event) => {
+  const handleSubmit = (e?: Event) => {
     e?.preventDefault();
     if (!title.trim()) {
-      setError("Title is required");
       return;
     }
 
-    setError(null);
-    setIsSubmitting(true);
-    try {
-      await onSubmit({
-        title: title.trim(),
-        description: description.trim() || undefined,
-        dueDate,
-        subtasks: subtasks.length > 0 ? subtasks : undefined,
-      });
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setDueDate(undefined);
-      setSubtasks([]);
-      setNewSubtaskTitle("");
-      setIsExpanded(false);
-      // Focus back to title input for quick task entry (defer to next tick after render)
-      setTimeout(() => titleInputRef.current?.focus(), 0);
-    } catch (err) {
-      setError("Failed to create task");
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Submit (fire-and-forget, skeleton shows immediately)
+    onSubmit({
+      title: title.trim(),
+      description: description.trim() || undefined,
+      dueDate,
+      subtasks: subtasks.length > 0 ? subtasks : undefined,
+    });
+
+    // Focus back to title input first (before state changes cause re-render)
+    titleInputRef.current?.focus();
+    // Reset form (keep expanded state)
+    setTitle("");
+    setDescription("");
+    setDueDate(undefined);
+    setSubtasks([]);
+    setNewSubtaskTitle("");
   };
 
   const handleTitleKeyDown = (e: KeyboardEvent) => {
@@ -83,21 +73,23 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
 
   return (
     <form onSubmit={handleSubmit} class="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 p-5">
-      {/* Header: Title + More Options Button */}
+      {/* Header: Title + Date + More Options Button */}
       <div class="flex items-center justify-between gap-3">
         <input
           ref={titleInputRef}
           type="text"
           placeholder={placeholder}
           value={title}
-          onInput={(e) => {
-            setTitle((e.target as HTMLInputElement).value);
-            setError(null);
-          }}
+          onInput={(e) => setTitle((e.target as HTMLInputElement).value)}
           onKeyDown={handleTitleKeyDown}
-          disabled={isSubmitting}
           class="flex-1 text-lg font-medium text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 bg-transparent border-none outline-none focus:ring-0 p-0"
         />
+        {isExpanded && (
+          <DatePicker
+            value={dueDate}
+            onChange={setDueDate}
+          />
+        )}
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
@@ -110,9 +102,6 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
         </button>
       </div>
 
-      {/* Error message */}
-      {error && <p class="mt-2 text-sm text-red-500">{error}</p>}
-
       {/* Expanded section: Description, Due Date, Subtasks, Create Button */}
       {isExpanded && (
         <div class="mt-4 space-y-4">
@@ -121,16 +110,8 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
             placeholder="Task description"
             value={description}
             onInput={(e) => setDescription((e.target as HTMLTextAreaElement).value)}
-            disabled={isSubmitting}
             rows={3}
             class="w-full px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 placeholder-neutral-400 dark:placeholder-neutral-500 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg resize-none outline-none focus:border-blue-300 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-300 dark:focus:ring-blue-500"
-          />
-
-          {/* Due Date */}
-          <DatePicker
-            value={dueDate}
-            onChange={setDueDate}
-            disabled={isSubmitting}
           />
 
           {/* Subtasks Section */}
@@ -141,7 +122,7 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
 
             {/* Existing subtasks */}
             {subtasks.length > 0 && (
-              <div class="space-y-0.5 mb-3">
+              <div class="space-y-0 mb-0">
                 {subtasks.map((subtask, index) => (
                   <div
                     key={index}
@@ -171,8 +152,7 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
               value={newSubtaskTitle}
               onInput={(e) => setNewSubtaskTitle((e.target as HTMLInputElement).value)}
               onKeyDown={handleSubtaskKeyDown}
-              disabled={isSubmitting}
-              class="w-full text-sm text-neutral-600 dark:text-neutral-300 placeholder-neutral-400 dark:placeholder-neutral-500 bg-transparent border-none outline-none focus:ring-0 p-0 py-2"
+              class="w-full text-sm text-neutral-600 dark:text-neutral-300 placeholder-neutral-400 dark:placeholder-neutral-500 bg-transparent border-none outline-none focus:ring-0 p-0 py-1"
             />
           </div>
 
@@ -180,9 +160,9 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
           <div class="pt-2">
             <Button
               type="submit"
-              disabled={isSubmitting || !title.trim()}
+              disabled={!title.trim()}
             >
-              {isSubmitting ? "Creating..." : "Create Task"}
+              Create Task
             </Button>
           </div>
         </div>

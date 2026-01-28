@@ -9,6 +9,8 @@ export const useProject = (id: string) => {
   const [project, setProject] = useState<ProjectWithTasksDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pendingTaskCount, setPendingTaskCount] = useState(0);
+  const [pendingSubtaskCounts, setPendingSubtaskCounts] = useState<Map<string, number>>(new Map());
 
   const load = async () => {
     try {
@@ -51,23 +53,36 @@ export const useProject = (id: string) => {
   };
 
   // Task actions
-  const createTask = async (data: { title: string; description?: string; dueDate?: string; subtasks?: string[] }) => {
+  const createTask = (data: { title: string; description?: string; dueDate?: string; subtasks?: string[] }) => {
     if (!project) return;
-    const result = await postTask({
+
+    // Show skeleton immediately
+    setPendingTaskCount((c) => c + 1);
+
+    // Fire API call in background
+    postTask({
       projectId: project.id,
       title: data.title,
       description: data.description,
       dueDate: data.dueDate,
       subtasks: data.subtasks,
-    });
-    setProject((prev) => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        tasks: [{ ...result.task, subtasks: result.subtasks ?? [] }, ...prev.tasks],
-      };
-    });
-    return result.task;
+    })
+      .then((result) => {
+        // Add the real task to the top
+        setProject((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            tasks: [{ ...result.task, subtasks: result.subtasks ?? [] }, ...prev.tasks],
+          };
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to create task", err);
+      })
+      .finally(() => {
+        setPendingTaskCount((c) => c - 1);
+      });
   };
 
   const updateTaskStatus = async (taskId: string, status: TaskStatus) => {
@@ -118,15 +133,33 @@ export const useProject = (id: string) => {
     });
   };
 
-  const removeTask = async (taskId: string) => {
+  const removeTask = (taskId: string) => {
     if (!project) return;
-    await deleteTask(project.id, taskId);
+
+    // Find the task to save for potential restoration
+    const taskToDelete = project.tasks.find((t) => t.id === taskId);
+    if (!taskToDelete) return;
+
+    // Optimistic update - remove immediately
     setProject((prev) => {
       if (!prev) return null;
       return {
         ...prev,
         tasks: prev.tasks.filter((t) => t.id !== taskId),
       };
+    });
+
+    // Call API in background
+    deleteTask(project.id, taskId).catch((err) => {
+      console.error("Failed to delete task, restoring", err);
+      // Restore the task on failure
+      setProject((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          tasks: [...prev.tasks, taskToDelete],
+        };
+      });
     });
   };
 
@@ -163,9 +196,15 @@ export const useProject = (id: string) => {
     });
   };
 
-  const removeSubtask = async (taskId: string, subtaskId: string) => {
+  const removeSubtask = (taskId: string, subtaskId: string) => {
     if (!project) return;
-    await deleteTask(project.id, subtaskId);
+
+    // Find the subtask to save for potential restoration
+    const parentTask = project.tasks.find((t) => t.id === taskId);
+    const subtaskToDelete = parentTask?.subtasks.find((st) => st.id === subtaskId);
+    if (!subtaskToDelete) return;
+
+    // Optimistic update - remove immediately
     setProject((prev) => {
       if (!prev) return null;
       return {
@@ -175,21 +214,61 @@ export const useProject = (id: string) => {
         ),
       };
     });
+
+    // Call API in background
+    deleteTask(project.id, subtaskId).catch((err) => {
+      console.error("Failed to delete subtask, restoring", err);
+      // Restore the subtask on failure
+      setProject((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          tasks: prev.tasks.map((t) =>
+            t.id === taskId ? { ...t, subtasks: [...t.subtasks, subtaskToDelete] } : t
+          ),
+        };
+      });
+    });
   };
 
-  const createSubtask = async (taskId: string, title: string) => {
+  const createSubtask = (taskId: string, title: string) => {
     if (!project) return;
-    const result = await postSubtask(project.id, taskId, title);
-    setProject((prev) => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        tasks: prev.tasks.map((t) =>
-          t.id === taskId ? { ...t, subtasks: [...t.subtasks, result.task] } : t
-        ),
-      };
+
+    // Show skeleton immediately
+    setPendingSubtaskCounts((prev) => {
+      const next = new Map(prev);
+      next.set(taskId, (next.get(taskId) ?? 0) + 1);
+      return next;
     });
-    return result.task;
+
+    // Fire API call in background
+    postSubtask(project.id, taskId, title)
+      .then((result) => {
+        setProject((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            tasks: prev.tasks.map((t) =>
+              t.id === taskId ? { ...t, subtasks: [...t.subtasks, result.task] } : t
+            ),
+          };
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to create subtask", err);
+      })
+      .finally(() => {
+        setPendingSubtaskCounts((prev) => {
+          const next = new Map(prev);
+          const current = next.get(taskId) ?? 0;
+          if (current <= 1) {
+            next.delete(taskId);
+          } else {
+            next.set(taskId, current - 1);
+          }
+          return next;
+        });
+      });
   };
 
   // Reorder task within its status group
@@ -329,6 +408,8 @@ export const useProject = (id: string) => {
     tasks: sortedTasks,
     isLoading,
     error,
+    pendingTaskCount,
+    pendingSubtaskCounts,
     // Project actions
     updateName,
     remove,

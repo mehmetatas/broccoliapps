@@ -1,7 +1,7 @@
+import type { TaskDto } from "@broccoliapps/tasquito-shared";
 import { Archive, ArchiveRestore, ArrowLeft, CheckSquare, ChevronDown, ChevronRight, Trash2 } from "lucide-preact";
 import { useMemo, useState } from "preact/hooks";
-import type { TaskDto } from "@broccoliapps/tasquito-shared";
-import { ArchiveConfirmModal, DeleteConfirmModal, EditableText, EmptyState, IconButton, ProjectDetailSkeleton, TaskCard, TaskForm } from "../components";
+import { ArchiveConfirmModal, DeleteConfirmModal, EditableText, EmptyState, IconButton, ProjectDetailSkeleton, TaskCard, TaskCardSkeleton, TaskForm } from "../components";
 import { useDragAndDrop, useProject } from "../hooks";
 import { AppLink } from "../SpaApp";
 
@@ -17,6 +17,8 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
     tasks,
     isLoading,
     error,
+    pendingTaskCount,
+    pendingSubtaskCounts,
     updateName,
     remove,
     archive,
@@ -130,16 +132,27 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
     }
   };
 
+  const handleTaskDelete = (task: TaskWithSubtasks) => {
+    if (task.status === "done") {
+      // Delete done tasks immediately without confirmation
+      removeTask(task.id);
+    } else {
+      // Show confirmation modal for non-done tasks
+      setTaskToDelete(task);
+    }
+  };
+
   const renderTaskCard = (task: TaskWithSubtasks) => (
     <TaskCard
       key={task.id}
       task={task}
       disabled={isArchived}
+      pendingSubtaskCount={pendingSubtaskCounts.get(task.id) ?? 0}
       onToggleStatus={(status) => updateTaskStatus(task.id, status)}
       onUpdateTitle={(title) => updateTaskTitle(task.id, title)}
       onUpdateDescription={(desc) => updateTaskDescription(task.id, desc)}
       onUpdateDueDate={(date) => updateTaskDueDate(task.id, date)}
-      onDelete={() => setTaskToDelete(task)}
+      onDelete={() => handleTaskDelete(task)}
       onSubtaskToggleStatus={(subtaskId, status) => updateSubtaskStatus(task.id, subtaskId, status)}
       onSubtaskUpdateTitle={(subtaskId, title) => updateSubtaskTitle(task.id, subtaskId, title)}
       onSubtaskDelete={(subtaskId) => removeSubtask(task.id, subtaskId)}
@@ -212,7 +225,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
               class="flex items-center gap-2 px-3 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
             >
               <Trash2 size={16} />
-              Delete Now
+              Permanently delete
             </button>
           </div>
         </div>
@@ -231,9 +244,13 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
       ) : (
         <div class="space-y-4">
           {/* Todo Tasks */}
-          {todoTasks.length > 0 && (
+          {(todoTasks.length > 0 || pendingTaskCount > 0) && (
             <div ref={todoContainerRef} class="space-y-4">
               {todoTasks.map(renderTaskCard)}
+              {/* Pending Task Skeletons at bottom */}
+              {Array.from({ length: pendingTaskCount }).map((_, i) => (
+                <TaskCardSkeleton key={`pending-${i}`} />
+              ))}
             </div>
           )}
 

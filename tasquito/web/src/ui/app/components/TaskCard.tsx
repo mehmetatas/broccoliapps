@@ -5,6 +5,7 @@ import Sortable from "sortablejs";
 import { Card } from "./Card";
 import { Checkbox } from "./Checkbox";
 import { EditableText } from "./EditableText";
+import { Skeleton } from "./Skeleton";
 
 type TaskWithSubtasks = TaskDto & {
   subtasks: TaskDto[];
@@ -23,6 +24,7 @@ type TaskCardProps = {
   onSubtaskAdd: (title: string) => void;
   onSubtaskReorder?: (subtaskId: string, afterId: string | null, beforeId: string | null) => void;
   disabled?: boolean;
+  pendingSubtaskCount?: number;
 };
 
 const formatDate = (dateStr: string): string => {
@@ -49,6 +51,7 @@ export const TaskCard = ({
   onSubtaskAdd,
   onSubtaskReorder,
   disabled = false,
+  pendingSubtaskCount = 0,
 }: TaskCardProps) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
@@ -57,9 +60,14 @@ export const TaskCard = ({
   const [showDoneSubtasks, setShowDoneSubtasks] = useState(false);
   const isDone = task.status === "done";
 
-  // Split subtasks into todo and done
-  const todoSubtasks = task.subtasks.filter((st) => st.status !== "done");
-  const doneSubtasks = task.subtasks.filter((st) => st.status === "done");
+  // Split subtasks into todo and done, sorted by sortOrder
+  const sortBySortOrder = (a: TaskDto, b: TaskDto) => {
+    const aOrder = a.sortOrder ?? "";
+    const bOrder = b.sortOrder ?? "";
+    return aOrder < bOrder ? -1 : aOrder > bOrder ? 1 : 0;
+  };
+  const todoSubtasks = task.subtasks.filter((st) => st.status !== "done").sort(sortBySortOrder);
+  const doneSubtasks = task.subtasks.filter((st) => st.status === "done").sort(sortBySortOrder);
   const dateInputRef = useRef<HTMLInputElement>(null);
   const subtasksContainerRef = useRef<HTMLDivElement>(null);
   const subtaskSortableRef = useRef<Sortable | null>(null);
@@ -185,8 +193,8 @@ export const TaskCard = ({
             disabled={disabled || isDone}
             textClassName={`text-lg font-medium ${isDone ? "line-through text-neutral-400 dark:text-neutral-500" : "text-neutral-900 dark:text-neutral-100"}`}
           />
-          {task.subtasks.length > 0 && (
-            <span class="text-xs text-neutral-400 dark:text-neutral-500">({doneSubtasks.length}/{task.subtasks.length})</span>
+          {(task.subtasks.length > 0 || pendingSubtaskCount > 0) && (
+            <span class="text-xs text-neutral-400 dark:text-neutral-500">({doneSubtasks.length}/{task.subtasks.length + pendingSubtaskCount})</span>
           )}
         </div>
         {/* Date badge - only show if has date or in edit mode */}
@@ -252,7 +260,7 @@ export const TaskCard = ({
       )}
 
       {/* Subtasks - Todo */}
-      {todoSubtasks.length > 0 && (
+      {(todoSubtasks.length > 0 || pendingSubtaskCount > 0) && (
         <div ref={subtasksContainerRef} class="mt-2 space-y-0.5">
           {todoSubtasks.map((subtask) => (
             <div
@@ -287,6 +295,13 @@ export const TaskCard = ({
               )}
             </div>
           ))}
+          {/* Pending subtask skeletons */}
+          {Array.from({ length: pendingSubtaskCount }).map((_, i) => (
+            <div key={`pending-${i}`} class="flex items-center gap-2 pl-4 py-0.5">
+              <Skeleton className="h-4 w-4 rounded" />
+              <Skeleton className="h-4 flex-1 max-w-[200px]" />
+            </div>
+          ))}
         </div>
       )}
 
@@ -306,7 +321,7 @@ export const TaskCard = ({
               {doneSubtasks.map((subtask) => (
                 <div
                   key={subtask.id}
-                  class="group/subtask flex items-center gap-2 py-0.5 rounded"
+                  class="group/subtask flex items-center gap-2 pl-4 py-0.5 rounded"
                 >
                   <Checkbox
                     checked={true}
