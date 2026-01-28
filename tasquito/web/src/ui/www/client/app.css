@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* Base styles */
+body {
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+a:not(:disabled),
+button:not(:disabled) {
+  cursor: pointer;
+}

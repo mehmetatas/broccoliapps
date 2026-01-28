@@ -22,6 +22,20 @@ jwIDAQAB
       publicKey: "TODO",
       baseUrl: isDev ? "http://localhost:8080" : "https://www.broccoliapps.com",
     },
+    tasquito: {
+      baseUrl: isDev ? "http://localhost:8082" : "https://www.tasquito.com",
+      publicKey: `
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuLwnizPrqMsdaDfs9N9r
+JS3e/+m6I8lIPx9x3vOiL04xgtzzDLb8zKFySE1ud28GYNnS5m8jQm5BVygiKMNo
+d9P9YGFjHWPXesm6wDRdv5rF/WNsCi3hkJ6a7IMI3siStLJijz4UQjWcQdoEUljO
+IV58Ocyh+vAtSK+QtkDJ9YmGERq4wXS7H5lNRXGwlA5FBc1PZy/qDWbt3fn6LH4p
+7MsRUHKEuu2hizzmTSbAe9rh+LAbOz/qpnklgixJXKrNjauc1eulEoPYBWgIpSmd
+s2C08cImZ0wGUMydDBfTGjm9Z4zU2tFNH9gH3R013SMT2N5+u5j6jHX+VKxAvhAl
+7QIDAQAB
+-----END PUBLIC KEY-----
+`.trim(),
+    },
   },
 };
 

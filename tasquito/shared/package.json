@@ -1,0 +1,25 @@
+{
+  "name": "@broccoliapps/tasquito-shared",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "npm run clean && tsc",
+    "clean": "rm -rf dist/"
+  },
+  "dependencies": {
+    "@broccoliapps/shared": "*",
+    "valibot": "^1.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

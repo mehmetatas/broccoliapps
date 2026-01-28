@@ -8,7 +8,8 @@
     "broccoliapps.com",
     "androidapptesters.com",
     "expense-tracker/*",
-    "networthmonitor/*"
+    "networthmonitor/*",
+    "tasquito/*"
   ],
   "engines": {
     "node": ">=22"
@@ -22,7 +23,9 @@
     "dotcom": "npm run build:framework && npm run dev -w @broccoliapps/dotcom",
     "deploy:dotcom": "npm run build:framework && npm run deploy -w @broccoliapps/dotcom",
     "nwm:web": "npm run build:framework && npm run dev -w @broccoliapps/nwm-web",
-    "deploy:nwm:web": "npm run build:framework && npm run deploy -w @broccoliapps/nwm-web"
+    "deploy:nwm": "npm run build:framework && npm run deploy -w @broccoliapps/nwm-web",
+    "tasquito:web": "npm run build:framework && npm run dev -w @broccoliapps/tasquito-web",
+    "deploy:tasquito": "npm run build:framework && npm run deploy -w @broccoliapps/tasquito-web"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

@@ -1,0 +1,57 @@
+{
+  "name": "@broccoliapps/tasquito-web",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "export AWS_PROFILE=appi && export TABLE_NAME=tasquito && concurrently --kill-others-on-fail -n hono,vite,tsc -c blue,magenta,yellow \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:typecheck\"",
+    "dev:typecheck": "tsc --watch --noEmit --preserveWatchOutput",
+    "dev:server": "NODE_ENV=development tsx watch scripts/dev-server/main.ts",
+    "dev:client": "vite",
+    "build:lambda": "rm -rf dist cdk.out && npm run typecheck && tsx scripts/build/main.ts",
+    "invalidate": "aws cloudfront create-invalidation --distribution-id E3V7GQGP2QLE1B --paths \"/*\" --profile appi --no-cli-pager",
+    "deploy": "export AWS_PROFILE=appi && npm run build:lambda && npx cdk deploy --profile appi --require-approval never && npm run invalidate"
+  },
+  "devDependencies": {
+    "@broccoliapps/dev-tools": "*",
+    "@broccoliapps/infra": "*",
+    "@hono/vite-dev-server": "^0.24.1",
+    "@preact/preset-vite": "^2.10.2",
+    "@tailwindcss/postcss": "^4.1.11",
+    "@types/aws-lambda": "^8.10.159",
+    "@types/node": "^25.0.3",
+    "aws-cdk-lib": "^2.234.0",
+    "concurrently": "^9.2.1",
+    "constructs": "^10.4.4",
+    "cssnano": "^7.1.2",
+    "esbuild": "^0.27.2",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "tailwindcss": "^4.1.11",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "@broccoliapps/backend": "*",
+    "@broccoliapps/browser": "*",
+    "@broccoliapps/frontend": "*",
+    "@broccoliapps/shared": "*",
+    "@broccoliapps/tasquito-shared": "*",
+    "@hono/valibot-validator": "^0.6.1",
+    "hono": "^4.11.3",
+    "lucide-preact": "^0.562.0",
+    "preact": "^10.28.2",
+    "preact-render-to-string": "^6.6.5",
+    "preact-router": "^4.1.2",
+    "valibot": "^1.2.0"
+  }
+}
