@@ -1,7 +1,7 @@
 import { cache } from "@broccoliapps/browser";
 import { CACHE_KEYS, sessionStorage } from "./cache";
 
-// Clear all net-worth-monitor caches (used for sign-out)
+// Clear all networthmonitor caches (used for sign-out)
 export const invalidateAll = () => {
   cache.removeByPrefix(CACHE_KEYS.accountPrefix, sessionStorage);
   cache.remove(CACHE_KEYS.buckets, sessionStorage);

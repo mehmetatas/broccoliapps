@@ -1,4 +1,4 @@
-// Cache keys for net-worth-monitor
+// Cache keys for networthmonitor
 export const CACHE_KEYS = {
   accountPrefix: "cache:account:",
   account: (id: string) => `cache:account:${id}` as const,

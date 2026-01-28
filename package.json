@@ -8,7 +8,7 @@
     "broccoliapps.com",
     "androidapptesters.com",
     "expense-tracker/*",
-    "net-worth-monitor"
+    "networthmonitor"
   ],
   "engines": {
     "node": ">=22"
