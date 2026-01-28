@@ -1,5 +1,5 @@
 {
-  "name": "@broccoliapps/nwm-backend",
+  "name": "@broccoliapps/nwm-web",
   "version": "0.0.0",
   "type": "module",
   "main": "dist/src/index.js",

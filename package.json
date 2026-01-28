@@ -8,7 +8,7 @@
     "broccoliapps.com",
     "androidapptesters.com",
     "expense-tracker/*",
-    "networthmonitor"
+    "networthmonitor/*"
   ],
   "engines": {
     "node": ">=22"
@@ -20,9 +20,9 @@
     "lint:fix": "eslint . --fix",
     "clean": "npm run clean --workspaces --if-present",
     "dotcom": "npm run build:framework && npm run dev -w @broccoliapps/dotcom",
-    "nwm:backend": "npm run build:framework && npm run dev -w @broccoliapps/nwm-backend",
     "deploy:dotcom": "npm run build:framework && npm run deploy -w @broccoliapps/dotcom",
-    "deploy:nwm": "npm run build:framework && npm run deploy -w @broccoliapps/nwm-backend"
+    "nwm:web": "npm run build:framework && npm run dev -w @broccoliapps/nwm-web",
+    "deploy:nwm:web": "npm run build:framework && npm run deploy -w @broccoliapps/nwm-web"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
