@@ -19,4 +19,7 @@ export const CACHE_KEYS = {
   theme: "cache:theme",
 } as const;
 
-export const sessionStorage = { storage: "session" } as const;
+// Cache TTL: 1 hour in milliseconds
+export const CACHE_TTL = 3600000;
+
+export const getCacheExpiry = (): number => Date.now() + CACHE_TTL;

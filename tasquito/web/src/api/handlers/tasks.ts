@@ -1,11 +1,14 @@
 import { HttpError } from "@broccoliapps/backend";
 import { random } from "@broccoliapps/shared";
 import { generateKeyBetween } from "fractional-indexing";
+import { projects } from "../../db/projects";
 import { tasks, type Task } from "../../db/tasks";
 import {
   deleteTask,
   getTask,
   getTasks,
+  LIMITS,
+  LIMIT_MESSAGES,
   patchTask,
   postSubtask,
   postTask,
@@ -18,6 +21,31 @@ const ensureSortOrder = (task: Task): Task & { sortOrder: string } => ({
   sortOrder: task.sortOrder ?? generateKeyBetween(null, null),
 });
 
+// Helper to update project task counts
+const updateProjectCounts = async (
+  userId: string,
+  projectId: string,
+  deltaOpen: number,
+  deltaTotal: number
+): Promise<{ openTaskCount: number; totalTaskCount: number }> => {
+  const project = await projects.get({ userId }, { id: projectId });
+  if (!project) {
+    throw new HttpError(404, "Project not found");
+  }
+
+  const openTaskCount = Math.max(0, (project.openTaskCount ?? 0) + deltaOpen);
+  const totalTaskCount = Math.max(0, (project.totalTaskCount ?? 0) + deltaTotal);
+
+  await projects.put({
+    ...project,
+    openTaskCount,
+    totalTaskCount,
+    updatedAt: Date.now(),
+  });
+
+  return { openTaskCount, totalTaskCount };
+};
+
 // POST /projects/:projectId/tasks - create task
 api.register(postTask, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
@@ -27,6 +55,18 @@ api.register(postTask, async (req, res, ctx) => {
 
   // Get existing tasks to determine sortOrder
   const existingTasks = await tasks.query({ userId, projectId: req.projectId }).all();
+
+  // Check task limit (parent tasks only)
+  const parentTaskCount = existingTasks.filter((t) => !t.parentId).length;
+  if (parentTaskCount >= LIMITS.MAX_TASKS_PER_PROJECT) {
+    throw new HttpError(403, LIMIT_MESSAGES.TASK);
+  }
+
+  // Check inline subtask count limit
+  if (req.subtasks && req.subtasks.length > LIMITS.MAX_SUBTASKS_PER_TASK) {
+    throw new HttpError(403, LIMIT_MESSAGES.SUBTASK);
+  }
+
   const parentTasks = existingTasks.filter((t) => !t.parentId && t.status === status);
   const sortedTasks = parentTasks.sort((a, b) => {
     const aOrder = a.sortOrder ?? "";
@@ -70,11 +110,23 @@ api.register(postTask, async (req, res, ctx) => {
       createdSubtasks.push(subtask);
       prevSubtaskOrder = subtaskSortOrder;
     }
+
+    // Update parent task with subtaskCount
+    await tasks.put({
+      ...task,
+      subtaskCount: createdSubtasks.length,
+      updatedAt: now,
+    });
   }
 
+  // Update project counts: +1 total, +1 open if status is "todo"
+  const deltaOpen = status === "todo" ? 1 : 0;
+  const projectCounts = await updateProjectCounts(userId, req.projectId, deltaOpen, 1);
+
   return res.ok({
-    task: ensureSortOrder(task),
+    task: ensureSortOrder({ ...task, subtaskCount: createdSubtasks.length || undefined }),
     subtasks: createdSubtasks.length > 0 ? createdSubtasks.map(ensureSortOrder) : undefined,
+    projectCounts,
   });
 });
 
@@ -93,9 +145,16 @@ api.register(postSubtask, async (req, res, ctx) => {
     throw new HttpError(400, "Cannot create subtask of a subtask");
   }
 
-  // Get existing subtasks to determine sortOrder
+  // Get existing subtasks to determine sortOrder and check limit
   const allTasks = await tasks.query({ userId, projectId: req.projectId }).all();
   const existingSubtasks = allTasks.filter((t) => t.parentId === req.taskId);
+
+  // Check subtask limit (use stored count if available, fall back to queried count)
+  const currentSubtaskCount = parentTask.subtaskCount ?? existingSubtasks.length;
+  if (currentSubtaskCount >= LIMITS.MAX_SUBTASKS_PER_TASK) {
+    throw new HttpError(403, LIMIT_MESSAGES.SUBTASK);
+  }
+
   const sortedSubtasks = existingSubtasks.sort((a, b) => {
     const aOrder = a.sortOrder ?? "";
     const bOrder = b.sortOrder ?? "";
@@ -117,6 +176,13 @@ api.register(postSubtask, async (req, res, ctx) => {
     status: "todo",
     sortOrder,
     createdAt: now,
+    updatedAt: now,
+  });
+
+  // Update parent's subtaskCount
+  await tasks.put({
+    ...parentTask,
+    subtaskCount: currentSubtaskCount + 1,
     updatedAt: now,
   });
 
@@ -163,7 +229,15 @@ api.register(patchTask, async (req, res, ctx) => {
 
   const updated = await tasks.put(updatedTask);
 
-  return res.ok({ task: ensureSortOrder(updated) });
+  // Update project counts if status changed on a parent task
+  let projectCounts: { openTaskCount: number; totalTaskCount: number } | undefined;
+  if (req.status !== undefined && req.status !== task.status && !task.parentId) {
+    // Status changed: todo->done means -1 open, done->todo means +1 open
+    const deltaOpen = req.status === "done" ? -1 : 1;
+    projectCounts = await updateProjectCounts(userId, req.projectId, deltaOpen, 0);
+  }
+
+  return res.ok({ task: ensureSortOrder(updated), projectCounts });
 });
 
 // DELETE /projects/:projectId/tasks/:id - delete task (cascades to subtasks)
@@ -190,5 +264,22 @@ api.register(deleteTask, async (req, res, ctx) => {
   // Delete the task
   await tasks.delete({ userId, projectId: req.projectId }, { id: req.id });
 
-  return res.noContent();
+  // Update project counts if this was a parent task
+  let projectCounts: { openTaskCount: number; totalTaskCount: number } | undefined;
+  if (!task.parentId) {
+    const deltaOpen = task.status === "todo" ? -1 : 0;
+    projectCounts = await updateProjectCounts(userId, req.projectId, deltaOpen, -1);
+  } else {
+    // This is a subtask - decrement parent's subtaskCount
+    const parentTask = await tasks.get({ userId, projectId: req.projectId }, { id: task.parentId });
+    if (parentTask) {
+      await tasks.put({
+        ...parentTask,
+        subtaskCount: Math.max(0, (parentTask.subtaskCount ?? 0) - 1),
+        updatedAt: Date.now(),
+      });
+    }
+  }
+
+  return res.ok({ projectCounts });
 });

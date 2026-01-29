@@ -7,6 +7,8 @@ export type Project = {
   isArchived?: boolean;
   archivedAt?: number;
   ttl?: number; // DynamoDB TTL for auto-deletion
+  openTaskCount?: number;
+  totalTaskCount?: number;
   createdAt: number;
   updatedAt: number;
 };

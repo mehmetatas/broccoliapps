@@ -1,4 +1,4 @@
-import type { TaskDto, TaskStatus } from "@broccoliapps/tasquito-shared";
+import { LIMITS, type TaskDto, type TaskStatus } from "@broccoliapps/tasquito-shared";
 import { Calendar, ChevronDown, ChevronRight, Pencil, Trash2, X } from "lucide-preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import Sortable from "sortablejs";
@@ -357,27 +357,33 @@ export const TaskCard = ({
 
       {/* Add subtask form - only in edit mode */}
       {isEditMode && (
-        <div class="no-drag mt-2 flex items-center gap-2">
-          <input
-            id="add-subtask-input"
-            name="subtask-title"
-            type="text"
-            placeholder="Add subtask..."
-            value={newSubtaskTitle}
-            onInput={(e) => setNewSubtaskTitle((e.target as HTMLInputElement).value)}
-            onKeyDown={handleSubtaskKeyDown}
-            disabled={disabled}
-            class="no-drag flex-1 text-base px-2 py-1 border border-neutral-200 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-blue-400 dark:focus:border-blue-500"
-          />
-          <button
-            type="button"
-            onClick={handleAddSubtask}
-            disabled={disabled || !newSubtaskTitle.trim()}
-            class="text-base px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Add
-          </button>
-        </div>
+        task.subtasks.length >= LIMITS.MAX_SUBTASKS_PER_TASK ? (
+          <p class="mt-2 text-xs text-neutral-500 dark:text-neutral-400 italic">
+            If a task needs more than {LIMITS.MAX_SUBTASKS_PER_TASK} subtasks, consider breaking it into smaller tasks. To add more, delete old ones first.
+          </p>
+        ) : (
+          <div class="no-drag mt-2 flex items-center gap-2">
+            <input
+              id="add-subtask-input"
+              name="subtask-title"
+              type="text"
+              placeholder="Add subtask..."
+              value={newSubtaskTitle}
+              onInput={(e) => setNewSubtaskTitle((e.target as HTMLInputElement).value)}
+              onKeyDown={handleSubtaskKeyDown}
+              disabled={disabled}
+              class="no-drag flex-1 text-base px-2 py-1 border border-neutral-200 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:border-blue-400 dark:focus:border-blue-500"
+            />
+            <button
+              type="button"
+              onClick={handleAddSubtask}
+              disabled={disabled || !newSubtaskTitle.trim()}
+              class="text-base px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Add
+            </button>
+          </div>
+        )
       )}
     </Card>
   );

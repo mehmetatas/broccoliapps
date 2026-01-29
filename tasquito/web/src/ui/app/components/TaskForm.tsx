@@ -1,3 +1,4 @@
+import { LIMITS } from "@broccoliapps/tasquito-shared";
 import { MoreHorizontal, X } from "lucide-preact";
 import { useRef, useState } from "preact/hooks";
 import { Button } from "./Button";
@@ -84,12 +85,6 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
           onKeyDown={handleTitleKeyDown}
           class="flex-1 text-lg font-medium text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 bg-transparent border-none outline-none focus:ring-0 p-0"
         />
-        {isExpanded && (
-          <DatePicker
-            value={dueDate}
-            onChange={setDueDate}
-          />
-        )}
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
@@ -113,6 +108,14 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
             rows={3}
             class="w-full px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 placeholder-neutral-400 dark:placeholder-neutral-500 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg resize-none outline-none focus:border-blue-300 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-300 dark:focus:ring-blue-500"
           />
+
+          {/* Due Date */}
+          <div>
+            <h4 class="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-2">
+              Due Date
+            </h4>
+            <DatePicker value={dueDate} onChange={setDueDate} />
+          </div>
 
           {/* Subtasks Section */}
           <div>
@@ -144,16 +147,22 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
               </div>
             )}
 
-            {/* Add subtask input */}
-            <input
-              ref={subtaskInputRef}
-              type="text"
-              placeholder="Add a subtask..."
-              value={newSubtaskTitle}
-              onInput={(e) => setNewSubtaskTitle((e.target as HTMLInputElement).value)}
-              onKeyDown={handleSubtaskKeyDown}
-              class="w-full text-sm text-neutral-600 dark:text-neutral-300 placeholder-neutral-400 dark:placeholder-neutral-500 bg-transparent border-none outline-none focus:ring-0 p-0 py-1"
-            />
+            {/* Add subtask input or limit message */}
+            {subtasks.length >= LIMITS.MAX_SUBTASKS_PER_TASK ? (
+              <p class="text-xs text-neutral-500 dark:text-neutral-400 italic py-1">
+                If a task needs more than {LIMITS.MAX_SUBTASKS_PER_TASK} subtasks, consider breaking it into smaller tasks.
+              </p>
+            ) : (
+              <input
+                ref={subtaskInputRef}
+                type="text"
+                placeholder="Add a subtask..."
+                value={newSubtaskTitle}
+                onInput={(e) => setNewSubtaskTitle((e.target as HTMLInputElement).value)}
+                onKeyDown={handleSubtaskKeyDown}
+                class="w-full text-sm text-neutral-600 dark:text-neutral-300 placeholder-neutral-400 dark:placeholder-neutral-500 bg-transparent border-none outline-none focus:ring-0 p-0 py-1"
+              />
+            )}
           </div>
 
           {/* Create Button */}

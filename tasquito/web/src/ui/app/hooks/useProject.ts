@@ -1,16 +1,77 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { generateKeyBetween } from "fractional-indexing";
 import type { ProjectWithTasksDto, TaskDto, TaskStatus } from "@broccoliapps/tasquito-shared";
 import { archiveProject, deleteProject, deleteTask, getProject, patchProject, patchTask, postSubtask, postTask, unarchiveProject } from "../api";
 
 type TaskWithSubtasks = TaskDto & { subtasks: TaskDto[] };
 
+type TaskCreateQueueItem = {
+  type: "create";
+  projectId: string;
+  title: string;
+  description?: string;
+  dueDate?: string;
+  subtasks?: string[];
+};
+
+type TaskStatusQueueItem = {
+  type: "status";
+  projectId: string;
+  taskId: string;
+  status: TaskStatus;
+  originalStatus: TaskStatus;
+};
+
+type TaskDeleteQueueItem = {
+  type: "delete";
+  projectId: string;
+  taskId: string;
+  taskToRestore: TaskWithSubtasks;
+};
+
+type TaskQueueItem = TaskCreateQueueItem | TaskStatusQueueItem | TaskDeleteQueueItem;
+
+type SubtaskCreateQueueItem = {
+  type: "create";
+  projectId: string;
+  taskId: string;
+  title: string;
+};
+
+type SubtaskStatusQueueItem = {
+  type: "status";
+  projectId: string;
+  taskId: string;
+  subtaskId: string;
+  status: TaskStatus;
+  originalStatus: TaskStatus;
+};
+
+type SubtaskDeleteQueueItem = {
+  type: "delete";
+  projectId: string;
+  taskId: string;
+  subtaskId: string;
+  subtaskToRestore: TaskDto;
+};
+
+type SubtaskQueueItem = SubtaskCreateQueueItem | SubtaskStatusQueueItem | SubtaskDeleteQueueItem;
+
 export const useProject = (id: string) => {
   const [project, setProject] = useState<ProjectWithTasksDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [limitError, setLimitError] = useState<string | null>(null);
   const [pendingTaskCount, setPendingTaskCount] = useState(0);
   const [pendingSubtaskCounts, setPendingSubtaskCounts] = useState<Map<string, number>>(new Map());
+
+  // Queue refs for sequential API calls
+  const taskQueueRef = useRef<TaskQueueItem[]>([]);
+  const isProcessingTaskRef = useRef(false);
+  const subtaskQueuesRef = useRef<Map<string, SubtaskQueueItem[]>>(new Map());
+  const processingSubtasksRef = useRef<Set<string>>(new Set());
+
+  const clearLimitError = () => setLimitError(null);
 
   const load = async () => {
     try {
@@ -48,8 +109,87 @@ export const useProject = (id: string) => {
 
   const unarchive = async () => {
     if (!project) return;
-    await unarchiveProject(project.id);
-    await load();
+    try {
+      await unarchiveProject(project.id);
+      await load();
+    } catch (err: unknown) {
+      // Check for limit error (403)
+      const error = err as { status?: number; message?: string };
+      if (error?.status === 403 && error?.message) {
+        setLimitError(error.message);
+      }
+      throw err;
+    }
+  };
+
+  // Process task queue sequentially
+  const processTaskQueue = () => {
+    if (isProcessingTaskRef.current || taskQueueRef.current.length === 0) return;
+
+    isProcessingTaskRef.current = true;
+    const item = taskQueueRef.current.shift()!;
+
+    if (item.type === "create") {
+      postTask({
+        projectId: item.projectId,
+        title: item.title,
+        description: item.description,
+        dueDate: item.dueDate,
+        subtasks: item.subtasks,
+      })
+        .then((result) => {
+          setProject((prev) => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              tasks: [{ ...result.task, subtasks: result.subtasks ?? [] }, ...prev.tasks],
+            };
+          });
+        })
+        .catch((err) => {
+          console.error("Failed to create task", err);
+          if (err?.status === 403 && err?.message) {
+            setLimitError(err.message);
+          }
+        })
+        .finally(() => {
+          setPendingTaskCount((c) => c - 1);
+          isProcessingTaskRef.current = false;
+          processTaskQueue();
+        });
+    } else if (item.type === "status") {
+      patchTask({ projectId: item.projectId, id: item.taskId, status: item.status })
+        .catch((err) => {
+          console.error("Failed to update task status, reverting", err);
+          setProject((prev) => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              tasks: prev.tasks.map((t) => (t.id === item.taskId ? { ...t, status: item.originalStatus } : t)),
+            };
+          });
+        })
+        .finally(() => {
+          isProcessingTaskRef.current = false;
+          processTaskQueue();
+        });
+    } else if (item.type === "delete") {
+      deleteTask(item.projectId, item.taskId)
+        .catch((err) => {
+          console.error("Failed to delete task, restoring", err);
+          setProject((prev) => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              tasks: [...prev.tasks, item.taskToRestore],
+            };
+          });
+        })
+        .finally(() => {
+          isProcessingTaskRef.current = false;
+          processTaskQueue();
+        });
+    }
   };
 
   // Task actions
@@ -59,35 +199,29 @@ export const useProject = (id: string) => {
     // Show skeleton immediately
     setPendingTaskCount((c) => c + 1);
 
-    // Fire API call in background
-    postTask({
+    // Add to queue
+    taskQueueRef.current.push({
+      type: "create",
       projectId: project.id,
       title: data.title,
       description: data.description,
       dueDate: data.dueDate,
       subtasks: data.subtasks,
-    })
-      .then((result) => {
-        // Add the real task to the top
-        setProject((prev) => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            tasks: [{ ...result.task, subtasks: result.subtasks ?? [] }, ...prev.tasks],
-          };
-        });
-      })
-      .catch((err) => {
-        console.error("Failed to create task", err);
-      })
-      .finally(() => {
-        setPendingTaskCount((c) => c - 1);
-      });
+    });
+
+    // Start processing if not already
+    processTaskQueue();
   };
 
-  const updateTaskStatus = async (taskId: string, status: TaskStatus) => {
+  const updateTaskStatus = (taskId: string, status: TaskStatus) => {
     if (!project) return;
-    await patchTask({ projectId: project.id, id: taskId, status });
+
+    // Save original status for potential rollback
+    const originalTask = project.tasks.find((t) => t.id === taskId);
+    if (!originalTask) return;
+    const originalStatus = originalTask.status;
+
+    // Optimistic update - move immediately
     setProject((prev) => {
       if (!prev) return null;
       return {
@@ -95,6 +229,18 @@ export const useProject = (id: string) => {
         tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, status } : t)),
       };
     });
+
+    // Add to queue
+    taskQueueRef.current.push({
+      type: "status",
+      projectId: project.id,
+      taskId,
+      status,
+      originalStatus,
+    });
+
+    // Start processing if not already
+    processTaskQueue();
   };
 
   const updateTaskTitle = async (taskId: string, title: string) => {
@@ -149,24 +295,29 @@ export const useProject = (id: string) => {
       };
     });
 
-    // Call API in background
-    deleteTask(project.id, taskId).catch((err) => {
-      console.error("Failed to delete task, restoring", err);
-      // Restore the task on failure
-      setProject((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          tasks: [...prev.tasks, taskToDelete],
-        };
-      });
+    // Add to queue
+    taskQueueRef.current.push({
+      type: "delete",
+      projectId: project.id,
+      taskId,
+      taskToRestore: taskToDelete,
     });
+
+    // Start processing if not already
+    processTaskQueue();
   };
 
   // Subtask actions
-  const updateSubtaskStatus = async (taskId: string, subtaskId: string, status: TaskStatus) => {
+  const updateSubtaskStatus = (taskId: string, subtaskId: string, status: TaskStatus) => {
     if (!project) return;
-    await patchTask({ projectId: project.id, id: subtaskId, status });
+
+    // Save original status for potential rollback
+    const parentTask = project.tasks.find((t) => t.id === taskId);
+    const originalSubtask = parentTask?.subtasks.find((st) => st.id === subtaskId);
+    if (!originalSubtask) return;
+    const originalStatus = originalSubtask.status;
+
+    // Optimistic update - move immediately
     setProject((prev) => {
       if (!prev) return null;
       return {
@@ -178,6 +329,22 @@ export const useProject = (id: string) => {
         ),
       };
     });
+
+    // Add to queue for this task
+    if (!subtaskQueuesRef.current.has(taskId)) {
+      subtaskQueuesRef.current.set(taskId, []);
+    }
+    subtaskQueuesRef.current.get(taskId)!.push({
+      type: "status",
+      projectId: project.id,
+      taskId,
+      subtaskId,
+      status,
+      originalStatus,
+    });
+
+    // Start processing if not already
+    processSubtaskQueue(taskId);
   };
 
   const updateSubtaskTitle = async (taskId: string, subtaskId: string, title: string) => {
@@ -215,20 +382,104 @@ export const useProject = (id: string) => {
       };
     });
 
-    // Call API in background
-    deleteTask(project.id, subtaskId).catch((err) => {
-      console.error("Failed to delete subtask, restoring", err);
-      // Restore the subtask on failure
-      setProject((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          tasks: prev.tasks.map((t) =>
-            t.id === taskId ? { ...t, subtasks: [...t.subtasks, subtaskToDelete] } : t
-          ),
-        };
-      });
+    // Add to queue for this task
+    if (!subtaskQueuesRef.current.has(taskId)) {
+      subtaskQueuesRef.current.set(taskId, []);
+    }
+    subtaskQueuesRef.current.get(taskId)!.push({
+      type: "delete",
+      projectId: project.id,
+      taskId,
+      subtaskId,
+      subtaskToRestore: subtaskToDelete,
     });
+
+    // Start processing if not already
+    processSubtaskQueue(taskId);
+  };
+
+  // Process subtask queue for a specific task sequentially
+  const processSubtaskQueue = (taskId: string) => {
+    if (processingSubtasksRef.current.has(taskId)) return;
+
+    const queue = subtaskQueuesRef.current.get(taskId);
+    if (!queue || queue.length === 0) return;
+
+    processingSubtasksRef.current.add(taskId);
+    const item = queue.shift()!;
+
+    if (item.type === "create") {
+      postSubtask(item.projectId, item.taskId, item.title)
+        .then((result) => {
+          setProject((prev) => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              tasks: prev.tasks.map((t) =>
+                t.id === taskId ? { ...t, subtasks: [...t.subtasks, result.task] } : t
+              ),
+            };
+          });
+        })
+        .catch((err) => {
+          console.error("Failed to create subtask", err);
+          if (err?.status === 403 && err?.message) {
+            setLimitError(err.message);
+          }
+        })
+        .finally(() => {
+          setPendingSubtaskCounts((prev) => {
+            const next = new Map(prev);
+            const current = next.get(taskId) ?? 0;
+            if (current <= 1) {
+              next.delete(taskId);
+            } else {
+              next.set(taskId, current - 1);
+            }
+            return next;
+          });
+          processingSubtasksRef.current.delete(taskId);
+          processSubtaskQueue(taskId);
+        });
+    } else if (item.type === "status") {
+      patchTask({ projectId: item.projectId, id: item.subtaskId, status: item.status })
+        .catch((err) => {
+          console.error("Failed to update subtask status, reverting", err);
+          setProject((prev) => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              tasks: prev.tasks.map((t) =>
+                t.id === taskId
+                  ? { ...t, subtasks: t.subtasks.map((st) => (st.id === item.subtaskId ? { ...st, status: item.originalStatus } : st)) }
+                  : t
+              ),
+            };
+          });
+        })
+        .finally(() => {
+          processingSubtasksRef.current.delete(taskId);
+          processSubtaskQueue(taskId);
+        });
+    } else if (item.type === "delete") {
+      deleteTask(item.projectId, item.subtaskId)
+        .catch((err) => {
+          console.error("Failed to delete subtask, restoring", err);
+          setProject((prev) => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              tasks: prev.tasks.map((t) =>
+                t.id === taskId ? { ...t, subtasks: [...t.subtasks, item.subtaskToRestore] } : t
+              ),
+            };
+          });
+        })
+        .finally(() => {
+          processingSubtasksRef.current.delete(taskId);
+          processSubtaskQueue(taskId);
+        });
+    }
   };
 
   const createSubtask = (taskId: string, title: string) => {
@@ -241,34 +492,19 @@ export const useProject = (id: string) => {
       return next;
     });
 
-    // Fire API call in background
-    postSubtask(project.id, taskId, title)
-      .then((result) => {
-        setProject((prev) => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            tasks: prev.tasks.map((t) =>
-              t.id === taskId ? { ...t, subtasks: [...t.subtasks, result.task] } : t
-            ),
-          };
-        });
-      })
-      .catch((err) => {
-        console.error("Failed to create subtask", err);
-      })
-      .finally(() => {
-        setPendingSubtaskCounts((prev) => {
-          const next = new Map(prev);
-          const current = next.get(taskId) ?? 0;
-          if (current <= 1) {
-            next.delete(taskId);
-          } else {
-            next.set(taskId, current - 1);
-          }
-          return next;
-        });
-      });
+    // Add to queue for this task
+    if (!subtaskQueuesRef.current.has(taskId)) {
+      subtaskQueuesRef.current.set(taskId, []);
+    }
+    subtaskQueuesRef.current.get(taskId)!.push({
+      type: "create",
+      projectId: project.id,
+      taskId,
+      title,
+    });
+
+    // Start processing if not already
+    processSubtaskQueue(taskId);
   };
 
   // Reorder task within its status group
@@ -408,6 +644,8 @@ export const useProject = (id: string) => {
     tasks: sortedTasks,
     isLoading,
     error,
+    limitError,
+    clearLimitError,
     pendingTaskCount,
     pendingSubtaskCounts,
     // Project actions

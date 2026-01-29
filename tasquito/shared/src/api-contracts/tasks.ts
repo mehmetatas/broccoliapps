@@ -1,6 +1,7 @@
 import { api } from "@broccoliapps/shared";
 import {
   deleteTaskRequest,
+  deleteTaskResponse,
   getTaskRequest,
   getTaskResponse,
   getTasksRequest,
@@ -40,4 +41,5 @@ export const patchTask = api("PATCH", "/projects/:projectId/tasks/:id")
 
 // DELETE /projects/:projectId/tasks/:id - delete task (cascades to subtasks)
 export const deleteTask = api("DELETE", "/projects/:projectId/tasks/:id")
-  .withRequest(deleteTaskRequest);
+  .withRequest(deleteTaskRequest)
+  .withResponse(deleteTaskResponse);

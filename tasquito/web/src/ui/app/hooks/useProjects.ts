@@ -6,6 +6,9 @@ export const useProjects = () => {
   const [projects, setProjects] = useState<ProjectSummaryDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [limitError, setLimitError] = useState<string | null>(null);
+
+  const clearLimitError = () => setLimitError(null);
 
   const load = async () => {
     try {
@@ -26,10 +29,19 @@ export const useProjects = () => {
   }, []);
 
   const create = async (name: string) => {
-    const result = await postProject({ name });
-    const newProject = { ...result.project, openTaskCount: 0, totalTaskCount: 0 };
-    setProjects((prev) => [...prev, newProject].sort((a, b) => a.name.localeCompare(b.name)));
-    return result.project;
+    try {
+      const result = await postProject({ name });
+      const newProject = { ...result.project, openTaskCount: 0, totalTaskCount: 0 };
+      setProjects((prev) => [...prev, newProject].sort((a, b) => a.name.localeCompare(b.name)));
+      return result.project;
+    } catch (err: unknown) {
+      // Check for limit error (403)
+      const error = err as { status?: number; message?: string };
+      if (error?.status === 403 && error?.message) {
+        setLimitError(error.message);
+      }
+      throw err;
+    }
   };
 
   const remove = async (id: string) => {
@@ -55,6 +67,8 @@ export const useProjects = () => {
     projects,
     isLoading,
     error,
+    limitError,
+    clearLimitError,
     create,
     remove,
     archive,

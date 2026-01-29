@@ -42,29 +42,28 @@ export const DatePicker = ({
 
   return (
     <div class="inline-flex items-center gap-1">
-      {/* Visible text input */}
-      <input
-        type="text"
-        value={value ?? ""}
-        placeholder={placeholder}
-        onBlur={handleTextChange}
-        disabled={disabled}
-        class="w-28 px-2 py-1.5 text-sm border border-neutral-300 dark:border-neutral-600 rounded-lg
-               bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100
-               focus:outline-none focus:border-blue-400 dark:focus:border-blue-500
-               disabled:bg-neutral-100 dark:disabled:bg-neutral-700 disabled:opacity-50"
-      />
-
-      {/* Calendar button */}
-      <button
-        type="button"
-        onClick={handleCalendarClick}
-        disabled={disabled}
-        class="p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700
-               rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <Calendar size={18} />
-      </button>
+      {/* Input with calendar icon inside */}
+      <div class="relative inline-flex items-center">
+        <input
+          type="text"
+          value={value ?? ""}
+          placeholder={placeholder}
+          onBlur={handleTextChange}
+          disabled={disabled}
+          class="w-36 pl-2 pr-8 py-1.5 text-sm border border-neutral-300 dark:border-neutral-600 rounded-lg
+                 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100
+                 focus:outline-none focus:border-blue-400 dark:focus:border-blue-500
+                 disabled:bg-neutral-100 dark:disabled:bg-neutral-700 disabled:opacity-50"
+        />
+        <button
+          type="button"
+          onClick={handleCalendarClick}
+          disabled={disabled}
+          class="absolute right-2 text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Calendar size={16} />
+        </button>
+      </div>
 
       {/* Hidden native date picker */}
       <input

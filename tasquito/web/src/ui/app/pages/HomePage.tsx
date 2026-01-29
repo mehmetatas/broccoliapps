@@ -1,4 +1,4 @@
-import { Archive, Check, Clock, Loader, RefreshCw } from "lucide-preact";
+import { Archive, Check, Clock, Loader, RefreshCw, X } from "lucide-preact";
 import { useMemo, useState } from "preact/hooks";
 import type { ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
 import { FilterPills, IconButton, ProjectForm, ProjectList, Spinner } from "../components";
@@ -23,7 +23,7 @@ const getProjectStatus = (project: ProjectSummaryDto): "pending" | "active" | "d
 
 export const HomePage = () => {
   const [filter, setFilter] = useState<ProjectFilter>("all");
-  const { projects, isLoading, error, create, refresh } = useProjects();
+  const { projects, isLoading, error, limitError, clearLimitError, create, refresh } = useProjects();
 
   const handleCreateProject = async (name: string) => {
     const project = await create(name);
@@ -55,6 +55,21 @@ export const HomePage = () => {
 
       {/* Create Project Form */}
       <ProjectForm onSubmit={handleCreateProject} />
+
+      {/* Limit Error Banner */}
+      {limitError && (
+        <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg p-4 flex items-start gap-3">
+          <div class="flex-1 text-orange-800 dark:text-orange-200 text-sm">{limitError}</div>
+          <button
+            type="button"
+            onClick={clearLimitError}
+            class="text-orange-500 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-200 transition-colors"
+            aria-label="Dismiss"
+          >
+            <X size={18} />
+          </button>
+        </div>
+      )}
 
       {/* Filter Pills */}
       <FilterPills options={filterOptions} selected={filter} onSelect={setFilter} />

@@ -1,5 +1,5 @@
 import type { TaskDto } from "@broccoliapps/tasquito-shared";
-import { Archive, ArchiveRestore, ArrowLeft, CheckSquare, ChevronDown, ChevronRight, Trash2 } from "lucide-preact";
+import { Archive, ArchiveRestore, ArrowLeft, CheckSquare, ChevronDown, ChevronRight, Trash2, X } from "lucide-preact";
 import { useMemo, useState } from "preact/hooks";
 import { ArchiveConfirmModal, DeleteConfirmModal, EditableText, EmptyState, IconButton, ProjectDetailSkeleton, TaskCard, TaskCardSkeleton, TaskForm } from "../components";
 import { useDragAndDrop, useProject } from "../hooks";
@@ -17,6 +17,8 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
     tasks,
     isLoading,
     error,
+    limitError,
+    clearLimitError,
     pendingTaskCount,
     pendingSubtaskCounts,
     updateName,
@@ -92,8 +94,13 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
     try {
       await unarchive();
       setShowUnarchiveProjectModal(false);
-    } catch {
-      // Keep modal open on error
+    } catch (err: unknown) {
+      // Close modal on limit error so user can see the error banner
+      const error = err as { status?: number };
+      if (error?.status === 403) {
+        setShowUnarchiveProjectModal(false);
+      }
+      // Keep modal open on other errors
     } finally {
       setIsUnarchivingProject(false);
     }
@@ -231,11 +238,26 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
         </div>
       )}
 
+      {/* Limit Error Banner */}
+      {limitError && (
+        <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg p-4 flex items-start gap-3">
+          <div class="flex-1 text-orange-800 dark:text-orange-200 text-sm">{limitError}</div>
+          <button
+            type="button"
+            onClick={clearLimitError}
+            class="text-orange-500 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-200 transition-colors"
+            aria-label="Dismiss"
+          >
+            <X size={18} />
+          </button>
+        </div>
+      )}
+
       {/* Task Form - only show when not archived */}
       {!isArchived && <TaskForm onSubmit={createTask} />}
 
       {/* Tasks */}
-      {tasks.length === 0 ? (
+      {tasks.length === 0 && pendingTaskCount === 0 ? (
         <EmptyState
           icon={<CheckSquare size={64} strokeWidth={1} />}
           title="No tasks yet"

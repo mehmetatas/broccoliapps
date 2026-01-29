@@ -12,6 +12,7 @@ export type Task = {
   dueDate?: string; // YYYY-MM-DD format, only for parent tasks
   status: TaskStatus;
   sortOrder?: string; // Fractional index for ordering (optional for backward compatibility)
+  subtaskCount?: number; // Only for parent tasks - tracks number of subtasks
   ttl?: number; // DynamoDB TTL for auto-deletion
   createdAt: number;
   updatedAt: number;

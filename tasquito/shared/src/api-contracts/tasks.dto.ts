@@ -1,6 +1,14 @@
 import * as v from "valibot";
 import { taskDto, taskStatusSchema } from "./dto";
 
+// Shared schema for project counts returned by task mutations
+const projectCountsSchema = v.optional(
+  v.object({
+    openTaskCount: v.number(),
+    totalTaskCount: v.number(),
+  })
+);
+
 // ============================================================================
 // POST /projects/:projectId/tasks - create task
 // ============================================================================
@@ -17,6 +25,7 @@ export type PostTaskRequest = v.InferOutput<v.ObjectSchema<typeof postTaskReques
 export const postTaskResponse = {
   task: v.object(taskDto),
   subtasks: v.optional(v.array(v.object(taskDto))),
+  projectCounts: projectCountsSchema,
 };
 export type PostTaskResponse = v.InferOutput<v.ObjectSchema<typeof postTaskResponse, undefined>>;
 
@@ -78,6 +87,7 @@ export type PatchTaskRequest = v.InferOutput<v.ObjectSchema<typeof patchTaskRequ
 
 export const patchTaskResponse = {
   task: v.object(taskDto),
+  projectCounts: projectCountsSchema,
 };
 export type PatchTaskResponse = v.InferOutput<v.ObjectSchema<typeof patchTaskResponse, undefined>>;
 
@@ -89,3 +99,8 @@ export const deleteTaskRequest = {
   id: v.string(),
 };
 export type DeleteTaskRequest = v.InferOutput<v.ObjectSchema<typeof deleteTaskRequest, undefined>>;
+
+export const deleteTaskResponse = {
+  projectCounts: projectCountsSchema,
+};
+export type DeleteTaskResponse = v.InferOutput<v.ObjectSchema<typeof deleteTaskResponse, undefined>>;

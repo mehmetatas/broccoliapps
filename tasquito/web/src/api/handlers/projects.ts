@@ -8,6 +8,8 @@ import {
   deleteProject,
   getProject,
   getProjects,
+  LIMITS,
+  LIMIT_MESSAGES,
   patchProject,
   postProject,
   unarchiveProject,
@@ -23,6 +25,14 @@ const ensureSortOrder = (task: Task): Task & { sortOrder: string } => ({
 // POST /projects - create project
 api.register(postProject, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
+
+  // Check active project limit
+  const userProjects = await projects.query({ userId }).all();
+  const activeCount = userProjects.filter((p) => !p.isArchived).length;
+  if (activeCount >= LIMITS.MAX_ACTIVE_PROJECTS) {
+    throw new HttpError(403, LIMIT_MESSAGES.PROJECT);
+  }
+
   const projectId = random.id();
   const now = Date.now();
 
@@ -30,6 +40,8 @@ api.register(postProject, async (req, res, ctx) => {
     userId,
     id: projectId,
     name: req.name,
+    openTaskCount: 0,
+    totalTaskCount: 0,
     createdAt: now,
     updatedAt: now,
   });
@@ -42,27 +54,17 @@ api.register(getProjects, async (_req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const projectList = await projects.query({ userId }).all();
 
-  // Get all tasks for counting
-  const projectSummaries = await Promise.all(
-    projectList.map(async (project) => {
-      const projectTasks = await tasks.query({ userId, projectId: project.id }).all();
-      // Only count parent tasks (exclude subtasks for cleaner count)
-      const parentTasks = projectTasks.filter((t) => !t.parentId);
-      const openTaskCount = parentTasks.filter((t) => t.status === "todo").length;
-      const totalTaskCount = parentTasks.length;
-
-      return {
-        id: project.id,
-        name: project.name,
-        isArchived: project.isArchived,
-        archivedAt: project.archivedAt,
-        createdAt: project.createdAt,
-        updatedAt: project.updatedAt,
-        openTaskCount,
-        totalTaskCount,
-      };
-    })
-  );
+  // Return stored counts (default to 0 if missing for backward compatibility)
+  const projectSummaries = projectList.map((project) => ({
+    id: project.id,
+    name: project.name,
+    isArchived: project.isArchived,
+    archivedAt: project.archivedAt,
+    createdAt: project.createdAt,
+    updatedAt: project.updatedAt,
+    openTaskCount: project.openTaskCount ?? 0,
+    totalTaskCount: project.totalTaskCount ?? 0,
+  }));
 
   return res.ok({ projects: projectSummaries });
 });
@@ -247,6 +249,13 @@ api.register(unarchiveProject, async (req, res, ctx) => {
 
   if (!project) {
     throw new HttpError(404, "Project not found");
+  }
+
+  // Check active project limit (excluding current project since it's archived)
+  const userProjects = await projects.query({ userId }).all();
+  const activeCount = userProjects.filter((p) => !p.isArchived && p.id !== req.id).length;
+  if (activeCount >= LIMITS.MAX_ACTIVE_PROJECTS) {
+    throw new HttpError(403, LIMIT_MESSAGES.PROJECT);
   }
 
   const now = Date.now();
