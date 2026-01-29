@@ -18,6 +18,7 @@ import {
   aws_s3 as s3,
   aws_s3_deployment as s3deploy,
   aws_scheduler as scheduler,
+  aws_ses as ses,
 } from "aws-cdk-lib";
 import fs from "fs";
 
@@ -88,6 +89,7 @@ class AppBuilder {
   private s3Origins: S3OriginDef[] = [];
   private cloudfrontFnPath?: string;
   private signinConfig?: SigninConfig;
+  private sesDomain?: string;
   private scheduledJobs?: {
     distPath: string;
     jobs: Record<string, ScheduledJobConfig>;
@@ -216,6 +218,11 @@ class AppBuilder {
     return this;
   }
 
+  public withSes(domain: string) {
+    this.sesDomain = domain;
+    return this;
+  }
+
   private configureStaticBucket(pathPattern: string, distPath: string) {
     const name = this.nameFromPath(pathPattern);
     const isDefaultOrigin = pathPattern === "/*";
@@ -260,6 +267,9 @@ class AppBuilder {
     if (table) {
       environment.TABLE_NAME = table.tableName;
     }
+    if (this.sesDomain) {
+      environment.SES_DOMAIN = this.sesDomain;
+    }
 
     const lambdaFn = new lambda.Function(this.stack, this.resourceName(name), {
       functionName: this.resourceName(name),
@@ -298,6 +308,18 @@ class AppBuilder {
         ],
       })
     );
+
+    // Grant SES permissions if SES is configured
+    if (this.sesDomain) {
+      lambdaFn.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["ses:SendEmail", "ses:SendRawEmail"],
+          resources: [
+            `arn:aws:ses:${this.region}:${this.account}:identity/${this.sesDomain}`,
+          ],
+        })
+      );
+    }
 
     return lambdaFn;
   }
@@ -526,6 +548,29 @@ class AppBuilder {
     }
   }
 
+  private configureSes() {
+    if (!this.sesDomain) {
+      return;
+    }
+
+    // Create SES email identity with automatic DNS verification via Route53
+    new ses.EmailIdentity(this.stack, this.resourceName("ses-identity"), {
+      identity: ses.Identity.publicHostedZone(this.getHostedZone()),
+      mailFromDomain: `mail.${this.sesDomain}`,
+    });
+
+    // Configuration set for reputation metrics
+    const configSet = new ses.ConfigurationSet(this.stack, this.resourceName("ses-config-set"), {
+      configurationSetName: this.resourceName("ses-config-set"),
+      reputationMetrics: true,
+      sendingEnabled: true,
+    });
+
+    new cdk.CfnOutput(this.stack, this.resourceName("ses-config-set-name"), {
+      value: configSet.configurationSetName,
+    });
+  }
+
   private async configureCognito(): Promise<{ userPoolId: string; userPoolClientId: string }> {
     if (!this.signinConfig) {
       throw new Error("SigninConfig is required for Cognito");
@@ -736,6 +781,9 @@ class AppBuilder {
 
     // Configure scheduled jobs (EventBridge)
     this.configureScheduledJobs(table);
+
+    // Configure SES
+    this.configureSes();
 
     app.synth();
   }

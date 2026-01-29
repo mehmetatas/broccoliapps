@@ -1,7 +1,7 @@
-import { auth, HttpError, log } from "@broccoliapps/backend";
+import { auth, crypto, HttpError, log } from "@broccoliapps/backend";
 import { Duration, globalConfig } from "@broccoliapps/shared";
 import { users } from "../../db/users";
-import { authExchange, refreshToken, type AuthUserDto } from "../../shared/api-contracts";
+import { authExchange, refreshToken, sendMagicLink, type AuthUserDto } from "../../shared/api-contracts";
 import { api } from "../lambda";
 
 const accessTokenLifetime = globalConfig.isProd ? Duration.days(1) : Duration.minutes(5);
@@ -84,4 +84,30 @@ api.register(refreshToken, async (req, res) => {
     accessTokenExpiresAt: accessTokenLifetime.fromNow().toMilliseconds(),
     refreshTokenExpiresAt: refreshTokenLifetime.fromNow().toMilliseconds(),
   });
+});
+
+api.register(sendMagicLink, async (req, res) => {
+  // Sign email with app's RSA private key for S2S verification
+  const code = await crypto.rsaPrivateEncrypt("networthmonitor", req.email);
+
+  // Call broccoliapps S2S API
+  const body = JSON.stringify({ app: "networthmonitor", email: req.email, code });
+  const resp = await fetch(
+    globalConfig.apps["broccoliapps-com"].baseUrl + "/api/v1/auth/email",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-amz-content-sha256": crypto.sha256(body),
+      },
+      body,
+    }
+  );
+
+  if (!resp.ok) {
+    const err = (await resp.json()) as { message?: string };
+    throw new HttpError(resp.status, err.message || "Failed to send magic link");
+  }
+
+  return res.ok({ success: true });
 });

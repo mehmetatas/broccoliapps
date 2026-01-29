@@ -1,4 +1,6 @@
 import { globalConfig } from "@broccoliapps/shared";
+import { sendMagicLink } from "@broccoliapps/tasquito-shared";
+import { useState } from "preact/hooks";
 
 const GoogleIcon = () => (
   <svg class="h-5 w-5" viewBox="0 0 24 24">
@@ -27,7 +29,19 @@ const AppleIcon = () => (
   </svg>
 );
 
-export const HomePage = () => {
+const EmailIcon = () => (
+  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+  </svg>
+);
+
+type EmailStatus = "idle" | "sending" | "sent" | "error";
+
+const AuthCard = ({ onClose }: { onClose?: () => void }) => {
+  const [email, setEmail] = useState("");
+  const [emailStatus, setEmailStatus] = useState<EmailStatus>("idle");
+  const [error, setError] = useState("");
+
   const signInWithGoogle = () => {
     window.location.href = `${globalConfig.apps["broccoliapps-com"].baseUrl}/auth?app=tasquito&provider=google`;
   };
@@ -35,6 +49,117 @@ export const HomePage = () => {
   const signInWithApple = () => {
     window.location.href = `${globalConfig.apps["broccoliapps-com"].baseUrl}/auth?app=tasquito&provider=apple`;
   };
+
+  const handleEmailSignIn = async () => {
+    if (!email) return;
+
+    setEmailStatus("sending");
+    setError("");
+
+    try {
+      await sendMagicLink.invoke({ email });
+      setEmailStatus("sent");
+    } catch (err) {
+      setEmailStatus("error");
+      setError(err instanceof Error ? err.message : "Failed to send email");
+    }
+  };
+
+  if (emailStatus === "sent") {
+    return (
+      <div class="rounded-xl bg-white p-8 shadow-lg text-center">
+        <div class="mb-4 flex justify-center">
+          <div class="rounded-full bg-emerald-100 p-3">
+            <EmailIcon />
+          </div>
+        </div>
+        <h2 class="mb-2 text-2xl font-semibold text-gray-900">Check your email</h2>
+        <p class="text-gray-600">
+          We sent a magic link to <span class="font-medium">{email}</span>. Click the link to sign in.
+        </p>
+        <button
+          onClick={() => {
+            setEmailStatus("idle");
+            setEmail("");
+          }}
+          class="mt-6 text-sm text-emerald-600 hover:text-emerald-700"
+        >
+          Use a different email
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div class="rounded-xl bg-white p-8 shadow-lg">
+      <div class="mb-6 flex items-center justify-between">
+        <h2 class="text-2xl font-semibold text-gray-900">Get Started</h2>
+        {onClose && (
+          <button onClick={onClose} class="text-gray-400 hover:text-gray-600 lg:hidden">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
+      <p class="mb-6 text-gray-600">Sign in to start managing your tasks.</p>
+
+      {/* Google Sign In */}
+      <button
+        onClick={signInWithGoogle}
+        class="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-3 font-medium text-gray-700 transition hover:bg-gray-50"
+      >
+        <GoogleIcon />
+        Continue with Google
+      </button>
+
+      {/* Apple Sign In */}
+      <button
+        onClick={signInWithApple}
+        class="mt-3 flex w-full items-center justify-center gap-3 rounded-lg bg-black px-4 py-3 font-medium text-white transition hover:bg-gray-900"
+      >
+        <AppleIcon />
+        Continue with Apple
+      </button>
+
+      {/* Divider */}
+      <div class="my-6 flex items-center">
+        <div class="flex-1 border-t border-gray-300" />
+        <span class="px-4 text-sm text-gray-500">or</span>
+        <div class="flex-1 border-t border-gray-300" />
+      </div>
+
+      {/* Email Sign In */}
+      <div class="space-y-3">
+        <input
+          type="email"
+          value={email}
+          onInput={(e) => setEmail((e.target as HTMLInputElement).value)}
+          placeholder="Enter your email"
+          class="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+          onKeyDown={(e) => e.key === "Enter" && handleEmailSignIn()}
+        />
+        <button
+          onClick={handleEmailSignIn}
+          disabled={!email || emailStatus === "sending"}
+          class="w-full rounded-lg bg-emerald-600 px-4 py-3 font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+        >
+          {emailStatus === "sending" ? "Sending..." : "Continue with Email"}
+        </button>
+        {error && (
+          <p class="text-sm text-red-600">{error}</p>
+        )}
+      </div>
+
+      <p class="mt-6 text-center text-xs text-gray-500">
+        By continuing, you agree to our Terms of Service and Privacy Policy.
+      </p>
+    </div>
+  );
+};
+
+export const HomePage = () => {
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <div class="flex min-h-screen">
@@ -69,48 +194,51 @@ export const HomePage = () => {
       {/* Right half - CTA (desktop only) */}
       <div class="hidden lg:flex w-1/2 flex-col items-center justify-center bg-gray-50 p-8">
         <div class="w-full max-w-md">
-          <div class="rounded-xl bg-white p-8 shadow-lg text-center">
-            <h2 class="mb-4 text-2xl font-semibold text-gray-900">Get Started</h2>
-            <p class="mb-6 text-gray-600">Sign in to start managing your tasks.</p>
-            <div class="space-y-3">
-              <button
-                onClick={signInWithGoogle}
-                class="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-3 font-medium text-gray-700 transition hover:bg-gray-50"
-              >
-                <GoogleIcon />
-                Continue with Google
-              </button>
-              <button
-                onClick={signInWithApple}
-                class="flex w-full items-center justify-center gap-3 rounded-lg bg-black px-4 py-3 font-medium text-white transition hover:bg-gray-900"
-              >
-                <AppleIcon />
-                Continue with Apple
-              </button>
-            </div>
-          </div>
+          <AuthCard />
         </div>
       </div>
 
       {/* Mobile sticky button */}
       <div class="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-emerald-900 to-transparent lg:hidden">
-        <div class="space-y-2">
-          <button
-            onClick={signInWithGoogle}
-            class="flex w-full items-center justify-center gap-3 rounded-lg bg-white px-4 py-3 font-semibold text-gray-700 shadow-lg transition hover:bg-gray-50"
-          >
-            <GoogleIcon />
-            Continue with Google
-          </button>
-          <button
-            onClick={signInWithApple}
-            class="flex w-full items-center justify-center gap-3 rounded-lg bg-black px-4 py-3 font-semibold text-white shadow-lg transition hover:bg-gray-900"
-          >
-            <AppleIcon />
-            Continue with Apple
-          </button>
-        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          class="w-full rounded-lg bg-white px-4 py-4 font-semibold text-emerald-600 shadow-lg transition hover:bg-gray-50"
+        >
+          Get Started
+        </button>
       </div>
+
+      {/* Mobile bottom sheet modal */}
+      {showModal && (
+        <div class="fixed inset-0 z-50 lg:hidden">
+          {/* Backdrop */}
+          <div class="absolute inset-0 bg-black/50" onClick={() => setShowModal(false)} />
+
+          {/* Bottom sheet */}
+          <div class="absolute bottom-0 left-0 right-0 animate-slide-up">
+            <div class="rounded-t-2xl bg-gray-50 p-4 pt-2">
+              {/* Handle */}
+              <div class="mx-auto mb-2 h-1 w-12 rounded-full bg-gray-300" />
+              <AuthCard onClose={() => setShowModal(false)} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Slide up animation */}
+      <style>{`
+        @keyframes slide-up {
+          from {
+            transform: translateY(100%);
+          }
+          to {
+            transform: translateY(0);
+          }
+        }
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 };

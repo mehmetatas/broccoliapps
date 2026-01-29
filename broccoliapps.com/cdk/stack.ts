@@ -26,6 +26,7 @@ await app("broccoliapps-com")
       privateKeySsmParam: "apple-private-key",
     },
   })
+  .withSes(DOMAIN)
   .withCloudFrontFn(path.join(__dirname, "cloudfront-fn.js"))
   .withLambdaOrigin("/*", path.join(__dirname, "../dist/ssr")) // SSR (default)
   .withLambdaOrigin("/api/*", path.join(__dirname, "../dist/api")) // API

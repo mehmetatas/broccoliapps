@@ -26,6 +26,7 @@
     "@preact/preset-vite": "^2.10.2",
     "@types/aws-lambda": "^8.10.159",
     "@types/node": "^25.0.3",
+    "@types/react": "^19.0.0",
     "aws-cdk-lib": "^2.234.0",
     "concurrently": "^9.2.1",
     "constructs": "^10.4.4",
@@ -35,15 +36,19 @@
     "vite": "^7.3.1"
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.721.0",
     "@broccoliapps/backend": "*",
     "@broccoliapps/browser": "*",
     "@broccoliapps/frontend": "*",
     "@broccoliapps/shared": "*",
     "@hono/valibot-validator": "^0.6.1",
+    "@react-email/components": "^0.0.31",
+    "@react-email/render": "^1.0.4",
     "hono": "^4.11.3",
     "preact": "^10.28.2",
     "preact-render-to-string": "^6.6.5",
     "preact-router": "^4.1.2",
+    "react": "^19.0.0",
     "valibot": "^1.2.0"
   }
 }

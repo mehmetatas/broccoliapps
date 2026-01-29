@@ -33,3 +33,16 @@ export const refreshTokenResponse = {
   refreshTokenExpiresAt: v.number(),
 };
 export type RefreshTokenResponse = v.InferOutput<v.ObjectSchema<typeof refreshTokenResponse, undefined>>;
+
+// ============================================================================
+// POST /auth/send-magic-link - send magic link email
+// ============================================================================
+export const sendMagicLinkRequest = {
+  email: v.pipe(v.string(), v.email()),
+};
+export type SendMagicLinkRequest = v.InferOutput<v.ObjectSchema<typeof sendMagicLinkRequest, undefined>>;
+
+export const sendMagicLinkResponse = {
+  success: v.boolean(),
+};
+export type SendMagicLinkResponse = v.InferOutput<v.ObjectSchema<typeof sendMagicLinkResponse, undefined>>;

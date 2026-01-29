@@ -12,3 +12,14 @@ export type AuthCode = {
 };
 
 export const authCodes = table<AuthCode>("authCode").key(["code"]).build();
+
+export type MagicLinkToken = {
+  token: string;
+  email: string;
+  app: string;
+  createdAt: number;
+  expiresAt: number;
+  ttl: number;
+};
+
+export const magicLinkTokens = table<MagicLinkToken>("magicLinkToken").key(["token"]).build();
