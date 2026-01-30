@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
   <defs>
     <radialGradient id="bgGradient" cx="50%" cy="50%" r="70%">
-      <stop offset="0%" stop-color="#4a4a4a"/>
+      <stop offset="0%" stop-color="#6a6a6a"/>
       <stop offset="100%" stop-color="#0a0a0a"/>
     </radialGradient>
   </defs>
@@ -10,17 +10,17 @@
   <rect width="200" height="200" fill="url(#bgGradient)"/>
   
   <!-- Top dot -->
-  <circle cx="60" cy="50" r="10" fill="#6ab02f"/>
+  <circle cx="60" cy="50" r="10" fill="#8ad04f"/>
   
   <!-- Horizontal line (same height as dot = 20px) -->
-  <rect x="85" y="40" width="75" height="20" rx="10" fill="#6ab02f"/>
+  <rect x="85" y="40" width="75" height="20" rx="10" fill="#8ad04f"/>
   
   <!-- Second dot - aligned under line start -->
-  <circle cx="95" cy="85" r="10" fill="#6ab02f"/>
+  <circle cx="95" cy="85" r="10" fill="#8ad04f"/>
   
   <!-- Third dot - aligned under line start -->
-  <circle cx="95" cy="117" r="10" fill="#6ab02f"/>
+  <circle cx="95" cy="117" r="10" fill="#8ad04f"/>
   
   <!-- Fourth dot - aligned under line start -->
-  <circle cx="95" cy="149" r="10" fill="#6ab02f"/>
+  <circle cx="95" cy="149" r="10" fill="#8ad04f"/>
 </svg>
