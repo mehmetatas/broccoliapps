@@ -9,14 +9,18 @@ type UseDragAndDropOptions<T extends DragItem> = {
   items: T[];
   onReorder: (itemId: string, afterId: string | null, beforeId: string | null) => void;
   disabled?: boolean;
+  onDragStateChange?: (isDragging: boolean) => void;
 };
 
 export const useDragAndDrop = <T extends DragItem>({
   onReorder,
   disabled = false,
+  onDragStateChange,
 }: UseDragAndDropOptions<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sortableRef = useRef<Sortable | null>(null);
+  const onDragStateChangeRef = useRef(onDragStateChange);
+  onDragStateChangeRef.current = onDragStateChange;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -38,10 +42,15 @@ export const useDragAndDrop = <T extends DragItem>({
         // Filter matched - drag is cancelled automatically
         // Do nothing here to allow default browser behavior (focus)
       },
+      forceFallback: true,
       animation: 150,
       ghostClass: "opacity-30",
       chosenClass: "shadow-xl",
+      onStart: () => {
+        onDragStateChangeRef.current?.(true);
+      },
       onEnd: (evt) => {
+        onDragStateChangeRef.current?.(false);
         const { oldIndex, newIndex, item: draggedEl } = evt;
 
         if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) {

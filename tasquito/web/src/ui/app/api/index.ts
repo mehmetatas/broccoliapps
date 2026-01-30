@@ -1,4 +1,8 @@
-export * from "./cache";
-export * from "./projects";
-export * from "./tasks";
-export * from "./users";
+export * from "@broccoliapps/tasquito-shared/client";
+
+import { cache } from "@broccoliapps/browser";
+
+export const signOut = (): void => {
+  cache.removeByPrefix("cache:");
+  window.location.href = "/";
+};

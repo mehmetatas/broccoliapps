@@ -31,13 +31,6 @@
                                     <constraint firstAttribute="height" constant="120" id="h1A-tL-001"/>
                                 </constraints>
                             </imageView>
-                            <!-- "by" label - small, near bottom -->
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="by" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="byL-ab-001">
-                                <rect key="frame" x="167.5" y="560" width="40" height="16"/>
-                                <fontDescription key="fontDescription" name="Nunito-Regular" family="Nunito" pointSize="11"/>
-                                <color key="textColor" red="0.6" green="0.6" blue="0.6" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <!-- Broccoli Apps logo - xs, near bottom -->
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="BroccoliAppsLogo" translatesAutoresizingMaskIntoConstraints="NO" id="bLg-Xx-001">
                                 <rect key="frame" x="171.5" y="580" width="32" height="32"/>
@@ -46,8 +39,8 @@
                                     <constraint firstAttribute="height" constant="32" id="h2A-bL-001"/>
                                 </constraints>
                             </imageView>
-                            <!-- "Broccoli Apps" label - xs, at bottom -->
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Broccoli Apps" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="baL-ab-001">
+                            <!-- "by Broccoli Apps" label - xs, at bottom -->
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="by Broccoli Apps" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="baL-ab-001">
                                 <rect key="frame" x="137.5" y="616" width="100" height="14"/>
                                 <fontDescription key="fontDescription" name="Nunito-Medium" family="Nunito" pointSize="10"/>
                                 <color key="textColor" red="0.6" green="0.6" blue="0.6" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

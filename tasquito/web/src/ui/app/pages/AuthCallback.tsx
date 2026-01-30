@@ -2,8 +2,7 @@ import { cache } from "@broccoliapps/browser";
 import { route } from "preact-router";
 import { useEffect, useState } from "preact/hooks";
 import { authExchange } from "@broccoliapps/tasquito-shared";
-import { setUserFromAuth } from "../api/users";
-import { CACHE_KEYS } from "../api/cache";
+import { setUserFromAuth, CACHE_KEYS } from "../api";
 
 export const AuthCallback = () => {
   const [error, setError] = useState<string | null>(null);

@@ -1,7 +1,7 @@
 import { cache } from "@broccoliapps/browser";
 import type { AnchorHTMLAttributes, ComponentType } from "preact";
 import Router, { type RoutableProps } from "preact-router";
-import { CACHE_KEYS } from "./api/cache";
+import { CACHE_KEYS } from "./api";
 import { Layout } from "./layout/Layout";
 import { AuthCallback, HomePage, ProjectDetailPage, SettingsPage } from "./pages";
 

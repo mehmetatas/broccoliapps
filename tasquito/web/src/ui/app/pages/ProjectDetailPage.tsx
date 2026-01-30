@@ -1,6 +1,7 @@
 import type { TaskDto } from "@broccoliapps/tasquito-shared";
 import { Archive, ArchiveRestore, ArrowLeft, CheckSquare, ChevronDown, ChevronRight, Trash2, X } from "lucide-preact";
-import { useMemo, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
+import autoAnimate, { type AnimationController } from "@formkit/auto-animate";
 import { ArchiveConfirmModal, DeleteConfirmModal, EditableText, EmptyState, IconButton, ProjectDetailSkeleton, TaskCard, TaskCardSkeleton, TaskForm } from "../components";
 import { useDragAndDrop, useProject } from "../hooks";
 import { AppLink } from "../SpaApp";
@@ -55,18 +56,49 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
     return { todoTasks: todo, doneTasks: done };
   }, [tasks]);
 
-  // Drag and drop for todo tasks
+  // Auto-animate for todo tasks (imperative - shares ref with SortableJS)
+  const todoAnimateRef = useRef<AnimationController | null>(null);
   const { containerRef: todoContainerRef } = useDragAndDrop({
     items: todoTasks,
     onReorder: reorderTask,
     disabled: isArchived,
+    onDragStateChange: (isDragging) => {
+      if (isDragging) {
+        todoAnimateRef.current?.disable();
+      } else {
+        todoAnimateRef.current?.enable();
+      }
+    },
   });
 
-  // Drag and drop for done tasks - disabled since done tasks shouldn't be reordered
-  const { containerRef: doneContainerRef } = useDragAndDrop({
-    items: doneTasks,
-    onReorder: reorderTask,
-    disabled: true,
+  useEffect(() => {
+    const el = todoContainerRef.current;
+    if (el) {
+      if (!todoAnimateRef.current || todoAnimateRef.current.parent !== el) {
+        todoAnimateRef.current?.destroy?.();
+        todoAnimateRef.current = autoAnimate(el, { duration: 200, easing: "ease-out", disrespectUserMotionPreference: true });
+      }
+    } else if (todoAnimateRef.current) {
+      todoAnimateRef.current.destroy?.();
+      todoAnimateRef.current = null;
+    }
+  });
+
+  // Auto-animate for done tasks (imperative - container is conditionally rendered)
+  const doneContainerRef = useRef<HTMLDivElement>(null);
+  const doneAnimateRef = useRef<AnimationController | null>(null);
+
+  useEffect(() => {
+    const el = doneContainerRef.current;
+    if (el) {
+      if (!doneAnimateRef.current || doneAnimateRef.current.parent !== el) {
+        doneAnimateRef.current?.destroy?.();
+        doneAnimateRef.current = autoAnimate(el, { duration: 200, easing: "ease-out", disrespectUserMotionPreference: true });
+      }
+    } else if (doneAnimateRef.current) {
+      doneAnimateRef.current.destroy?.();
+      doneAnimateRef.current = null;
+    }
   });
 
   const [showArchiveProjectModal, setShowArchiveProjectModal] = useState(false);

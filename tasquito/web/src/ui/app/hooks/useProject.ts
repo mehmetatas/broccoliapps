@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "preact/hooks";
-import { generateKeyBetween } from "fractional-indexing";
 import type { ProjectWithTasksDto, TaskDto, TaskStatus } from "@broccoliapps/tasquito-shared";
+import { generateKeyBetween } from "fractional-indexing";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { archiveProject, deleteProject, deleteTask, getProject, patchProject, patchTask, postSubtask, postTask, unarchiveProject } from "../api";
 
 type TaskWithSubtasks = TaskDto & { subtasks: TaskDto[] };
@@ -509,52 +509,28 @@ export const useProject = (id: string) => {
 
   // Reorder task within its status group
   const reorderTask = async (taskId: string, afterId: string | null, beforeId: string | null) => {
-    console.log("[reorderTask] Called with", { taskId, afterId, beforeId });
-
     if (!project) {
-      console.log("[reorderTask] No project, returning");
       return;
     }
 
     const task = project.tasks.find((t) => t.id === taskId);
     if (!task) {
-      console.log("[reorderTask] Task not found", { taskId });
       return;
     }
-
-    console.log("[reorderTask] Task being dragged", {
-      id: task.id,
-      title: task.title,
-      currentSortOrder: task.sortOrder,
-    });
 
     // Get the sortOrders of the adjacent tasks
     const afterTask = afterId ? project.tasks.find((t) => t.id === afterId) : null;
     const beforeTask = beforeId ? project.tasks.find((t) => t.id === beforeId) : null;
 
-    console.log("[reorderTask] Adjacent tasks", {
-      afterTask: afterTask ? { id: afterTask.id, title: afterTask.title, sortOrder: afterTask.sortOrder } : null,
-      beforeTask: beforeTask ? { id: beforeTask.id, title: beforeTask.title, sortOrder: beforeTask.sortOrder } : null,
-    });
-
     const afterOrder = afterTask?.sortOrder ?? null;
     const beforeOrder = beforeTask?.sortOrder ?? null;
 
-    console.log("[reorderTask] Sort order bounds", { afterOrder, beforeOrder });
-
     const newSortOrder = generateKeyBetween(afterOrder, beforeOrder);
-
-    console.log("[reorderTask] Generated new sortOrder", { newSortOrder });
 
     // Optimistic update
     setProject((prev) => {
       if (!prev) return null;
       const updatedTasks = prev.tasks.map((t) => (t.id === taskId ? { ...t, sortOrder: newSortOrder } : t));
-
-      // Log the updated tasks with their sortOrders
-      console.log("[reorderTask] Tasks after optimistic update",
-        updatedTasks.map((t) => ({ id: t.id, title: t.title, sortOrder: t.sortOrder, status: t.status }))
-      );
 
       return {
         ...prev,
@@ -564,11 +540,8 @@ export const useProject = (id: string) => {
 
     // Persist to server
     try {
-      console.log("[reorderTask] Persisting to server", { projectId: project.id, taskId, sortOrder: newSortOrder });
       await patchTask({ projectId: project.id, id: taskId, sortOrder: newSortOrder });
-      console.log("[reorderTask] Server persist successful");
     } catch (err) {
-      console.error("[reorderTask] Server persist failed, reverting", err);
       // Revert on error
       load();
     }
@@ -606,11 +579,11 @@ export const useProject = (id: string) => {
         tasks: prev.tasks.map((t) =>
           t.id === parentId
             ? {
-                ...t,
-                subtasks: t.subtasks.map((st) =>
-                  st.id === subtaskId ? { ...st, sortOrder: newSortOrder } : st
-                ),
-              }
+              ...t,
+              subtasks: t.subtasks.map((st) =>
+                st.id === subtaskId ? { ...st, sortOrder: newSortOrder } : st
+              ),
+            }
             : t
         ),
       };
@@ -630,13 +603,13 @@ export const useProject = (id: string) => {
   // because fractional-indexing generates keys designed for ASCII comparison
   const sortedTasks: TaskWithSubtasks[] = project
     ? [...project.tasks].sort((a, b) => {
-        if (a.status !== b.status) {
-          return a.status === "todo" ? -1 : 1;
-        }
-        const aOrder = a.sortOrder ?? "";
-        const bOrder = b.sortOrder ?? "";
-        return aOrder < bOrder ? -1 : aOrder > bOrder ? 1 : 0;
-      })
+      if (a.status !== b.status) {
+        return a.status === "todo" ? -1 : 1;
+      }
+      const aOrder = a.sortOrder ?? "";
+      const bOrder = b.sortOrder ?? "";
+      return aOrder < bOrder ? -1 : aOrder > bOrder ? 1 : 0;
+    })
     : [];
 
   return {

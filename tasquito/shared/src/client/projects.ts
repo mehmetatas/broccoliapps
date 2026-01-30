@@ -1,4 +1,3 @@
-import { cache } from "@broccoliapps/browser";
 import {
   archiveProject as archiveProjectApi,
   deleteProject as deleteProjectApi,
@@ -10,15 +9,16 @@ import {
   type ProjectDto,
   type ProjectSummaryDto,
   type ProjectWithTasksDto,
-} from "@broccoliapps/tasquito-shared";
+} from "../api-contracts";
 import { CACHE_KEYS, getCacheExpiry } from "./cache";
+import { getCache } from "./init";
 
 // Helper functions for cache management
 const getAllProjectsFromCache = (): ProjectSummaryDto[] => {
-  const keys = cache.keys(CACHE_KEYS.projectPrefix);
+  const keys = getCache().keys(CACHE_KEYS.projectPrefix);
   const projects: ProjectSummaryDto[] = [];
   for (const key of keys) {
-    const project = cache.get<ProjectSummaryDto>(key);
+    const project = getCache().get<ProjectSummaryDto>(key);
     if (project) projects.push(project);
   }
   return projects;
@@ -31,7 +31,7 @@ const setProjectInCache = (project: ProjectSummaryDto | ProjectDto) => {
     openTaskCount: "openTaskCount" in project ? project.openTaskCount : 0,
     totalTaskCount: "totalTaskCount" in project ? project.totalTaskCount : 0,
   };
-  cache.set(CACHE_KEYS.project(project.id), projectWithCounts, getCacheExpiry());
+  getCache().set(CACHE_KEYS.project(project.id), projectWithCounts, getCacheExpiry());
 };
 
 const setAllProjectsInCache = (projects: ProjectSummaryDto[]) => {
@@ -41,7 +41,7 @@ const setAllProjectsInCache = (projects: ProjectSummaryDto[]) => {
 };
 
 const removeProjectFromCache = (id: string) => {
-  cache.remove(CACHE_KEYS.project(id));
+  getCache().remove(CACHE_KEYS.project(id));
 };
 
 export const setProjectCountsInCache = (
@@ -49,14 +49,14 @@ export const setProjectCountsInCache = (
   openTaskCount: number,
   totalTaskCount: number
 ): void => {
-  const existing = cache.get<ProjectSummaryDto>(CACHE_KEYS.project(projectId));
+  const existing = getCache().get<ProjectSummaryDto>(CACHE_KEYS.project(projectId));
   if (!existing) return;
-  cache.set(CACHE_KEYS.project(projectId), { ...existing, openTaskCount, totalTaskCount }, getCacheExpiry());
+  getCache().set(CACHE_KEYS.project(projectId), { ...existing, openTaskCount, totalTaskCount }, getCacheExpiry());
 };
 
 // GET /projects - list all projects with cache
 export const getProjects = async (): Promise<{ projects: ProjectSummaryDto[] }> => {
-  const projectsFetched = cache.get<boolean>(CACHE_KEYS.projectsFetched);
+  const projectsFetched = getCache().get<boolean>(CACHE_KEYS.projectsFetched);
   if (projectsFetched) {
     const projects = getAllProjectsFromCache();
     if (projects.length > 0) return { projects };
@@ -64,7 +64,7 @@ export const getProjects = async (): Promise<{ projects: ProjectSummaryDto[] }> 
 
   const data = await getProjectsApi.invoke({});
   setAllProjectsInCache(data.projects);
-  cache.set(CACHE_KEYS.projectsFetched, true, getCacheExpiry());
+  getCache().set(CACHE_KEYS.projectsFetched, true, getCacheExpiry());
   return data;
 };
 
@@ -86,7 +86,7 @@ export const postProject = async (data: { name: string }): Promise<{ project: Pr
 export const patchProject = async (data: { id: string; name?: string }): Promise<{ project: ProjectDto }> => {
   const result = await patchProjectApi.invoke(data);
   // Update cache - preserve task counts from existing cache if available
-  const existing = cache.get<ProjectSummaryDto>(CACHE_KEYS.project(result.project.id));
+  const existing = getCache().get<ProjectSummaryDto>(CACHE_KEYS.project(result.project.id));
   setProjectInCache({
     ...result.project,
     openTaskCount: existing?.openTaskCount ?? 0,
@@ -100,8 +100,8 @@ export const deleteProject = async (id: string): Promise<void> => {
   await deleteProjectApi.invoke({ id });
   removeProjectFromCache(id);
   // Also clear any cached tasks for this project
-  cache.removeByPrefix(CACHE_KEYS.taskPrefix(id));
-  cache.remove(CACHE_KEYS.tasksFetched(id));
+  getCache().removeByPrefix(CACHE_KEYS.taskPrefix(id));
+  getCache().remove(CACHE_KEYS.tasksFetched(id));
 };
 
 // POST /projects/:id/archive - archive project with cache update
@@ -110,8 +110,8 @@ export const archiveProject = async (id: string): Promise<{ project: ProjectDto 
   // Update the project in cache with archived status
   setProjectInCache(result.project);
   // Also clear any cached tasks for this project
-  cache.removeByPrefix(CACHE_KEYS.taskPrefix(id));
-  cache.remove(CACHE_KEYS.tasksFetched(id));
+  getCache().removeByPrefix(CACHE_KEYS.taskPrefix(id));
+  getCache().remove(CACHE_KEYS.tasksFetched(id));
   return result;
 };
 
@@ -125,6 +125,6 @@ export const unarchiveProject = async (id: string): Promise<{ project: ProjectDt
 
 // Invalidate all projects cache
 export const invalidateProjectsCache = () => {
-  cache.removeByPrefix(CACHE_KEYS.projectPrefix);
-  cache.remove(CACHE_KEYS.projectsFetched);
+  getCache().removeByPrefix(CACHE_KEYS.projectPrefix);
+  getCache().remove(CACHE_KEYS.projectsFetched);
 };

@@ -1,4 +1,3 @@
-import { cache } from "@broccoliapps/browser";
 import {
   deleteTask as deleteTaskApi,
   getTask as getTaskApi,
@@ -7,25 +6,26 @@ import {
   postSubtask as postSubtaskApi,
   postTask as postTaskApi,
   type TaskDto,
-} from "@broccoliapps/tasquito-shared";
+} from "../api-contracts";
 import { CACHE_KEYS, getCacheExpiry } from "./cache";
+import { getCache } from "./init";
 import { setProjectCountsInCache } from "./projects";
 
 type Task = TaskDto;
 
 // Helper functions for cache management
 const getAllTasksFromCache = (projectId: string): Task[] => {
-  const keys = cache.keys(CACHE_KEYS.taskPrefix(projectId));
+  const keys = getCache().keys(CACHE_KEYS.taskPrefix(projectId));
   const tasks: Task[] = [];
   for (const key of keys) {
-    const task = cache.get<Task>(key);
+    const task = getCache().get<Task>(key);
     if (task) tasks.push(task);
   }
   return tasks;
 };
 
 const setTaskInCache = (task: Task) => {
-  cache.set(CACHE_KEYS.task(task.projectId, task.id), task, getCacheExpiry());
+  getCache().set(CACHE_KEYS.task(task.projectId, task.id), task, getCacheExpiry());
 };
 
 const setAllTasksInCache = (tasks: Task[]) => {
@@ -35,12 +35,12 @@ const setAllTasksInCache = (tasks: Task[]) => {
 };
 
 const removeTaskFromCache = (projectId: string, id: string) => {
-  cache.remove(CACHE_KEYS.task(projectId, id));
+  getCache().remove(CACHE_KEYS.task(projectId, id));
 };
 
 // GET /projects/:projectId/tasks - list all tasks in project with cache
 export const getTasks = async (projectId: string): Promise<{ tasks: Task[] }> => {
-  const tasksFetched = cache.get<boolean>(CACHE_KEYS.tasksFetched(projectId));
+  const tasksFetched = getCache().get<boolean>(CACHE_KEYS.tasksFetched(projectId));
   if (tasksFetched) {
     const tasks = getAllTasksFromCache(projectId);
     if (tasks.length > 0) return { tasks };
@@ -48,13 +48,13 @@ export const getTasks = async (projectId: string): Promise<{ tasks: Task[] }> =>
 
   const data = await getTasksApi.invoke({ projectId });
   setAllTasksInCache(data.tasks);
-  cache.set(CACHE_KEYS.tasksFetched(projectId), true, getCacheExpiry());
+  getCache().set(CACHE_KEYS.tasksFetched(projectId), true, getCacheExpiry());
   return data;
 };
 
 // GET /projects/:projectId/tasks/:id - get single task with cache
 export const getTask = async (projectId: string, id: string): Promise<{ task: Task }> => {
-  const cachedTask = cache.get<Task>(CACHE_KEYS.task(projectId, id));
+  const cachedTask = getCache().get<Task>(CACHE_KEYS.task(projectId, id));
   if (cachedTask) {
     return { task: cachedTask };
   }
@@ -118,6 +118,6 @@ export const deleteTask = async (projectId: string, id: string): Promise<void> =
 
 // Invalidate tasks cache for a project
 export const invalidateTasksCache = (projectId: string) => {
-  cache.removeByPrefix(CACHE_KEYS.taskPrefix(projectId));
-  cache.remove(CACHE_KEYS.tasksFetched(projectId));
+  getCache().removeByPrefix(CACHE_KEYS.taskPrefix(projectId));
+  getCache().remove(CACHE_KEYS.tasksFetched(projectId));
 };

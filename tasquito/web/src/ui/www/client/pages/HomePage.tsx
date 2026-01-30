@@ -2,7 +2,7 @@ import { cache } from "@broccoliapps/browser";
 import { globalConfig } from "@broccoliapps/shared";
 import { sendMagicLink } from "@broccoliapps/tasquito-shared";
 import { useEffect, useState } from "preact/hooks";
-import { CACHE_KEYS } from "../../../app/api/cache";
+import { CACHE_KEYS } from "../../../app/api";
 
 const GoogleIcon = () => (
   <svg class="h-5 w-5" viewBox="0 0 24 24">

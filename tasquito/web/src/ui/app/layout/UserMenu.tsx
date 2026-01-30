@@ -2,7 +2,7 @@ import { cache } from "@broccoliapps/browser";
 import type { AuthUserDto } from "@broccoliapps/tasquito-shared";
 import { Settings } from "lucide-preact";
 import { useRef, useState } from "preact/hooks";
-import { CACHE_KEYS } from "../api/cache";
+import { CACHE_KEYS } from "../api";
 import { useClickOutside } from "../hooks/useClickOutside";
 
 export const UserMenu = () => {

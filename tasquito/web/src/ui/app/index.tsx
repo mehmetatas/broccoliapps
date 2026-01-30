@@ -3,9 +3,13 @@ import { cache } from "@broccoliapps/browser";
 import { setTokenProvider } from "@broccoliapps/shared";
 import { render } from "preact";
 import { refreshToken } from "@broccoliapps/tasquito-shared";
-import { CACHE_KEYS } from "./api/cache";
+import { initClient } from "@broccoliapps/tasquito-shared/client";
+import { CACHE_KEYS } from "./api";
 import { App } from "./SpaApp";
 import { applyTheme, getStoredTheme } from "./utils/themeUtils";
+
+// Initialize shared client with browser cache provider
+initClient(cache);
 
 // CSS import for Vite HMR in development only
 // In production, CSS is loaded via <link> tag in AppHtml.tsx

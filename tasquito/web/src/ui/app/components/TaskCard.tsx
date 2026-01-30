@@ -1,6 +1,7 @@
 import { LIMITS, type TaskDto, type TaskStatus } from "@broccoliapps/tasquito-shared";
 import { Calendar, ChevronDown, ChevronRight, Pencil, Trash2, X } from "lucide-preact";
 import { useEffect, useRef, useState } from "preact/hooks";
+import autoAnimate, { type AnimationController } from "@formkit/auto-animate";
 import Sortable from "sortablejs";
 import { Card } from "./Card";
 import { Checkbox } from "./Checkbox";
@@ -71,6 +72,7 @@ export const TaskCard = ({
   const dateInputRef = useRef<HTMLInputElement>(null);
   const subtasksContainerRef = useRef<HTMLDivElement>(null);
   const subtaskSortableRef = useRef<Sortable | null>(null);
+  const subtaskAnimateRef = useRef<AnimationController | null>(null);
 
   // Subtask drag and drop with SortableJS
   useEffect(() => {
@@ -88,10 +90,15 @@ export const TaskCard = ({
         // Filter matched - drag is cancelled automatically
         // Do nothing here to allow default browser behavior (focus)
       },
+      forceFallback: true,
       animation: 150,
       ghostClass: "opacity-30",
       chosenClass: "shadow-lg",
+      onStart: () => {
+        subtaskAnimateRef.current?.disable();
+      },
       onEnd: (evt) => {
+        subtaskAnimateRef.current?.enable();
         const { oldIndex, newIndex, item: draggedEl } = evt;
         if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) {
           return;
@@ -126,6 +133,37 @@ export const TaskCard = ({
       }
     };
   }, [onSubtaskReorder, disabled, isDone]);
+
+  // Auto-animate for todo subtasks (imperative - shares ref with SortableJS)
+  useEffect(() => {
+    const el = subtasksContainerRef.current;
+    if (el) {
+      if (!subtaskAnimateRef.current || subtaskAnimateRef.current.parent !== el) {
+        subtaskAnimateRef.current?.destroy?.();
+        subtaskAnimateRef.current = autoAnimate(el, { duration: 150, easing: "ease-out", disrespectUserMotionPreference: true });
+      }
+    } else if (subtaskAnimateRef.current) {
+      subtaskAnimateRef.current.destroy?.();
+      subtaskAnimateRef.current = null;
+    }
+  });
+
+  // Auto-animate for done subtasks (imperative - container is conditionally rendered)
+  const doneSubtasksRef = useRef<HTMLDivElement>(null);
+  const doneSubtaskAnimateRef = useRef<AnimationController | null>(null);
+
+  useEffect(() => {
+    const el = doneSubtasksRef.current;
+    if (el) {
+      if (!doneSubtaskAnimateRef.current || doneSubtaskAnimateRef.current.parent !== el) {
+        doneSubtaskAnimateRef.current?.destroy?.();
+        doneSubtaskAnimateRef.current = autoAnimate(el, { duration: 150, easing: "ease-out", disrespectUserMotionPreference: true });
+      }
+    } else if (doneSubtaskAnimateRef.current) {
+      doneSubtaskAnimateRef.current.destroy?.();
+      doneSubtaskAnimateRef.current = null;
+    }
+  });
 
   const handleToggleStatus = async (checked: boolean) => {
     setIsTogglingTask(true);
@@ -174,7 +212,7 @@ export const TaskCard = ({
 
   return (
     <Card
-      class={`group transition-all duration-150 ${disabled || isDone ? "" : "cursor-grab active:cursor-grabbing"}`}
+      class={`group transition-[color,background-color,border-color,box-shadow,opacity] duration-150 ${disabled || isDone ? "" : "cursor-grab active:cursor-grabbing"}`}
       data-drag-id={task.id}
     >
       {/* Header: Checkbox + Title + Date + Edit + Delete */}
@@ -265,7 +303,7 @@ export const TaskCard = ({
           {todoSubtasks.map((subtask) => (
             <div
               key={subtask.id}
-              class={`group/subtask flex items-center gap-2 pl-4 py-0.5 rounded transition-all duration-150 ${onSubtaskReorder && !disabled && !isDone ? "cursor-grab active:cursor-grabbing" : ""}`}
+              class={`group/subtask flex items-center gap-2 pl-4 py-0.5 rounded transition-[color,background-color,border-color,box-shadow,opacity] duration-150 ${onSubtaskReorder && !disabled && !isDone ? "cursor-grab active:cursor-grabbing" : ""}`}
               data-drag-id={subtask.id}
             >
               <Checkbox
@@ -317,7 +355,7 @@ export const TaskCard = ({
             <span>Done ({doneSubtasks.length})</span>
           </button>
           {showDoneSubtasks && (
-            <div class="mt-1 space-y-0.5">
+            <div ref={doneSubtasksRef} class="mt-1 space-y-0.5">
               {doneSubtasks.map((subtask) => (
                 <div
                   key={subtask.id}

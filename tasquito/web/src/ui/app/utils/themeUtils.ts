@@ -1,5 +1,5 @@
 import { cache } from "@broccoliapps/browser";
-import { CACHE_KEYS } from "../api/cache";
+import { CACHE_KEYS } from "../api";
 
 export type Theme = "system" | "light" | "dark";
 
