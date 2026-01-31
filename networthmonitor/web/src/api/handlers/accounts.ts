@@ -15,7 +15,7 @@ import {
   postAccount,
   postHistoryItem,
   putAccountBuckets,
-} from "../../shared/api-contracts";
+} from "@broccoliapps/nwm-shared";
 import { api } from "../lambda";
 
 // GET /accounts/:id/detail - get account with all related data (register most specific routes first)

@@ -6,5 +6,6 @@ page.handle("/privacy", async () => {
   return render(<PrivacyPage />, {
     title: "Privacy Policy - Broccoli Apps",
     headers: { "Cache-Control": "public, max-age=86400" },
+    staticPage: true,
   });
 });

@@ -1,6 +1,6 @@
 import { Check, ChevronDown, ChevronRight, Loader2, Pencil, Trash2, X } from "lucide-preact";
 import type { TargetedKeyboardEvent } from "preact";
-import type { AccountDto, BucketDto } from "../../../shared/api-contracts/dto";
+import type { AccountDto, BucketDto } from "@broccoliapps/nwm-shared";
 import { AccountTypeSection } from "./AccountTypeSection";
 
 type BucketListItemProps = {

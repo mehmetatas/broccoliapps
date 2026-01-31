@@ -1,5 +1,5 @@
 import { Check } from "lucide-preact";
-import type { AccountDto } from "../../../shared/api-contracts/dto";
+import type { AccountDto } from "@broccoliapps/nwm-shared";
 
 type AccountTypeSectionProps = {
   title: string;

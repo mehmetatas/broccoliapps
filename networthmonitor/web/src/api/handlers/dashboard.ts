@@ -1,6 +1,6 @@
 import { accounts, historyItems } from "../../db/accounts";
 import { buckets } from "../../db/buckets";
-import { getDashboard } from "../../shared/api-contracts";
+import { getDashboard } from "@broccoliapps/nwm-shared";
 import { api } from "../lambda";
 
 // GET /dashboard - get all accounts, buckets, and histories in a single call

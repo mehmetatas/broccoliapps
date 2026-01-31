@@ -7,5 +7,6 @@ page.onError(async (error) => {
     title: `${error.status} - Error`,
     status: error.status,
     skipLayout: true,
+    staticPage: true,
   });
 });

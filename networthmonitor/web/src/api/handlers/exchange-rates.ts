@@ -1,6 +1,6 @@
 import { HttpError } from "@broccoliapps/backend";
 import { exchangeRates } from "../../db/currencyRates";
-import { getExchangeRates } from "../../shared/api-contracts";
+import { getExchangeRates } from "@broccoliapps/nwm-shared";
 import { api } from "../lambda";
 
 // GET /exchange-rates/:fromCurrency/:toCurrency - get historical exchange rates

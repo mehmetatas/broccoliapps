@@ -5,14 +5,14 @@ type AddBucketFormProps = {
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
-  loading?: boolean;
+  isLoading?: boolean;
 };
 
 export const AddBucketForm = ({
   value,
   onChange,
   onSubmit,
-  loading = false,
+  isLoading = false,
 }: AddBucketFormProps) => {
   return (
     <div class="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
@@ -27,8 +27,8 @@ export const AddBucketForm = ({
             if (e.key === "Enter") {onSubmit();}
           }}
         />
-        <Button onClick={onSubmit} disabled={!value.trim() || loading}>
-          {loading ? (
+        <Button onClick={onSubmit} disabled={!value.trim() || isLoading}>
+          {isLoading ? (
             <Loader2 size={18} class="animate-spin" />
           ) : (
             <Plus size={18} />

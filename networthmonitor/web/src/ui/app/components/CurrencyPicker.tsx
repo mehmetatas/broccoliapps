@@ -1,6 +1,6 @@
 import { DropdownButton, useClickOutside } from "@broccoliapps/browser";
 import { useCallback, useRef, useState } from "preact/hooks";
-import { getCurrencies } from "../../../shared/currency";
+import { getCurrencies } from "@broccoliapps/nwm-shared";
 
 type CurrencyPickerProps = {
   value: string;

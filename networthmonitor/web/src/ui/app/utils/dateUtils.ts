@@ -1,4 +1,4 @@
-import type { UpdateFrequency } from "../../../shared/api-contracts/dto";
+import type { UpdateFrequency } from "@broccoliapps/nwm-shared";
 
 /**
  * Get the current month in YYYY-MM format

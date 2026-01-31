@@ -1,6 +1,10 @@
 // Client-side hydration entry point
-import { initSpaApp } from "@broccoliapps/browser";
+import { cache, initSpaApp } from "@broccoliapps/browser";
+import { initClient } from "@broccoliapps/nwm-shared/client";
 import { App } from "./SpaApp";
+
+// Initialize shared client with browser cache provider
+initClient(cache);
 
 // CSS import for Vite HMR in development only
 // In production, CSS is loaded via <link> tag in Html.tsx from CDN

@@ -4,7 +4,7 @@ import type { ExchangeRateMap } from "../utils/currencyConversion";
 
 type UseExchangeRatesResult = {
   rates: ExchangeRateMap | null;
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
 };
 
@@ -20,7 +20,7 @@ export function useExchangeRates(
   earliestMonth: string | null
 ): UseExchangeRatesResult {
   const [rates, setRates] = useState<ExchangeRateMap | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,19 +30,19 @@ export function useExchangeRates(
     // No currencies to fetch
     if (currenciesToFetch.length === 0) {
       setRates({});
-      setLoading(false);
+      setIsLoading(false);
       return;
     }
 
     // No data yet
     if (!earliestMonth) {
       setRates({});
-      setLoading(false);
+      setIsLoading(false);
       return;
     }
 
     const fetchRates = async () => {
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
 
       try {
@@ -65,12 +65,12 @@ export function useExchangeRates(
         setError(err instanceof Error ? err.message : "Failed to fetch exchange rates");
         setRates({});
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchRates();
   }, [currencies.join(","), targetCurrency, earliestMonth]);
 
-  return { rates, loading, error };
+  return { rates, isLoading, error };
 }

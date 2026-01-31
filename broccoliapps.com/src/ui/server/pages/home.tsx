@@ -6,5 +6,6 @@ page.handle("/", async () => {
   return render(<HomePage />, {
     title: "Broccoli Apps",
     headers: { "Cache-Control": "public, max-age=86400" },
+    staticPage: true,
   });
 });

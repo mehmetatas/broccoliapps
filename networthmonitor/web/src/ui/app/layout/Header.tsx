@@ -1,7 +1,7 @@
 import { useClickOutside } from "@broccoliapps/browser";
 import { Bell } from "lucide-preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import type { AccountDto, UserDto } from "../../../shared/api-contracts/dto";
+import type { AccountDto, UserDto } from "@broccoliapps/nwm-shared";
 import { getDashboard, getUser, getUserSync } from "../api";
 import { hasMissedUpdate } from "../utils/dateUtils";
 

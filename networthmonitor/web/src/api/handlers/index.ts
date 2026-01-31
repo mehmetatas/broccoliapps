@@ -1,3 +1,4 @@
+import "./auth";
 import "./accounts";
 import "./buckets";
 import "./dashboard";

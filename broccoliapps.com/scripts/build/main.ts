@@ -1,3 +1,4 @@
+import { execSync } from "child_process";
 import * as esbuild from "esbuild";
 import * as fs from "fs";
 import * as path from "path";
@@ -69,7 +70,8 @@ const buildLambda = async ({ entry, outdir, forbiddenDeps }: LambdaConfig) => {
   }
 
   // Write package.json for ESM support
-  fs.writeFileSync(path.join(outdir, "package.json"), JSON.stringify({ type: "module" }, null, 2));
+  fs.mkdirSync(path.join(rootDir, outdir), { recursive: true });
+  fs.writeFileSync(path.join(rootDir, outdir, "package.json"), JSON.stringify({ type: "module" }, null, 2));
 };
 
 const copyStaticAssets = () => {
@@ -111,21 +113,25 @@ const buildClient = async () => {
     format: "esm",
     jsx: "automatic",
     jsxImportSource: "preact",
-    // Bundle everything including Preact
+    external: ["*.css"],
+    alias: {
+      react: "preact/compat",
+      "react-dom": "preact/compat",
+      "react-dom/client": "preact/compat",
+    },
     define: {
       "process.env.NODE_ENV": JSON.stringify(isDevBuild ? "development" : "production"),
       "import.meta.env.DEV": isDevBuild ? "true" : "false",
     },
   });
 
-  // Build CSS (using esbuild to process CSS imports)
+  // Build CSS with PostCSS (Tailwind 4)
   console.log(`  src/ui/client/app.css → dist/static/${cssFileName}`);
-
-  await esbuild.build({
-    entryPoints: [path.join(rootDir, "src/ui/client/app.css")],
-    bundle: true,
-    minify: !isDevBuild,
-    outfile: path.join(outDir, cssFileName),
+  const monorepoRoot = path.join(rootDir, "..");
+  const postcssPath = path.join(monorepoRoot, "node_modules/.bin/postcss");
+  execSync(`"${postcssPath}" "${path.join(rootDir, "src/ui/client/app.css")}" -o "${path.join(outDir, cssFileName)}"`, {
+    stdio: "inherit",
+    cwd: rootDir,
   });
 
   // Copy static assets

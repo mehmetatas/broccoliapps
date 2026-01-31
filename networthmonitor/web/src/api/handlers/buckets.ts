@@ -9,7 +9,7 @@ import {
   patchBucket,
   postBucket,
   putBucketAccounts,
-} from "../../shared/api-contracts";
+} from "@broccoliapps/nwm-shared";
 import { api } from "../lambda";
 
 // GET /buckets/:id/accounts - get accounts in a bucket (register most specific routes first)

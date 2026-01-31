@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "preact/hooks";
-import type { UpdateFrequency } from "../../../shared/api-contracts/dto";
+import type { UpdateFrequency } from "@broccoliapps/nwm-shared";
 import {
   formatMonth,
   generateMonthRange,

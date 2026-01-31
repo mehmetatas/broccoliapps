@@ -1,95 +1,13 @@
 import { EmptyState, preferences } from "@broccoliapps/browser";
 import { Archive } from "lucide-preact";
-import { useEffect, useMemo, useState } from "preact/hooks";
-import type { AccountDto } from "../../../shared/api-contracts/dto";
-import { getAccountHistory, getAccounts } from "../api";
 import { ArchivedAccountCard, PageHeader } from "../components";
-import { useExchangeRates } from "../hooks/useExchangeRates";
-import { getUniqueCurrencies } from "../utils/currencyConversion";
+import { useArchivedAccounts } from "../hooks";
 
 export const ArchivedAccountsPage = () => {
   const targetCurrency = (preferences.getAllSync()?.targetCurrency as string) || "USD";
+  const { archivedAccounts, archivedAssets, archivedDebts, maxValues, isLoading, error } = useArchivedAccounts(targetCurrency);
 
-  const [accounts, setAccounts] = useState<AccountDto[]>([]);
-  const [maxValues, setMaxValues] = useState<Record<string, number>>({});
-  const [accountHistories, setAccountHistories] = useState<Record<string, Record<string, number>>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { accounts: accountList } = await getAccounts();
-        setAccounts(accountList);
-
-        // Fetch history for archived accounts to get max values
-        const archivedAccounts = accountList.filter((a) => a.archivedAt);
-        const historyPromises = archivedAccounts.map((acc) =>
-          getAccountHistory(acc.id).then((result) => {
-            const values = Object.values(result.history);
-            return {
-              accountId: acc.id,
-              maxValue: values.length > 0 ? Math.max(...values) : 0,
-              history: result.history,
-            };
-          })
-        );
-        const histories = await Promise.all(historyPromises);
-
-        const maxValuesMap: Record<string, number> = {};
-        const historiesMap: Record<string, Record<string, number>> = {};
-        for (const { accountId, maxValue, history } of histories) {
-          maxValuesMap[accountId] = maxValue;
-          historiesMap[accountId] = history;
-        }
-        setMaxValues(maxValuesMap);
-        setAccountHistories(historiesMap);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  // Get archived accounts for currency extraction
-  const archivedAccountsList = useMemo(() => {
-    return accounts.filter((a) => a.archivedAt);
-  }, [accounts]);
-
-  // Extract unique currencies that need conversion
-  const currenciesToConvert = useMemo(() => {
-    return getUniqueCurrencies(archivedAccountsList, targetCurrency);
-  }, [archivedAccountsList, targetCurrency]);
-
-  // Find earliest month from account histories
-  const earliestMonth = useMemo(() => {
-    let earliest: string | null = null;
-    for (const history of Object.values(accountHistories)) {
-      for (const month of Object.keys(history)) {
-        if (!earliest || month < earliest) {
-          earliest = month;
-        }
-      }
-    }
-    return earliest;
-  }, [accountHistories]);
-
-  // Fetch exchange rates (caches them for MoneyDisplay to use)
-  const { loading: ratesLoading } = useExchangeRates(
-    currenciesToConvert,
-    targetCurrency,
-    earliestMonth
-  );
-
-  const archivedAccounts = archivedAccountsList
-    .sort((a, b) => (b.archivedAt ?? 0) - (a.archivedAt ?? 0));
-
-  const archivedAssets = archivedAccounts.filter((a) => a.type === "asset");
-  const archivedDebts = archivedAccounts.filter((a) => a.type === "debt");
-
-  if (loading || ratesLoading) {
+  if (isLoading) {
     return (
       <div>
         <PageHeader title="Archived" backHref="/" />

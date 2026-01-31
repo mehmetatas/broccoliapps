@@ -1,10 +1,8 @@
 import { preferences } from "@broccoliapps/browser";
 import { route } from "preact-router";
 import { useEffect, useMemo, useState } from "preact/hooks";
-import type { AccountDto, BucketDto } from "../../../shared/api-contracts/dto";
-import { getDashboard } from "../api";
 import { AccountList, BucketFilterPills, HomePageSkeleton, MoneyDisplay, NewAccountForm, ValueChart } from "../components";
-import { useExchangeRates } from "../hooks/useExchangeRates";
+import { useDashboard, useExchangeRates } from "../hooks";
 import { convertLatestValues, getEarliestMonth, getUniqueCurrencies } from "../utils/currencyConversion";
 import { getCurrentMonth } from "../utils/dateUtils";
 import { calculateNetWorthWithConversion } from "../utils/historyUtils";
@@ -18,54 +16,8 @@ export const HomePage = () => {
     }
   }, [prefs]);
 
-  const [accounts, setAccounts] = useState<AccountDto[]>([]);
-  const [latestValues, setLatestValues] = useState<Record<string, number>>({});
-  const [accountHistories, setAccountHistories] = useState<Record<string, Record<string, number>>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [buckets, setBuckets] = useState<BucketDto[]>([]);
-  const [accountsByBucket, setAccountsByBucket] = useState<Record<string, string[]>>({});
-  const [selectedBucketId, setSelectedBucketId] = useState<string | null>(null); // null = "Net Worth" (all accounts)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { accounts: accountList, buckets: bucketList } = await getDashboard();
-        setAccounts(accountList);
-        setBuckets(bucketList);
-
-        // Build bucket -> accountIds map from already-fetched bucket data
-        const bucketAccountsMap: Record<string, string[]> = {};
-        for (const bucket of bucketList) {
-          bucketAccountsMap[bucket.id] = bucket.accountIds ?? [];
-        }
-        setAccountsByBucket(bucketAccountsMap);
-
-        // Extract latest value for each account and build accountValuesByMonth
-        const values: Record<string, number> = {};
-        const accountValuesByMonth: Record<string, Record<string, number>> = {};
-
-        for (const account of accountList) {
-          const history = account.history ?? {};
-          accountValuesByMonth[account.id] = history;
-
-          // Get latest value by finding max month
-          const months = Object.keys(history).sort((a, b) => b.localeCompare(a));
-          if (months.length > 0) {
-            const latestMonth = months[0]!;
-            values[account.id] = history[latestMonth]!;
-          }
-        }
-        setLatestValues(values);
-        setAccountHistories(accountValuesByMonth);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const { accounts, buckets, latestValues, accountHistories, accountsByBucket, isLoading, error } = useDashboard();
+  const [selectedBucketId, setSelectedBucketId] = useState<string | null>(null);
 
   const targetCurrency = (prefs?.targetCurrency as string) || "USD";
 
@@ -80,7 +32,7 @@ export const HomePage = () => {
   }, [accountHistories]);
 
   // Fetch exchange rates for all currencies
-  const { rates: exchangeRates, loading: ratesLoading } = useExchangeRates(
+  const { rates: exchangeRates, isLoading: isRatesLoading } = useExchangeRates(
     currenciesToConvert,
     targetCurrency,
     earliestMonth
@@ -90,7 +42,6 @@ export const HomePage = () => {
   const filteredAccounts = useMemo(() => {
     const activeAccounts = accounts.filter((a) => !a.archivedAt);
     if (selectedBucketId === null) {
-      // "Net Worth" selected - show all active accounts
       return activeAccounts;
     }
     const bucketAccountIds = accountsByBucket[selectedBucketId] || [];
@@ -100,10 +51,8 @@ export const HomePage = () => {
   // Get all accounts for net worth calculation (including archived)
   const accountsForNetWorth = useMemo(() => {
     if (selectedBucketId === null) {
-      // "Net Worth" selected - include all accounts (active + archived)
       return accounts;
     }
-    // For bucket filter, include both active and archived accounts in that bucket
     const bucketAccountIds = accountsByBucket[selectedBucketId] || [];
     return accounts.filter((a) => bucketAccountIds.includes(a.id));
   }, [accounts, selectedBucketId, accountsByBucket]);
@@ -160,7 +109,7 @@ export const HomePage = () => {
     return result;
   }, [filteredAccounts, latestValues]);
 
-  if (loading || ratesLoading) {
+  if (isLoading || isRatesLoading) {
     return <HomePageSkeleton />;
   }
 

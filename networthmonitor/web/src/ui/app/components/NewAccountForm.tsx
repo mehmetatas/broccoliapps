@@ -1,7 +1,7 @@
 import { Button, Input, preferences } from "@broccoliapps/browser";
 import { route } from "preact-router";
 import { useState } from "preact/hooks";
-import type { BucketDto, UpdateFrequency } from "../../../shared/api-contracts/dto";
+import type { BucketDto, UpdateFrequency } from "@broccoliapps/nwm-shared";
 import { getBuckets, postAccount, putAccountBuckets } from "../api";
 import { getCurrentMonth, shouldShowMonth } from "../utils/dateUtils";
 import { BucketPicker } from "./BucketPicker";

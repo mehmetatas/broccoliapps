@@ -12,7 +12,7 @@ framework/
   dev-tools/          # Shared build scripts and dev server code
 
 web-and-mobile-project/
-  backend/
+  web/
     scripts/          # build, dev server, and some operational scripts (ie backfill gsi)
     build/            # build and some operational scripts (ie backfill gsi)
     cdk/              # CDK stack, uses AppBuilder

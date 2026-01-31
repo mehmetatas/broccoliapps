@@ -1,6 +1,6 @@
 import type { ComponentChildren } from "preact";
-import { Header } from "./Header";
 import { Footer } from "./Footer";
+import { Header } from "./Header";
 
 type LayoutProps = {
   children: ComponentChildren;
@@ -13,9 +13,9 @@ export const Layout = ({ children, skip = false }: LayoutProps) => {
   }
 
   return (
-    <div class="layout">
+    <div class="flex flex-col min-h-screen bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200">
       <Header />
-      <main class="main-content">{children}</main>
+      <main class="flex-1 py-4 max-w-[1200px] mx-auto w-full">{children}</main>
       <Footer />
     </div>
   );

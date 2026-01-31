@@ -13,6 +13,8 @@ export const globalConfig = {
   apps: {
     networthmonitor: {
       baseUrl: isDev ? "http://localhost:8081" : "https://www.networthmonitor.com",
+      mobileScheme: "networthmonitor",
+      appleAudience: "com.broccoliapps.networthmonitor.ios",
       publicKey: `
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArJShNjxl7Fu9z3pgEkdb

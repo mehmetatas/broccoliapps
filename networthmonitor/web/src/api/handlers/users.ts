@@ -1,5 +1,5 @@
 import { db, HttpError } from "@broccoliapps/backend";
-import { getUser } from "../../shared/api-contracts";
+import { getUser } from "@broccoliapps/nwm-shared";
 import { api } from "../lambda";
 
 // GET /user - get current user profile

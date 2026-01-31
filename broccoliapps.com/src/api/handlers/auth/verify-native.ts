@@ -18,14 +18,14 @@ api.register(verifyNative, async (req, res) => {
     }
 
     // 2. Get or create user in central users table
-    const user = await getOrCreateUser(req.email, req.name);
+    const user = await getOrCreateUser(req.email, req.name, req.provider);
 
     return res.ok({
       user: {
         userId: user.id,
         email: user.email,
         name: user.name,
-        provider: req.provider,
+        provider: user.signInProvider,
       },
     });
   } catch (error) {

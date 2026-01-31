@@ -1,6 +1,6 @@
 import { Check } from "lucide-preact";
 import { useCallback, useRef } from "preact/hooks";
-import type { BucketDto } from "../../../shared/api-contracts/dto";
+import type { BucketDto } from "@broccoliapps/nwm-shared";
 
 type BucketFilterPillsProps = {
   buckets: BucketDto[];

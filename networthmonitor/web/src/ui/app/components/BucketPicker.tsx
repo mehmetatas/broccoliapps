@@ -1,6 +1,6 @@
 import { Check, Loader2, Plus } from "lucide-preact";
 import { useEffect, useState } from "preact/hooks";
-import type { BucketDto } from "../../../shared/api-contracts/dto";
+import type { BucketDto } from "@broccoliapps/nwm-shared";
 import { getBuckets, postBucket } from "../api";
 import { AppLink } from "../SpaApp";
 
@@ -22,7 +22,7 @@ export const BucketPicker = ({
   onBucketsChange,
 }: BucketPickerProps) => {
   const [buckets, setBuckets] = useState<BucketDto[]>(preloadedBuckets ?? []);
-  const [loading, setLoading] = useState(!preloadedBuckets);
+  const [isLoading, setIsLoading] = useState(!preloadedBuckets);
   const [newBucketName, setNewBucketName] = useState("");
   const [creatingBucket, setCreatingBucket] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -36,7 +36,7 @@ export const BucketPicker = ({
       } catch (err) {
         console.error("Failed to load buckets:", err);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     fetchBuckets();
@@ -73,7 +73,7 @@ export const BucketPicker = ({
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div class="flex items-center justify-center py-4">
         <Loader2 size={20} class="animate-spin text-neutral-400" />

@@ -1,4 +1,4 @@
-import type { AccountDto } from "../../../shared/api-contracts/dto";
+import type { AccountDto } from "@broccoliapps/nwm-shared";
 import { AccountCard } from "./AccountCard";
 import { MoneyDisplay } from "./MoneyDisplay";
 

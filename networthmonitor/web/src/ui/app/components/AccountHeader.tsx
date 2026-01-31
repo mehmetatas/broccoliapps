@@ -1,5 +1,5 @@
 import { ArrowLeft, Check, CreditCard, Loader2, Pencil, TrendingUp, X } from "lucide-preact";
-import type { AccountDto } from "../../../shared/api-contracts/dto";
+import type { AccountDto } from "@broccoliapps/nwm-shared";
 import { AppLink } from "../SpaApp";
 
 type AccountHeaderProps = {

@@ -1,5 +1,5 @@
 import { preferences } from "@broccoliapps/browser";
-import { getCurrencySymbol } from "../../../shared/currency";
+import { getCurrencySymbol } from "@broccoliapps/nwm-shared";
 import { getAggregatedRates } from "../api";
 import { convertValue } from "../utils/currencyConversion";
 import { getCurrentMonth } from "../utils/dateUtils";
