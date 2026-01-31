@@ -47,14 +47,15 @@
     "@broccoliapps/frontend": "*",
     "@broccoliapps/shared": "*",
     "@broccoliapps/tasquito-shared": "*",
+    "@formkit/auto-animate": "^0.9.0",
     "@hono/valibot-validator": "^0.6.1",
     "fractional-indexing": "^3.2.0",
     "hono": "^4.11.3",
+    "jose": "^6.1.3",
     "lucide-preact": "^0.562.0",
     "preact": "^10.28.2",
     "preact-render-to-string": "^6.6.5",
     "preact-router": "^4.1.2",
-    "@formkit/auto-animate": "^0.9.0",
     "sortablejs": "^1.15.6",
     "valibot": "^1.2.0"
   }

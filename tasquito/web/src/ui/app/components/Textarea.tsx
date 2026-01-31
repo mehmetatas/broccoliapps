@@ -7,10 +7,12 @@ type TextareaProps = JSX.HTMLAttributes<HTMLTextAreaElement> & {
   placeholder?: string;
   value?: string;
   rows?: number;
+  maxLength?: number;
 };
 
-export const Textarea = ({ label, error, class: className, id, rows = 3, ...props }: TextareaProps) => {
+export const Textarea = ({ label, error, class: className, id, rows = 3, maxLength, value, ...props }: TextareaProps) => {
   const textareaId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
+  const atLimit = maxLength != null && typeof value === "string" && value.length >= maxLength;
 
   return (
     <div class="w-full">
@@ -21,6 +23,8 @@ export const Textarea = ({ label, error, class: className, id, rows = 3, ...prop
       )}
       <textarea
         {...props}
+        value={value}
+        maxLength={maxLength}
         id={textareaId}
         rows={rows}
         class={`
@@ -34,6 +38,7 @@ export const Textarea = ({ label, error, class: className, id, rows = 3, ...prop
         `.trim()}
       />
       {error && <p class="mt-1 text-sm text-red-600">{error}</p>}
+      {atLimit && !error && <p class="mt-1 text-xs text-neutral-400">Character limit reached</p>}
     </div>
   );
 };

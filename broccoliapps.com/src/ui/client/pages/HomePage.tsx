@@ -88,7 +88,13 @@ export const HomePage = ({ }: HomeProps) => {
                 <a href="https://www.tasquito.com" class="app-link secondary" target="_blank">
                   Web
                 </a>
-                <span class="coming-soon">Mobile apps coming soon</span>
+                <div class="coming-soon-divider">Coming Soon</div>
+                <span class="app-link disabled">
+                  <AppleIcon /> App Store
+                </span>
+                <span class="app-link disabled">
+                  <PlayStoreIcon /> Google Play
+                </span>
               </div>
             </div>
 
@@ -103,7 +109,13 @@ export const HomePage = ({ }: HomeProps) => {
                 <a href="https://www.networthmonitor.com" class="app-link secondary" target="_blank">
                   Web
                 </a>
-                <span class="coming-soon">Mobile apps coming soon</span>
+                <div class="coming-soon-divider">Coming Soon</div>
+                <span class="app-link disabled">
+                  <AppleIcon /> App Store
+                </span>
+                <span class="app-link disabled">
+                  <PlayStoreIcon /> Google Play
+                </span>
               </div>
             </div>
           </div>

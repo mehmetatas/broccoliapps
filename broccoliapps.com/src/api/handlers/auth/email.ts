@@ -41,6 +41,7 @@ api.register(sendMagicLink, async (req, res) => {
       token,
       email: req.email,
       app: req.app,
+      ...(req.platform && { platform: req.platform }),
       createdAt: Date.now(),
       expiresAt: expires.toMilliseconds(),
       ttl: expires.toSeconds(),

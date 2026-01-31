@@ -229,6 +229,7 @@ export const TaskCard = ({
             value={task.title}
             onSave={onUpdateTitle}
             disabled={disabled || isDone}
+            maxLength={LIMITS.MAX_TASK_TITLE_LENGTH}
             textClassName={`text-lg font-medium ${isDone ? "line-through text-neutral-400 dark:text-neutral-500" : "text-neutral-900 dark:text-neutral-100"}`}
           />
           {(task.subtasks.length > 0 || pendingSubtaskCount > 0) && (
@@ -292,6 +293,7 @@ export const TaskCard = ({
             placeholder={isEditMode ? "Add description..." : undefined}
             disabled={disabled}
             multiline
+            maxLength={LIMITS.MAX_TASK_DESCRIPTION_LENGTH}
             textClassName="text-base text-neutral-500 dark:text-neutral-400 line-clamp-2"
           />
         </div>
@@ -318,6 +320,7 @@ export const TaskCard = ({
                   value={subtask.title}
                   onSave={(title) => onSubtaskUpdateTitle(subtask.id, title)}
                   disabled={disabled || isDone}
+                  maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
                   textClassName="text-base text-neutral-600 dark:text-neutral-300"
                 />
               </div>
@@ -373,6 +376,7 @@ export const TaskCard = ({
                       value={subtask.title}
                       onSave={(title) => onSubtaskUpdateTitle(subtask.id, title)}
                       disabled={disabled || isDone}
+                      maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
                       textClassName="text-base line-through text-neutral-400 dark:text-neutral-500"
                     />
                   </div>
@@ -407,6 +411,7 @@ export const TaskCard = ({
               type="text"
               placeholder="Add subtask..."
               value={newSubtaskTitle}
+              maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
               onInput={(e) => setNewSubtaskTitle((e.target as HTMLInputElement).value)}
               onKeyDown={handleSubtaskKeyDown}
               disabled={disabled}

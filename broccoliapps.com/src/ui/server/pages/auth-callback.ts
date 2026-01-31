@@ -12,6 +12,7 @@ page
   .handle("/auth/callback", async (req, ctx) => {
     const codeVerifier = ctx.getCookie("pkce_code_verifier");
     const app = ctx.getCookie("auth_app");
+    const platform = ctx.getCookie("auth_platform");
 
     if (!codeVerifier || !app || !Object.keys(globalConfig.apps).includes(app)) {
       log.wrn("pkce_code_verifier or auth_app cookie not found - auth session expired");
@@ -45,10 +46,17 @@ page
       ttl: expires.toSeconds(),
     });
 
-    // Clean up PKCE cookie and redirect to app
+    // Determine redirect URL: mobile deep link or web URL
+    const appConfig = globalConfig.apps[app as AppId];
+    const mobileScheme = "mobileScheme" in appConfig ? appConfig.mobileScheme : undefined;
+    const redirectUrl = platform === "mobile" && mobileScheme
+      ? `${mobileScheme}://auth/callback?code=${authCode.code}`
+      : `${appConfig.baseUrl}/app/auth/callback?code=${authCode.code}`;
+
+    // Clean up cookies and redirect
     return {
       status: 302,
-      headers: { Location: globalConfig.apps[app as AppId].baseUrl + "/app/auth/callback?code=" + authCode.code },
+      headers: { Location: redirectUrl },
       cookies: [
         Cookie.delete("pkce_code_verifier", {
           path: "/",
@@ -56,6 +64,11 @@ page
           secure: true,
         }),
         Cookie.delete("app", {
+          path: "/",
+          sameSite: "lax",
+          secure: true,
+        }),
+        Cookie.delete("auth_platform", {
           path: "/",
           sameSite: "lax",
           secure: true,

@@ -7,10 +7,12 @@ type InputProps = Omit<JSX.HTMLAttributes<HTMLInputElement>, "size"> & {
   disabled?: boolean;
   placeholder?: string;
   value?: string;
+  maxLength?: number;
 };
 
-export const Input = ({ label, error, class: className, id, ...props }: InputProps) => {
+export const Input = ({ label, error, class: className, id, maxLength, value, ...props }: InputProps) => {
   const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
+  const atLimit = maxLength != null && typeof value === "string" && value.length >= maxLength;
 
   return (
     <div class="w-full">
@@ -21,6 +23,8 @@ export const Input = ({ label, error, class: className, id, ...props }: InputPro
       )}
       <input
         {...props}
+        value={value}
+        maxLength={maxLength}
         id={inputId}
         class={`
           w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg
@@ -32,6 +36,7 @@ export const Input = ({ label, error, class: className, id, ...props }: InputPro
         `.trim()}
       />
       {error && <p class="mt-1 text-sm text-red-600">{error}</p>}
+      {atLimit && !error && <p class="mt-1 text-xs text-neutral-400">Character limit reached</p>}
     </div>
   );
 };

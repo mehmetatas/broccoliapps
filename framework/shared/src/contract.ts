@@ -1,4 +1,5 @@
 import * as v from "valibot";
+import { sha256 as jsSha256 } from "js-sha256";
 import type { HttpMethod, Schema } from "./types";
 
 // API Error class for client-side error handling
@@ -45,12 +46,16 @@ const extractPathParams = (path: string): string[] => {
 };
 
 // SHA256 hash for request body (required by CloudFront with IAM auth)
+// Uses Web Crypto API when available (browser), falls back to js-sha256 (React Native)
 const sha256 = async (message: string): Promise<string> => {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(message);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  if (typeof crypto !== "undefined" && crypto.subtle) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(message);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  return jsSha256(message);
 };
 
 // Response schema type alias for cleaner signatures

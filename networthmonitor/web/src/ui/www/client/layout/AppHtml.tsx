@@ -19,7 +19,7 @@ export const AppHtml = ({
   // In dev mode, Vite serves JS with HMR; in prod, load from static path
   const cssFile = buildId ? `/static/app.${buildId}.css` : "/static/app.css";
   const jsFile = isDevMode
-    ? "http://localhost:5174/src/ui/app/index.tsx"
+    ? "http://localhost:5081/src/ui/app/index.tsx"
     : buildId
       ? `/static/app.${buildId}.js`
       : "/static/app.js"; // TODO this needs to be different for SPA
@@ -50,7 +50,7 @@ export const AppHtml = ({
         {/* Client bundle */}
         <script type="module" src={jsFile} />
         {/* Vite HMR client (dev mode only) */}
-        {isDevMode && <script type="module" src="http://localhost:5174/@vite/client" />}
+        {isDevMode && <script type="module" src="http://localhost:5081/@vite/client" />}
       </body>
     </html>
   );

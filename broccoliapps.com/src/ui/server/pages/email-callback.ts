@@ -49,9 +49,12 @@ page
 
     log.inf("Magic link verified, redirecting to app", { app: magicLink.app, email: magicLink.email });
 
-    // 7. Redirect to app.baseUrl/app/auth/callback?code=xxx
+    // 7. Redirect to mobile deep link or web URL
     const appConfig = globalConfig.apps[magicLink.app as AppId];
-    const redirectUrl = `${appConfig.baseUrl}/app/auth/callback?code=${authCode.code}`;
+    const mobileScheme = "mobileScheme" in appConfig ? appConfig.mobileScheme : undefined;
+    const redirectUrl = magicLink.platform === "mobile" && mobileScheme
+      ? `${mobileScheme}://auth/callback?code=${authCode.code}`
+      : `${appConfig.baseUrl}/app/auth/callback?code=${authCode.code}`;
 
     return {
       status: 302,

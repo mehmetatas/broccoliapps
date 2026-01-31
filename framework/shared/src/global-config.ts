@@ -1,4 +1,11 @@
-const isDev = typeof window === "undefined" ? !process.env.LAMBDA_TASK_ROOT : window.location.hostname === "localhost";
+declare const __DEV__: boolean | undefined;
+
+const isDev =
+  typeof window === "undefined"
+    ? !process.env.LAMBDA_TASK_ROOT                       // Node.js / Lambda
+    : typeof window.location !== "undefined"
+      ? window.location.hostname === "localhost"           // Browser
+      : typeof __DEV__ !== "undefined" && __DEV__ === true; // React Native
 
 export const globalConfig = {
   isDev,
@@ -24,6 +31,7 @@ jwIDAQAB
     },
     tasquito: {
       baseUrl: isDev ? "http://localhost:8082" : "https://www.tasquito.com",
+      mobileScheme: "tasquito",
       publicKey: `
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuLwnizPrqMsdaDfs9N9r

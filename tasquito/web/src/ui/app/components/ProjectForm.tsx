@@ -1,3 +1,4 @@
+import { LIMITS } from "@broccoliapps/tasquito-shared";
 import { useState } from "preact/hooks";
 import { Button } from "./Button";
 import { Input } from "./Input";
@@ -37,6 +38,7 @@ export const ProjectForm = ({ onSubmit }: ProjectFormProps) => {
           type="text"
           placeholder="New project name"
           value={name}
+          maxLength={LIMITS.MAX_PROJECT_NAME_LENGTH}
           onInput={(e) => {
             setName((e.target as HTMLInputElement).value);
             setError(null);

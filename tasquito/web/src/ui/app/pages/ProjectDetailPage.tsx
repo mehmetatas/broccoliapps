@@ -1,4 +1,4 @@
-import type { TaskDto } from "@broccoliapps/tasquito-shared";
+import { LIMITS, type TaskDto } from "@broccoliapps/tasquito-shared";
 import { Archive, ArchiveRestore, ArrowLeft, CheckSquare, ChevronDown, ChevronRight, Trash2, X } from "lucide-preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import autoAnimate, { type AnimationController } from "@formkit/auto-animate";
@@ -230,6 +230,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
             value={project.name}
             onSave={updateName}
             disabled={isArchived}
+            maxLength={LIMITS.MAX_PROJECT_NAME_LENGTH}
             textClassName="text-2xl font-bold text-neutral-900 dark:text-neutral-100"
           />
         </div>

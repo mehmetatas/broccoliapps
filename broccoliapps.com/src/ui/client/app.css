@@ -243,14 +243,14 @@ body {
 
 .app-links {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.75rem;
-  align-items: center;
 }
 
 .app-link {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
   padding: 0.5rem 1rem;
   background: #1a1a1a;
@@ -275,10 +275,28 @@ body {
   background: #f5f5f5;
 }
 
-.coming-soon {
-  font-size: 0.85rem;
-  color: #888;
-  font-style: italic;
+.app-link.disabled {
+  background: #e5e5e5;
+  color: #999;
+  cursor: default;
+  pointer-events: none;
+}
+
+.coming-soon-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: #999;
+  margin: 0.25rem 0;
+}
+
+.coming-soon-divider::before,
+.coming-soon-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #ddd;
 }
 
 /* Responsive */
@@ -562,6 +580,209 @@ body {
 }
 
 @media (prefers-color-scheme: dark) {
+  /* Base */
+  body {
+    background: #121212;
+    color: #e5e5e5;
+  }
+
+  /* Header */
+  .header {
+    background: rgba(26, 26, 26, 0.95);
+    border-bottom-color: #333;
+  }
+
+  .logo-text {
+    color: #e5e5e5;
+  }
+
+  .nav a {
+    color: #aaa;
+  }
+
+  .nav a:hover,
+  .nav a.active {
+    color: #e5e5e5;
+  }
+
+  /* Footer */
+  .footer {
+    background: rgba(26, 26, 26, 0.5);
+    color: #999;
+  }
+
+  .footer-links a {
+    color: #aaa;
+  }
+
+  .footer-links .separator {
+    color: #666;
+  }
+
+  /* Hero */
+  .hero h1 {
+    color: #e5e5e5;
+  }
+
+  .hero p {
+    color: #aaa;
+  }
+
+  /* Philosophy */
+  .philosophy-item h3 {
+    color: #e5e5e5;
+  }
+
+  .philosophy-item p {
+    color: #aaa;
+  }
+
+  /* Apps Section */
+  .apps {
+    background: #1a1a1a;
+    border-top-color: #333;
+    border-bottom-color: #333;
+  }
+
+  .apps h2 {
+    color: #e5e5e5;
+  }
+
+  .app-card {
+    background: #222;
+    border-color: #333;
+  }
+
+  .app-card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .app-card-header h3 {
+    color: #e5e5e5;
+  }
+
+  .app-card p {
+    color: #aaa;
+  }
+
+  .app-link {
+    background: #e5e5e5;
+    color: #1a1a1a;
+  }
+
+  .app-link:hover {
+    background: #ccc;
+  }
+
+  .app-link.secondary {
+    background: #2a2a2a;
+    color: #e5e5e5;
+    border-color: #444;
+  }
+
+  .app-link.secondary:hover {
+    background: #333;
+  }
+
+  .app-link.disabled {
+    background: #333;
+    color: #666;
+  }
+
+  .coming-soon-divider {
+    color: #666;
+  }
+
+  .coming-soon-divider::before,
+  .coming-soon-divider::after {
+    background: #444;
+  }
+
+  /* Legal pages (Privacy, Terms) */
+  .legal-page {
+    background: rgba(26, 26, 26, 0.9);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .legal-page h1 {
+    color: #e0e0e0;
+  }
+
+  .legal-page .meta {
+    color: #999;
+    border-bottom-color: #333;
+  }
+
+  .legal-page h2 {
+    color: #e0e0e0;
+  }
+
+  .legal-page h3 {
+    color: #aaa;
+  }
+
+  .legal-page p {
+    color: #bbb;
+  }
+
+  .legal-page ul {
+    color: #bbb;
+  }
+
+  .legal-page a {
+    color: #aaa;
+  }
+
+  .legal-page th,
+  .legal-page td {
+    border-bottom-color: #333;
+  }
+
+  .legal-page th {
+    background: #252525;
+    color: #e0e0e0;
+  }
+
+  .legal-page td {
+    color: #bbb;
+  }
+
+  .legal-page address {
+    color: #bbb;
+  }
+
+  /* About page */
+  .about-page {
+    background: rgba(26, 26, 26, 0.9);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .about-page h1 {
+    color: #e0e0e0;
+  }
+
+  .about-page h2 {
+    color: #e0e0e0;
+  }
+
+  .about-page p {
+    color: #bbb;
+  }
+
+  .about-page strong {
+    color: #e0e0e0;
+  }
+
+  .about-page hr {
+    border-top-color: #333;
+  }
+
+  .about-page .footer-note,
+  .about-page .footer-note p {
+    color: #999;
+  }
+
+  /* Auth page */
   .auth-page {
     background: linear-gradient(135deg, #171717 0%, #0a0a0a 100%);
     color: #e5e5e5;

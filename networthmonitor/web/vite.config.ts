@@ -6,7 +6,7 @@ export default defineConfig({
   root: ".",
   publicDir: false,
   server: {
-    port: 5174,
+    port: 5081,
     strictPort: true,
     cors: true,
   },

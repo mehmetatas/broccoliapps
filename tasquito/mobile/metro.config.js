@@ -12,10 +12,15 @@ const monorepoRoot = path.resolve(__dirname, '../..');
 const config = {
   watchFolders: [monorepoRoot],
   resolver: {
+    unstable_enablePackageExports: true,
     nodeModulesPaths: [
       path.resolve(__dirname, 'node_modules'),
       path.resolve(monorepoRoot, 'node_modules'),
     ],
+    extraNodeModules: {
+      react: path.resolve(__dirname, 'node_modules/react'),
+      'react-native': path.resolve(__dirname, 'node_modules/react-native'),
+    },
   },
 };
 

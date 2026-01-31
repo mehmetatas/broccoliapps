@@ -4,11 +4,12 @@ import { useEffect } from "preact/hooks";
 type AuthPageProps = {
   app: string;
   provider: CognitoIdentityProvider;
+  platform?: "mobile";
 };
 
-export const AuthPage = ({ app, provider }: AuthPageProps) => {
+export const AuthPage = ({ app, provider, platform }: AuthPageProps) => {
   useEffect(() => {
-    cognitoClient.signInWith(provider, app);
+    cognitoClient.signInWith(provider, app, platform);
   }, []);
 
   return (

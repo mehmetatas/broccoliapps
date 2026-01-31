@@ -40,7 +40,7 @@ const generateChallengeHash = async (code: string): Promise<string> => {
     .replace(/=/g, "");
 };
 
-const signInWith = async (provider: CognitoIdentityProvider, app: string): Promise<void> => {
+const signInWith = async (provider: CognitoIdentityProvider, app: string, platform?: "mobile"): Promise<void> => {
   const config = getConfig();
   const code = generateChallengeCode();
   const hash = await generateChallengeHash(code);
@@ -74,6 +74,17 @@ const signInWith = async (provider: CognitoIdentityProvider, app: string): Promi
       secure: true,
     })
   );
+
+  if (platform === "mobile") {
+    cookies.set(
+      new Cookie("auth_platform", "mobile", {
+        maxAge: 300, // 5 minutes
+        path: "/",
+        sameSite: "lax",
+        secure: true,
+      })
+    );
+  }
 
   window.location.href = authUrl;
 };

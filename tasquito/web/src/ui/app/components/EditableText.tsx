@@ -8,6 +8,7 @@ type EditableTextProps = {
   className?: string;
   textClassName?: string;
   disabled?: boolean;
+  maxLength?: number;
 };
 
 export const EditableText = ({
@@ -18,6 +19,7 @@ export const EditableText = ({
   className = "",
   textClassName = "",
   disabled = false,
+  maxLength,
 }: EditableTextProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
@@ -68,31 +70,41 @@ export const EditableText = ({
       ${className}
     `.trim();
 
+    const atLimit = maxLength != null && editValue.length >= maxLength;
+
     if (multiline) {
       return (
-        <textarea
-          ref={inputRef as any}
-          value={editValue}
-          onInput={(e) => setEditValue((e.target as HTMLTextAreaElement).value)}
-          onBlur={handleSave}
-          onKeyDown={handleKeyDown}
-          class={`${inputClass} min-h-[80px] resize-none`}
-          placeholder={placeholder}
-        />
+        <div>
+          <textarea
+            ref={inputRef as any}
+            value={editValue}
+            onInput={(e) => setEditValue((e.target as HTMLTextAreaElement).value)}
+            onBlur={handleSave}
+            onKeyDown={handleKeyDown}
+            maxLength={maxLength}
+            class={`${inputClass} min-h-[80px] resize-none`}
+            placeholder={placeholder}
+          />
+          {atLimit && <p class="mt-1 text-xs text-neutral-400">Character limit reached</p>}
+        </div>
       );
     }
 
     return (
-      <input
-        ref={inputRef as any}
-        type="text"
-        value={editValue}
-        onInput={(e) => setEditValue((e.target as HTMLInputElement).value)}
-        onBlur={handleSave}
-        onKeyDown={handleKeyDown}
-        class={inputClass}
-        placeholder={placeholder}
-      />
+      <div>
+        <input
+          ref={inputRef as any}
+          type="text"
+          value={editValue}
+          onInput={(e) => setEditValue((e.target as HTMLInputElement).value)}
+          onBlur={handleSave}
+          onKeyDown={handleKeyDown}
+          maxLength={maxLength}
+          class={inputClass}
+          placeholder={placeholder}
+        />
+        {atLimit && <p class="mt-1 text-xs text-neutral-400">Character limit reached</p>}
+      </div>
     );
   }
 

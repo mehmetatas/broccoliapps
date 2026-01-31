@@ -1,6 +1,6 @@
 import { Plus, Trash2 } from "lucide-preact";
 import { useState } from "preact/hooks";
-import type { TaskDto, TaskStatus } from "@broccoliapps/tasquito-shared";
+import { LIMITS, type TaskDto, type TaskStatus } from "@broccoliapps/tasquito-shared";
 import { Checkbox } from "./Checkbox";
 import { EditableText } from "./EditableText";
 import { IconButton } from "./IconButton";
@@ -59,6 +59,7 @@ export const SubtaskList = ({
               value={subtask.title}
               onSave={(title) => onUpdateTitle(subtask.id, title)}
               disabled={disabled}
+              maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
               textClassName={subtask.status === "done" ? "line-through text-neutral-400" : "text-neutral-700"}
             />
           </div>
@@ -81,6 +82,7 @@ export const SubtaskList = ({
               type="text"
               placeholder="Subtask title"
               value={newSubtaskTitle}
+              maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
               onInput={(e) => setNewSubtaskTitle((e.target as HTMLInputElement).value)}
               onKeyDown={handleKeyDown}
               autoFocus

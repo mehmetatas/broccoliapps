@@ -8,13 +8,17 @@ api.register(verifyAuthToken, async (req, res) => {
   try {
     const code = auth.verifyAuthCode(req.app as AppId, req.code);
 
+    log.inf("REMOVE THIS LOG - Auth code verified", { code });
+
     if (!code) {
+      log.wrn("Invalid auth code", { req });
       throw new HttpError(403, "Auth code could not be verified");
     }
 
     const authCode = await authCodes.get({ code });
 
     if (!authCode || isExpired(authCode) || authCode.app !== req.app) {
+      log.wrn("Invalid auth code", { authCode, req });
       throw new HttpError(404, "Auth code not found");
     }
 

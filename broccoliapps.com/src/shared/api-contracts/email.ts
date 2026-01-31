@@ -6,6 +6,7 @@ export const sendMagicLinkRequest = {
   app: v.pipe(v.string(), v.picklist(Object.keys(globalConfig.apps))),
   email: v.pipe(v.string(), v.email()),
   code: v.pipe(v.string(), v.maxLength(1024)),
+  platform: v.optional(v.picklist(["mobile"])),
 };
 export type SendMagicLinkRequest = v.InferOutput<v.ObjectSchema<typeof sendMagicLinkRequest, undefined>>;
 

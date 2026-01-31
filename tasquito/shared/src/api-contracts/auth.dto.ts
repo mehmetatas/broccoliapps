@@ -39,6 +39,7 @@ export type RefreshTokenResponse = v.InferOutput<v.ObjectSchema<typeof refreshTo
 // ============================================================================
 export const sendMagicLinkRequest = {
   email: v.pipe(v.string(), v.email()),
+  platform: v.optional(v.picklist(["mobile"])),
 };
 export type SendMagicLinkRequest = v.InferOutput<v.ObjectSchema<typeof sendMagicLinkRequest, undefined>>;
 
@@ -46,3 +47,22 @@ export const sendMagicLinkResponse = {
   success: v.boolean(),
 };
 export type SendMagicLinkResponse = v.InferOutput<v.ObjectSchema<typeof sendMagicLinkResponse, undefined>>;
+
+// ============================================================================
+// POST /auth/verify-apple - verify Apple Sign In identity token
+// ============================================================================
+export const verifyAppleRequest = {
+  identityToken: v.string(),
+  authorizationCode: v.string(),
+  user: v.string(),
+  fullName: v.optional(v.object({
+    givenName: v.optional(v.nullable(v.string())),
+    familyName: v.optional(v.nullable(v.string())),
+  })),
+};
+export type VerifyAppleRequest = v.InferOutput<v.ObjectSchema<typeof verifyAppleRequest, undefined>>;
+
+export const verifyAppleResponse = {
+  ...authExchangeResponse,
+};
+export type VerifyAppleResponse = v.InferOutput<v.ObjectSchema<typeof verifyAppleResponse, undefined>>;

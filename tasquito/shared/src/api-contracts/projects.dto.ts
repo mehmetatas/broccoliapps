@@ -1,11 +1,12 @@
 import * as v from "valibot";
 import { idRequest, projectDto, projectSummaryDto, projectWithTasksDto } from "./dto";
+import { LIMITS } from "../limits";
 
 // ============================================================================
 // POST /projects - create project
 // ============================================================================
 export const postProjectRequest = {
-  name: v.pipe(v.string(), v.minLength(1), v.maxLength(200)),
+  name: v.pipe(v.string(), v.minLength(1), v.maxLength(LIMITS.MAX_PROJECT_NAME_LENGTH)),
 };
 export type PostProjectRequest = v.InferOutput<v.ObjectSchema<typeof postProjectRequest, undefined>>;
 
@@ -38,7 +39,7 @@ export type GetProjectResponse = v.InferOutput<v.ObjectSchema<typeof getProjectR
 // ============================================================================
 export const patchProjectRequest = {
   id: v.string(),
-  name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(200))),
+  name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(LIMITS.MAX_PROJECT_NAME_LENGTH))),
 };
 export type PatchProjectRequest = v.InferOutput<v.ObjectSchema<typeof patchProjectRequest, undefined>>;
 

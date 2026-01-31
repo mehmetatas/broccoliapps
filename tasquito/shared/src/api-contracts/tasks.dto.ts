@@ -1,5 +1,6 @@
 import * as v from "valibot";
 import { taskDto, taskStatusSchema } from "./dto";
+import { LIMITS } from "../limits";
 
 // Shared schema for project counts returned by task mutations
 const projectCountsSchema = v.optional(
@@ -14,11 +15,11 @@ const projectCountsSchema = v.optional(
 // ============================================================================
 export const postTaskRequest = {
   projectId: v.string(),
-  title: v.pipe(v.string(), v.minLength(1), v.maxLength(50)),
-  description: v.optional(v.pipe(v.string(), v.maxLength(200))),
+  title: v.pipe(v.string(), v.minLength(1), v.maxLength(LIMITS.MAX_TASK_TITLE_LENGTH)),
+  description: v.optional(v.pipe(v.string(), v.maxLength(LIMITS.MAX_TASK_DESCRIPTION_LENGTH))),
   dueDate: v.optional(v.string()),
   status: v.optional(taskStatusSchema),
-  subtasks: v.optional(v.array(v.pipe(v.string(), v.minLength(1), v.maxLength(50)))),
+  subtasks: v.optional(v.array(v.pipe(v.string(), v.minLength(1), v.maxLength(LIMITS.MAX_SUBTASK_TITLE_LENGTH)))),
 };
 export type PostTaskRequest = v.InferOutput<v.ObjectSchema<typeof postTaskRequest, undefined>>;
 
@@ -35,7 +36,7 @@ export type PostTaskResponse = v.InferOutput<v.ObjectSchema<typeof postTaskRespo
 export const postSubtaskRequest = {
   projectId: v.string(),
   taskId: v.string(),
-  title: v.pipe(v.string(), v.minLength(1), v.maxLength(50)),
+  title: v.pipe(v.string(), v.minLength(1), v.maxLength(LIMITS.MAX_SUBTASK_TITLE_LENGTH)),
 };
 export type PostSubtaskRequest = v.InferOutput<v.ObjectSchema<typeof postSubtaskRequest, undefined>>;
 
@@ -77,8 +78,8 @@ export type GetTaskResponse = v.InferOutput<v.ObjectSchema<typeof getTaskRespons
 export const patchTaskRequest = {
   projectId: v.string(),
   id: v.string(),
-  title: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(50))),
-  description: v.optional(v.pipe(v.string(), v.maxLength(200))),
+  title: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(LIMITS.MAX_TASK_TITLE_LENGTH))),
+  description: v.optional(v.pipe(v.string(), v.maxLength(LIMITS.MAX_TASK_DESCRIPTION_LENGTH))),
   dueDate: v.optional(v.nullable(v.string())), // null to clear
   status: v.optional(taskStatusSchema),
   sortOrder: v.optional(v.string()),

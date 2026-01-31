@@ -18,6 +18,7 @@ export type MagicLinkToken = {
   token: string;
   email: string;
   app: string;
+  platform?: string;
   createdAt: number;
   expiresAt: number;
   ttl: number;

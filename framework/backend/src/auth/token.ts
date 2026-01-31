@@ -54,7 +54,7 @@ const refresh = async (refreshToken: string, dataProvider: (userId: string) => P
   const user = await dataProvider(token.userId);
 
   // if refresh token completed 80% of its life time refresh it too
-  if ((token.expiresAt - epoch.millis()) / getAuthConfig().refreshTokenLifetime.toMilliseconds() > 0.8) {
+  if ((token.expiresAt - epoch.millis()) / getAuthConfig().refreshTokenLifetime.toMilliseconds() < 0.2) {
     [refreshToken] = await Promise.all([createRefreshToken(user.userId), tokens.delete({ hash })]);
   }
 
@@ -96,10 +96,17 @@ const createRefreshToken = async (userId: string): Promise<string> => {
   return token;
 };
 
+const generateTokens = async (data: JwtData): Promise<AuthTokens> => {
+  const accessToken = await createAccessToken(data);
+  const refreshToken = await createRefreshToken(data.userId);
+  return { accessToken, refreshToken, user: data };
+};
+
 export const authToken = {
   exchange,
   verifyAuthCode,
   refresh,
   verifyAccessToken,
+  generateTokens,
   // todo: token invalidation
 };
