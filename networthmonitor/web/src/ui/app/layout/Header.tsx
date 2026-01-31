@@ -1,12 +1,12 @@
+import { useClickOutside } from "@broccoliapps/browser";
 import { Bell } from "lucide-preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import type { AccountDto, AuthUserDto } from "../../../shared/api-contracts/dto";
+import type { AccountDto, UserDto } from "../../../shared/api-contracts/dto";
 import { getDashboard, getUser, getUserSync } from "../api";
-import { useClickOutside } from "../hooks";
 import { hasMissedUpdate } from "../utils/dateUtils";
 
 export const Header = () => {
-  const [user, setUser] = useState<AuthUserDto | undefined>(getUserSync());
+  const [user, setUser] = useState<UserDto | undefined>(getUserSync());
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [accountsNeedingUpdate, setAccountsNeedingUpdate] = useState<AccountDto[]>([]);

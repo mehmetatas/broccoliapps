@@ -12,7 +12,7 @@ import {
   postHistoryItem as postHistoryItemApi,
   putAccountBuckets as putAccountBucketsApi,
 } from "../../../shared/api-contracts";
-import { CACHE_KEYS, sessionStorage } from "./cache";
+import { CACHE_KEYS, SESSION_TTL } from "./cache";
 
 type DashboardResponse = Awaited<ReturnType<typeof getDashboardApi.invoke>>;
 type Account = DashboardResponse["accounts"][number];
@@ -25,7 +25,7 @@ type AccountBucketsResponse = Awaited<ReturnType<typeof getAccountBucketsApi.inv
 // GET /accounts - list all accounts
 export const getAccounts = async (): Promise<AccountsResponse> => {
   // Only use cache if dashboard was fetched (so we know we have all accounts)
-  const dashboardFetched = cache.get<boolean>(CACHE_KEYS.dashboardFetched, sessionStorage);
+  const dashboardFetched = cache.get<boolean>(CACHE_KEYS.dashboardFetched);
   if (dashboardFetched) {
     const accounts = getAllAccountsFromCache();
     if (accounts.length > 0) return { accounts };
@@ -33,14 +33,14 @@ export const getAccounts = async (): Promise<AccountsResponse> => {
 
   const data = await getAccountsApi.invoke({});
   setAllAccountsInCache(data.accounts);
-  cache.set(CACHE_KEYS.dashboardFetched, true, undefined, sessionStorage);
+  cache.set(CACHE_KEYS.dashboardFetched, true, SESSION_TTL());
   return data;
 };
 
 // GET /accounts/:id/detail - get account with all related data
 export const getAccountDetail = async (id: string): Promise<AccountDetailResponse> => {
-  const account = cache.get<Account>(CACHE_KEYS.account(id), sessionStorage);
-  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets, sessionStorage);
+  const account = cache.get<Account>(CACHE_KEYS.account(id));
+  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets);
 
   if (account && buckets) {
     const accountBuckets = account.bucketIds
@@ -51,13 +51,13 @@ export const getAccountDetail = async (id: string): Promise<AccountDetailRespons
 
   const data = await getAccountDetailApi.invoke({ id });
   setAccountInCache(data.account);
-  cache.set(CACHE_KEYS.buckets, data.allBuckets, undefined, sessionStorage);
+  cache.set(CACHE_KEYS.buckets, data.allBuckets, SESSION_TTL());
   return data;
 };
 
 // GET /accounts/:id/history - get history items
 export const getAccountHistory = async (id: string): Promise<AccountHistoryResponse> => {
-  const account = cache.get<Account>(CACHE_KEYS.account(id), sessionStorage);
+  const account = cache.get<Account>(CACHE_KEYS.account(id));
   if (account?.history) {
     return { history: account.history };
   }
@@ -73,8 +73,8 @@ export const getAccountHistory = async (id: string): Promise<AccountHistoryRespo
 
 // GET /accounts/:id/buckets - get buckets for an account
 export const getAccountBuckets = async (id: string): Promise<AccountBucketsResponse> => {
-  const account = cache.get<Account>(CACHE_KEYS.account(id), sessionStorage);
-  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets, sessionStorage);
+  const account = cache.get<Account>(CACHE_KEYS.account(id));
+  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets);
 
   if (account?.bucketIds && buckets) {
     const accountBuckets = buckets.filter(b => account.bucketIds!.includes(b.id));
@@ -114,7 +114,7 @@ export const deleteAccount = async (
   ...args: Parameters<typeof deleteAccountApi.invoke>
 ): Promise<void> => {
   await deleteAccountApi.invoke(...args);
-  cache.remove(CACHE_KEYS.account(args[0]!.id), sessionStorage);
+  cache.remove(CACHE_KEYS.account(args[0]!.id));
 };
 
 // POST /accounts/:id/history-item - add/update a single history item
@@ -146,10 +146,10 @@ export const putAccountBuckets = async (
 // Helper functions
 
 const getAllAccountsFromCache = (): Account[] => {
-  const keys = cache.keys(CACHE_KEYS.accountPrefix, sessionStorage);
+  const keys = cache.keys(CACHE_KEYS.accountPrefix);
   const accounts: Account[] = [];
   for (const key of keys) {
-    const account = cache.get<Account>(key, sessionStorage);
+    const account = cache.get<Account>(key);
     if (account) accounts.push(account);
   }
   return accounts;
@@ -157,16 +157,16 @@ const getAllAccountsFromCache = (): Account[] => {
 
 export const setAllAccountsInCache = (accounts: Account[]) => {
   for (const account of accounts) {
-    cache.set(CACHE_KEYS.account(account.id), account, undefined, sessionStorage);
+    cache.set(CACHE_KEYS.account(account.id), account, SESSION_TTL());
   }
 };
 
 const setAccountInCache = (account: Account) => {
-  cache.set(CACHE_KEYS.account(account.id), account, undefined, sessionStorage);
+  cache.set(CACHE_KEYS.account(account.id), account, SESSION_TTL());
 };
 
 const updateAccountHistory = (id: string, month: string, value: number, nextUpdate?: string) => {
-  const account = cache.get<Account>(CACHE_KEYS.account(id), sessionStorage);
+  const account = cache.get<Account>(CACHE_KEYS.account(id));
   if (account) {
     setAccountInCache({
       ...account,
@@ -177,7 +177,7 @@ const updateAccountHistory = (id: string, month: string, value: number, nextUpda
 };
 
 const removeAccountHistoryItem = (id: string, month: string, nextUpdate?: string) => {
-  const account = cache.get<Account>(CACHE_KEYS.account(id), sessionStorage);
+  const account = cache.get<Account>(CACHE_KEYS.account(id));
   if (account) {
     const { [month]: _, ...rest } = account.history ?? {};
     setAccountInCache({
@@ -189,7 +189,7 @@ const removeAccountHistoryItem = (id: string, month: string, nextUpdate?: string
 };
 
 const updateAccountBucketIds = (id: string, bucketIds: string[]) => {
-  const account = cache.get<Account>(CACHE_KEYS.account(id), sessionStorage);
+  const account = cache.get<Account>(CACHE_KEYS.account(id));
   if (account) {
     setAccountInCache({ ...account, bucketIds });
   }

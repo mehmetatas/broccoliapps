@@ -1,0 +1,59 @@
+declare const __BUILD_ID__: string;
+
+export type AppHtmlProps = {
+  title?: string;
+  description?: string;
+  devPort: number;
+};
+
+export const AppHtml = ({
+  title,
+  description,
+  devPort,
+}: AppHtmlProps) => {
+  // Build ID from esbuild define (set at build time)
+  const buildId = typeof __BUILD_ID__ !== "undefined" ? __BUILD_ID__ : "";
+
+  // Dev mode: use NODE_ENV or check if running without build ID
+  const isDevMode = process.env.NODE_ENV === "development" || (!buildId && typeof window === "undefined");
+
+  // CSS is always loaded (built by PostCSS for Tailwind 4)
+  // In dev mode, Vite serves JS with HMR; in prod, load from static path
+  const cssFile = buildId ? `/static/app.${buildId}.css` : "/static/app.css";
+  const jsFile = isDevMode
+    ? `http://localhost:${devPort}/src/ui/app/index.tsx`
+    : buildId
+      ? `/static/app.${buildId}.js`
+      : "/static/app.js";
+
+  return (
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{title}</title>
+        {description && <meta name="description" content={description} />}
+
+        {/* Preconnect for fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+        <link rel="icon" href="/static/logo-64.png" />
+
+        {/* CSS - only load in production (Vite handles CSS in dev via JS import) */}
+        {!isDevMode && <link rel="stylesheet" href={cssFile} />}
+      </head>
+      <body>
+        <div id="app" />
+
+        {/* Client bundle */}
+        <script type="module" src={jsFile} />
+        {/* Vite HMR client (dev mode only) */}
+        {isDevMode && <script type="module" src={`http://localhost:${devPort}/@vite/client`} />}
+      </body>
+    </html>
+  );
+};

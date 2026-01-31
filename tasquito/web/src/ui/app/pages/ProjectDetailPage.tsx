@@ -2,8 +2,10 @@ import { LIMITS, type TaskDto } from "@broccoliapps/tasquito-shared";
 import { Archive, ArchiveRestore, ArrowLeft, CheckSquare, ChevronDown, ChevronRight, Trash2, X } from "lucide-preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import autoAnimate, { type AnimationController } from "@formkit/auto-animate";
-import { ArchiveConfirmModal, DeleteConfirmModal, EditableText, EmptyState, IconButton, ProjectDetailSkeleton, TaskCard, TaskCardSkeleton, TaskForm } from "../components";
-import { useDragAndDrop, useProject } from "../hooks";
+import { ArchiveConfirmModal, DeleteConfirmModal, EditableText, EmptyState, IconButton, useModal } from "@broccoliapps/browser";
+import { useDragAndDrop } from "@broccoliapps/browser";
+import { ProjectDetailSkeleton, TaskCard, TaskCardSkeleton, TaskForm } from "../components";
+import { useProject } from "../hooks";
 import { AppLink } from "../SpaApp";
 
 type ProjectDetailPageProps = {
@@ -101,13 +103,13 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
     }
   });
 
-  const [showArchiveProjectModal, setShowArchiveProjectModal] = useState(false);
+  const archiveModal = useModal();
   const [isArchivingProject, setIsArchivingProject] = useState(false);
-  const [showUnarchiveProjectModal, setShowUnarchiveProjectModal] = useState(false);
+  const unarchiveModal = useModal();
   const [isUnarchivingProject, setIsUnarchivingProject] = useState(false);
-  const [showDeleteProjectModal, setShowDeleteProjectModal] = useState(false);
+  const deleteProjectModal = useModal();
   const [isDeletingProject, setIsDeletingProject] = useState(false);
-  const [taskToDelete, setTaskToDelete] = useState<TaskWithSubtasks | null>(null);
+  const deleteTaskModal = useModal<TaskWithSubtasks>();
   const [isDeletingTask, setIsDeletingTask] = useState(false);
   const [showDoneTasks, setShowDoneTasks] = useState(false);
 
@@ -125,12 +127,12 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
     setIsUnarchivingProject(true);
     try {
       await unarchive();
-      setShowUnarchiveProjectModal(false);
+      unarchiveModal.close();
     } catch (err: unknown) {
       // Close modal on limit error so user can see the error banner
       const error = err as { status?: number };
       if (error?.status === 403) {
-        setShowUnarchiveProjectModal(false);
+        unarchiveModal.close();
       }
       // Keep modal open on other errors
     } finally {
@@ -159,11 +161,11 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
   };
 
   const handleDeleteTask = async () => {
-    if (!taskToDelete) return;
+    if (!deleteTaskModal.data) return;
     setIsDeletingTask(true);
     try {
-      await removeTask(taskToDelete.id);
-      setTaskToDelete(null);
+      await removeTask(deleteTaskModal.data.id);
+      deleteTaskModal.close();
     } catch {
       // Keep modal open on error
     } finally {
@@ -177,7 +179,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
       removeTask(task.id);
     } else {
       // Show confirmation modal for non-done tasks
-      setTaskToDelete(task);
+      deleteTaskModal.open(task);
     }
   };
 
@@ -238,7 +240,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
           <IconButton
             icon={<Archive size={20} />}
             aria-label="Archive project"
-            onClick={() => setShowArchiveProjectModal(true)}
+            onClick={() => archiveModal.open()}
           />
         )}
       </div>
@@ -253,7 +255,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
           <div class="flex gap-2">
             <button
               type="button"
-              onClick={() => setShowUnarchiveProjectModal(true)}
+              onClick={() => unarchiveModal.open()}
               class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-neutral-800 border border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-300 rounded-lg hover:bg-amber-50 dark:hover:bg-neutral-700 transition-colors"
             >
               <ArchiveRestore size={16} />
@@ -261,7 +263,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
             </button>
             <button
               type="button"
-              onClick={() => setShowDeleteProjectModal(true)}
+              onClick={() => deleteProjectModal.open()}
               class="flex items-center gap-2 px-3 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
             >
               <Trash2 size={16} />
@@ -336,8 +338,8 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
 
       {/* Archive Project Modal */}
       <ArchiveConfirmModal
-        isOpen={showArchiveProjectModal}
-        onClose={() => setShowArchiveProjectModal(false)}
+        isOpen={archiveModal.isOpen}
+        onClose={archiveModal.close}
         onConfirm={handleArchiveProject}
         title="Archive Project"
         itemName={project.name}
@@ -346,18 +348,18 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
 
       {/* Delete Task Modal */}
       <DeleteConfirmModal
-        isOpen={taskToDelete !== null}
-        onClose={() => setTaskToDelete(null)}
+        isOpen={deleteTaskModal.isOpen}
+        onClose={deleteTaskModal.close}
         onConfirm={handleDeleteTask}
         title="Delete Task"
-        itemName={taskToDelete?.title ?? ""}
+        itemName={deleteTaskModal.data?.title ?? ""}
         isLoading={isDeletingTask}
       />
 
       {/* Unarchive Project Modal */}
       <ArchiveConfirmModal
-        isOpen={showUnarchiveProjectModal}
-        onClose={() => setShowUnarchiveProjectModal(false)}
+        isOpen={unarchiveModal.isOpen}
+        onClose={unarchiveModal.close}
         onConfirm={handleUnarchiveProject}
         title="Unarchive Project"
         itemName={project.name}
@@ -368,8 +370,8 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
 
       {/* Delete Project Modal */}
       <DeleteConfirmModal
-        isOpen={showDeleteProjectModal}
-        onClose={() => setShowDeleteProjectModal(false)}
+        isOpen={deleteProjectModal.isOpen}
+        onClose={deleteProjectModal.close}
         onConfirm={handleDeleteProject}
         title="Delete Project"
         itemName={project.name}

@@ -32,8 +32,6 @@ export { getAggregatedRates, getExchangeRates } from "./exchange-rates";
 export {
   getUser,
   getUserSync,
-  patchUser,
-  setUserFromAuth,
   signOut,
 } from "./users";
 

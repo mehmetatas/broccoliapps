@@ -203,7 +203,7 @@ class AppBuilder {
 
   // Derive resource name from path pattern: "/api/*" -> "api", "/*" -> "default"
   private nameFromPath(pathPattern: string): string {
-    if (pathPattern === "/*") {return "default";}
+    if (pathPattern === "/*") { return "default"; }
     const match = pathPattern.match(/^\/([^/*]+)/);
     return match?.[1] ?? "origin";
   }
@@ -258,6 +258,7 @@ class AppBuilder {
   ): lambda.Function {
     // Merge Cognito env vars with user-provided config
     const environment: Record<string, string> = {
+      BA_APP_ID: this.appName,
       ...(config?.environment ?? defaultConfig.lambda.environment),
     };
     if (cognitoConfig) {

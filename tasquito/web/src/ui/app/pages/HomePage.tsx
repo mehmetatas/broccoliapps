@@ -1,7 +1,8 @@
 import { Archive, Check, Clock, Loader, RefreshCw, X } from "lucide-preact";
 import { useMemo, useState } from "preact/hooks";
 import type { ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
-import { FilterPills, IconButton, ProjectForm, ProjectList, Spinner } from "../components";
+import { FilterPills, IconButton, Spinner } from "@broccoliapps/browser";
+import { ProjectForm, ProjectList } from "../components";
 import { useProjects } from "../hooks";
 
 type ProjectFilter = "all" | "active" | "pending" | "done" | "archived";

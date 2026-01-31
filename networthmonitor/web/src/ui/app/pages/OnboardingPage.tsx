@@ -1,7 +1,8 @@
+import { Button, preferences } from "@broccoliapps/browser";
 import { route } from "preact-router";
 import { useState } from "preact/hooks";
-import { getUserSync, patchUser } from "../api";
-import { Button, CurrencyPicker } from "../components";
+import { getUserSync } from "../api";
+import { CurrencyPicker } from "../components";
 
 export const OnboardingPage = () => {
   const user = getUserSync();
@@ -12,13 +13,13 @@ export const OnboardingPage = () => {
   const firstName = user?.name?.split(" ")[0] || "there";
 
   const handleContinue = async () => {
-    if (!currency) {return;}
+    if (!currency) { return; }
 
     setSaving(true);
     setError(null);
 
     try {
-      await patchUser({ targetCurrency: currency });
+      await preferences.set("targetCurrency", currency);
       route("/app");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save currency");
@@ -38,9 +39,6 @@ export const OnboardingPage = () => {
         </p>
 
         <div class="mb-6">
-          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
-            Select your currency
-          </label>
           <CurrencyPicker value={currency} onChange={setCurrency} />
         </div>
 

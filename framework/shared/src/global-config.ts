@@ -5,7 +5,7 @@ const isDev =
     ? !process.env.LAMBDA_TASK_ROOT                       // Node.js / Lambda
     : typeof window.location !== "undefined"
       ? window.location.hostname === "localhost"           // Browser
-      : typeof __DEV__ !== "undefined" && __DEV__ === true; // React Native
+      : false;                                              // React Native — always use prod URLs
 
 export const globalConfig = {
   isDev,
@@ -32,6 +32,7 @@ jwIDAQAB
     tasquito: {
       baseUrl: isDev ? "http://localhost:8082" : "https://www.tasquito.com",
       mobileScheme: "tasquito",
+      appleAudience: "com.broccoliapps.tasquito.ios",
       publicKey: `
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuLwnizPrqMsdaDfs9N9r

@@ -115,9 +115,3 @@ export const deleteTask = async (projectId: string, id: string): Promise<void> =
     setProjectCountsInCache(projectId, result.projectCounts.openTaskCount, result.projectCounts.totalTaskCount);
   }
 };
-
-// Invalidate tasks cache for a project
-export const invalidateTasksCache = (projectId: string) => {
-  getCache().removeByPrefix(CACHE_KEYS.taskPrefix(projectId));
-  getCache().remove(CACHE_KEYS.tasksFetched(projectId));
-};

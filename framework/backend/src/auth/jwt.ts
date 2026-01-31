@@ -1,43 +1,62 @@
-import { JwtPayload, globalConfig } from "@broccoliapps/shared";
-import JWT from "jsonwebtoken";
-import { AuthCode } from "../db/schemas/broccoliapps";
+import { AppId, globalConfig } from "@broccoliapps/shared";
+import * as jose from "jose";
 import { params } from "../params";
 import { getAuthConfig } from "./config";
 
 const ALGORITHM = "RS256";
 
-export type JwtData = Pick<AuthCode, "userId" | "email" | "name" | "provider">;
+export type JwtData = {
+  userId: string;
+  email: string;
+  name: string;
+  provider: string;
+};
+
+const privateKeyCache = new Map<AppId, CryptoKey>();
+const publicKeyCache = new Map<AppId, CryptoKey>();
+
+const getPrivateKey = async (appId: AppId): Promise<CryptoKey> => {
+  const cached = privateKeyCache.get(appId);
+  if (cached) return cached;
+
+  const pem = await params.getAppKey(appId);
+  const key = await jose.importPKCS8(pem, ALGORITHM);
+  privateKeyCache.set(appId, key as CryptoKey);
+  return key as CryptoKey;
+};
+
+const getPublicKey = async (appId: AppId): Promise<CryptoKey> => {
+  const cached = publicKeyCache.get(appId);
+  if (cached) return cached;
+
+  const pem = globalConfig.apps[appId].publicKey;
+  const key = await jose.importSPKI(pem, ALGORITHM);
+  publicKeyCache.set(appId, key as CryptoKey);
+  return key as CryptoKey;
+};
 
 const sign = async (data: JwtData): Promise<string> => {
   const { appId, accessTokenLifetime } = getAuthConfig();
+  const key = await getPrivateKey(appId);
 
-  const key = await params.getAppKey(appId);
-
-  return JWT.sign(
-    {
-      sub: data.userId,
-      data,
-    },
-    key,
-    {
-      expiresIn: accessTokenLifetime.toSeconds(),
-      algorithm: ALGORITHM,
-      issuer: appId,
-    }
-  );
+  return new jose.SignJWT({ data })
+    .setProtectedHeader({ alg: ALGORITHM })
+    .setSubject(data.userId)
+    .setIssuer(appId)
+    .setExpirationTime(`${accessTokenLifetime.toSeconds()}s`)
+    .sign(key);
 };
 
-const verify = <T extends JwtPayload & { data: JwtData }>(token: string): T | undefined => {
+const verify = async (token: string): Promise<{ data: JwtData; exp: number } | undefined> => {
   const { appId } = getAuthConfig();
-
-  const key = globalConfig.apps[appId].publicKey;
+  const key = await getPublicKey(appId);
 
   try {
-    const decoded = JWT.verify(token, key, {
+    const { payload } = await jose.jwtVerify(token, key, {
       algorithms: [ALGORITHM],
       issuer: appId,
     });
-    return decoded as T;
+    return { data: payload.data as JwtData, exp: payload.exp! };
   } catch {
     return undefined;
   }

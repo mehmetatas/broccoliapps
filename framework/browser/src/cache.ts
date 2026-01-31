@@ -5,62 +5,49 @@ type CacheValue<T> = {
   expiresAt?: number; // epoch ms
 };
 
-type StorageType = "local" | "session";
-
-type CacheOptions = {
-  storage?: StorageType;
-};
-
-const getStorage = (storage: StorageType = "local"): Storage => {
-  return storage === "session" ? sessionStorage : localStorage;
-};
-
-const set = <T>(key: string, value: T, expiresAt?: number, options?: CacheOptions): void => {
+const set = <T>(key: string, value: T, expiresAt?: number): void => {
   const cacheValue: CacheValue<T> = { value, expiresAt };
-  getStorage(options?.storage).setItem(key, JSON.stringify(cacheValue));
+  localStorage.setItem(key, JSON.stringify(cacheValue));
 };
 
-const get = <T>(key: string, options?: CacheOptions): T | null => {
-  const storage = getStorage(options?.storage);
-  const raw = storage.getItem(key);
+const get = <T>(key: string): T | null => {
+  const raw = localStorage.getItem(key);
   if (!raw) {return null;}
 
   try {
     const cacheValue: CacheValue<T> = JSON.parse(raw);
     // Validate it has the expected structure
     if (typeof cacheValue !== "object" || cacheValue === null || !("value" in cacheValue)) {
-      storage.removeItem(key);
+      localStorage.removeItem(key);
       return null;
     }
     if (cacheValue.expiresAt && Date.now() > cacheValue.expiresAt) {
-      storage.removeItem(key);
+      localStorage.removeItem(key);
       return null;
     }
     return cacheValue.value;
   } catch {
     // Invalid JSON or unexpected format - remove corrupted entry
-    storage.removeItem(key);
+    localStorage.removeItem(key);
     return null;
   }
 };
 
-const remove = (key: string, options?: CacheOptions): void => {
-  getStorage(options?.storage).removeItem(key);
+const remove = (key: string): void => {
+  localStorage.removeItem(key);
 };
 
-const removeByPrefix = (prefix: string, options?: CacheOptions): void => {
-  const storage = getStorage(options?.storage);
-  const keysToRemove = keys(prefix, options);
+const removeByPrefix = (prefix: string): void => {
+  const keysToRemove = keys(prefix);
   for (const key of keysToRemove) {
-    storage.removeItem(key);
+    localStorage.removeItem(key);
   }
 };
 
-const keys = (prefix: string, options?: CacheOptions): string[] => {
-  const storage = getStorage(options?.storage);
+const keys = (prefix: string): string[] => {
   const result: string[] = [];
-  for (let i = 0; i < storage.length; i++) {
-    const key = storage.key(i);
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
     if (key && key.startsWith(prefix)) {
       result.push(key);
     }
@@ -68,8 +55,8 @@ const keys = (prefix: string, options?: CacheOptions): string[] => {
   return result;
 };
 
-const clear = (options?: CacheOptions): void => {
-  getStorage(options?.storage).clear();
+const clear = (): void => {
+  localStorage.clear();
 };
 
 export const cache: CacheProvider = { set, get, remove, removeByPrefix, keys, clear };

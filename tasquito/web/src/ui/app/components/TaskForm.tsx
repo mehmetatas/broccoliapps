@@ -1,8 +1,7 @@
 import { LIMITS } from "@broccoliapps/tasquito-shared";
 import { MoreHorizontal, X } from "lucide-preact";
 import { useRef, useState } from "preact/hooks";
-import { Button } from "./Button";
-import { DatePicker } from "./DatePicker";
+import { Button, DatePicker } from "@broccoliapps/browser";
 
 type TaskFormData = {
   title: string;

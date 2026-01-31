@@ -1,9 +1,8 @@
 import { ArrowLeft, LogOut } from "lucide-preact";
 import { useState } from "preact/hooks";
+import { ThemeSettings, type Theme, getStoredTheme } from "@broccoliapps/browser";
 import { signOut } from "../api";
-import { ThemeSettings } from "../components";
 import { AppLink } from "../SpaApp";
-import { type Theme, getStoredTheme } from "../utils/themeUtils";
 
 export const SettingsPage = () => {
   const [theme, setTheme] = useState<Theme>(getStoredTheme);

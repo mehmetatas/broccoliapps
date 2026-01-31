@@ -1,7 +1,9 @@
 import type { ApiContract, HttpMethod, HttpResponse, ResponseSchema, Schema } from "@broccoliapps/shared";
 import type { Context } from "hono";
 import * as v from "valibot";
+import { registerAuthHandlers, type UseAuthOptions } from "../auth/handlers";
 import { log } from "../log";
+import { registerPreferenceHandlers } from "../preferences";
 import { RequestContext } from "./context";
 import { deserializeRequest } from "./deserializer";
 import { HttpRouter, setCookies } from "./http-router";
@@ -19,6 +21,24 @@ type ApiErrorResponse = {
 };
 
 export class ApiRouter extends HttpRouter {
+  /**
+   * Register all standard auth handlers (exchange, refresh, magic link, Apple sign-in).
+   * Auth config is auto-initialized from BA_APP_ID env var.
+   */
+  useAuth(options?: UseAuthOptions): this {
+    registerAuthHandlers(this, options);
+    return this;
+  }
+
+  /**
+   * Register preference handlers (get all, set single).
+   * Requires auth to be enabled.
+   */
+  usePreferences(): this {
+    registerPreferenceHandlers(this);
+    return this;
+  }
+
   /**
    * Register an API contract with its implementation
    *
@@ -89,12 +109,17 @@ export class ApiRouter extends HttpRouter {
         }),
       };
     } else if (error instanceof HttpError) {
+      if (error.status >= 500) {
+        log.err("API error:", { path: c.req.path, status: error.status, error });
+      } else {
+        log.wrn("API error:", { path: c.req.path, status: error.status, message: error.message });
+      }
       apiError = {
         status: error.status,
         message: error.status >= 500 ? "Internal Server Error" : error.message,
       };
     } else {
-      log.err("API error:", { error });
+      log.err("API error:", { path: c.req.path, status: 500, error });
       apiError = {
         status: 500,
         message: "Internal Server Error",

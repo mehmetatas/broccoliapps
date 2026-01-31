@@ -1,14 +1,13 @@
+import { Button, Input, preferences } from "@broccoliapps/browser";
 import { route } from "preact-router";
 import { useState } from "preact/hooks";
 import type { BucketDto, UpdateFrequency } from "../../../shared/api-contracts/dto";
-import { getBuckets, getUserSync, postAccount, putAccountBuckets } from "../api";
+import { getBuckets, postAccount, putAccountBuckets } from "../api";
 import { getCurrentMonth, shouldShowMonth } from "../utils/dateUtils";
 import { BucketPicker } from "./BucketPicker";
-import { Button } from "./Button";
 import { CurrencyPicker } from "./CurrencyPicker";
 import { FrequencyPicker } from "./FrequencyPicker";
 import { HistoryEditor } from "./HistoryEditor";
-import { Input } from "./Input";
 import { MoneyInput } from "./MoneyInput";
 import { TypeToggle } from "./TypeToggle";
 import { ValueChart } from "./ValueChart";
@@ -19,12 +18,11 @@ type NewAccountFormProps = {
 };
 
 export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
-  const user = getUserSync();
   const [viewMode, setViewMode] = useState<"quick" | "advanced">("quick");
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [name, setName] = useState("");
   const [type, setType] = useState<"asset" | "debt">("asset");
-  const [currency, setCurrency] = useState(user?.targetCurrency || "USD");
+  const [currency, setCurrency] = useState((preferences.getAllSync()?.targetCurrency as string) || "USD");
   const [updateFrequency, setUpdateFrequency] = useState<UpdateFrequency>("monthly");
   const [currentValue, setCurrentValue] = useState<number | undefined>(undefined);
   const [history, setHistory] = useState<Record<string, number | undefined>>({});
@@ -179,7 +177,7 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
           <Input
             label="Name"
             value={name}
-            onChange={setName}
+            onInput={(e) => setName(e.currentTarget.value)}
             placeholder="e.g., Main Savings"
           />
 
@@ -234,7 +232,7 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
           <Input
             label="Name"
             value={name}
-            onChange={setName}
+            onInput={(e) => setName(e.currentTarget.value)}
             placeholder="e.g., Main Savings"
           />
 

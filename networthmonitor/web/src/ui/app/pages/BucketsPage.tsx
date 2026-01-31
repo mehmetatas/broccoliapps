@@ -1,3 +1,4 @@
+import { EmptyState, Modal, useModal } from "@broccoliapps/browser";
 import { useEffect, useState } from "preact/hooks";
 import type { AccountDto, BucketDto } from "../../../shared/api-contracts/dto";
 import {
@@ -9,8 +10,7 @@ import {
   postBucket,
   putBucketAccounts,
 } from "../api";
-import { AddBucketForm, BucketListItem, ConfirmActionModal, EmptyState, PageHeader } from "../components";
-import { useModal } from "../hooks";
+import { AddBucketForm, BucketListItem, PageHeader } from "../components";
 
 export const BucketsPage = () => {
   const [buckets, setBuckets] = useState<BucketDto[]>([]);
@@ -227,19 +227,19 @@ export const BucketsPage = () => {
         />
       </div>
 
-      <ConfirmActionModal
-        open={deleteModal.isOpen}
+      <Modal
+        isOpen={deleteModal.isOpen}
         onClose={deleteModal.close}
         onConfirm={handleDeleteBucket}
         title="Delete Bucket"
         confirmText="Delete"
         confirmVariant="danger"
-        loading={deleting}
+        isLoading={deleting}
       >
         <p>
           Are you sure you want to delete "{deleteModal.data?.name}"? Accounts will be unlinked but not deleted.
         </p>
-      </ConfirmActionModal>
+      </Modal>
     </div>
   );
 };

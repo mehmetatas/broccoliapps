@@ -1,3 +1,5 @@
+export * from "./auth";
+export * from "./auth.dto";
 export * from "./coerce";
 export * from "./contract";
 export * from "./cookie";
@@ -6,5 +8,7 @@ export * from "./epoch";
 export * from "./expires";
 export * from "./global-config";
 export * from "./jwt";
+export * from "./preferences";
+export * from "./preferences.dto";
 export * from "./random";
 export * from "./types";

@@ -20,7 +20,19 @@
   "dependencies": {
     "@broccoliapps/shared": "*"
   },
+  "peerDependencies": {
+    "preact": "^10.0.0",
+    "preact-router": "^4.1.0",
+    "preact-render-to-string": "^6.0.0",
+    "lucide-preact": "^0.400.0",
+    "sortablejs": "^1.15.0"
+  },
   "devDependencies": {
+    "preact": "^10.28.2",
+    "preact-router": "^4.1.2",
+    "preact-render-to-string": "^6.6.5",
+    "lucide-preact": "^0.562.0",
+    "@types/sortablejs": "^1.15.9",
     "typescript": "^5.9.3"
   }
 }

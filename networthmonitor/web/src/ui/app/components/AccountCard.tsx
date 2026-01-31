@@ -1,6 +1,6 @@
+import { preferences } from "@broccoliapps/browser";
 import { ChevronRight, CreditCard, TrendingUp } from "lucide-preact";
 import type { AccountDto } from "../../../shared/api-contracts/dto";
-import { getUserSync } from "../api";
 import { AppLink } from "../SpaApp";
 import { hasMissedUpdate } from "../utils/dateUtils";
 import { MoneyDisplay } from "./MoneyDisplay";
@@ -14,8 +14,7 @@ export const AccountCard = ({
   account,
   value,
 }: AccountCardProps) => {
-  const user = getUserSync();
-  const targetCurrency = user?.targetCurrency || "USD";
+  const targetCurrency = (preferences.getAllSync()?.targetCurrency as string) || "USD";
   const showOriginal = account.currency !== targetCurrency;
   const needsUpdate = hasMissedUpdate(account.nextUpdate);
 

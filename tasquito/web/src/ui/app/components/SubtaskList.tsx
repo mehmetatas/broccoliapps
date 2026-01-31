@@ -1,11 +1,7 @@
 import { Plus, Trash2 } from "lucide-preact";
 import { useState } from "preact/hooks";
 import { LIMITS, type TaskDto, type TaskStatus } from "@broccoliapps/tasquito-shared";
-import { Checkbox } from "./Checkbox";
-import { EditableText } from "./EditableText";
-import { IconButton } from "./IconButton";
-import { Input } from "./Input";
-import { Button } from "./Button";
+import { Button, Checkbox, EditableText, IconButton, Input } from "@broccoliapps/browser";
 
 type SubtaskListProps = {
   subtasks: TaskDto[];

@@ -1,7 +1,8 @@
+import { preferences } from "@broccoliapps/browser";
 import { route } from "preact-router";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import type { AccountDto, BucketDto } from "../../../shared/api-contracts/dto";
-import { getDashboard, getUserSync } from "../api";
+import { getDashboard } from "../api";
 import { AccountList, BucketFilterPills, HomePageSkeleton, MoneyDisplay, NewAccountForm, ValueChart } from "../components";
 import { useExchangeRates } from "../hooks/useExchangeRates";
 import { convertLatestValues, getEarliestMonth, getUniqueCurrencies } from "../utils/currencyConversion";
@@ -10,12 +11,12 @@ import { calculateNetWorthWithConversion } from "../utils/historyUtils";
 
 export const HomePage = () => {
   // Redirect to onboarding if user has no currency set
-  const user = getUserSync();
+  const prefs = preferences.getAllSync();
   useEffect(() => {
-    if (user && !user.targetCurrency) {
+    if (prefs && !prefs.targetCurrency) {
       route("/app/onboarding");
     }
-  }, [user]);
+  }, [prefs]);
 
   const [accounts, setAccounts] = useState<AccountDto[]>([]);
   const [latestValues, setLatestValues] = useState<Record<string, number>>({});
@@ -66,7 +67,7 @@ export const HomePage = () => {
     fetchData();
   }, []);
 
-  const targetCurrency = user?.targetCurrency || "USD";
+  const targetCurrency = (prefs?.targetCurrency as string) || "USD";
 
   // Extract unique currencies that need conversion
   const currenciesToConvert = useMemo(() => {

@@ -1,6 +1,6 @@
+import { preferences } from "@broccoliapps/browser";
 import { CreditCard, Wallet } from "lucide-preact";
 import type { AccountDto } from "../../../shared/api-contracts/dto";
-import { getUserSync } from "../api";
 import { AppLink } from "../SpaApp";
 import { MoneyDisplay } from "./MoneyDisplay";
 
@@ -13,8 +13,7 @@ export const ArchivedAccountCard = ({
   account,
   maxValue,
 }: ArchivedAccountCardProps) => {
-  const user = getUserSync();
-  const targetCurrency = user?.targetCurrency || "USD";
+  const targetCurrency = (preferences.getAllSync()?.targetCurrency as string) || "USD";
   const showOriginal = account.currency !== targetCurrency;
   const isAsset = account.type === "asset";
   const Icon = isAsset ? Wallet : CreditCard;

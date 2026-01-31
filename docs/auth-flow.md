@@ -63,7 +63,7 @@ Browser               broccoliapps.com           Cognito              App Backen
 ### Email Magic Link
 
 ```
-Browser              App Backend            broccoliapps.com           Email
+Browser              App Backend            broccoliapps.com                   Email
   │                       │                              │                       │
   │── enter email ───────>│                              │                       │
   │                       │                              │                       │
@@ -291,3 +291,186 @@ Refresh tokens are automatically rotated when they've consumed 80% of their tota
 ### Secure Cookies
 
 Auth-related cookies use `httpOnly`, `Secure`, and `SameSite=lax` flags with short max-age values (5 minutes).
+
+---
+
+## 6. Mobile App Sign-In
+
+The Tasquito mobile app supports all three sign-in methods. The reusable `Login` component lives in `framework/mobile` and each app wraps it in a screen that connects to its own `AuthContext`.
+
+### Overview
+
+| Method | iOS | Android |
+|---|---|---|
+| Google | InAppBrowser OAuth | InAppBrowser OAuth |
+| Apple | Native `appleAuth` | InAppBrowser OAuth fallback |
+| Email | Magic link → deep link | Magic link → deep link |
+
+All three methods ultimately produce the same `AuthExchangeResponse` containing `accessToken`, `refreshToken`, and their expiration timestamps.
+
+### Google Sign-In Flow
+
+1. User taps "Continue with Google".
+2. `Login` opens an InAppBrowser to `{broccoliappsBaseUrl}/auth?app={appId}&provider=google&platform=mobile`.
+3. The redirect URI is `{mobileScheme}://auth/callback` (e.g. `tasquito://auth/callback`).
+4. The standard OAuth flow runs in the browser (PKCE via Cognito, same as web).
+5. broccoliapps.com redirects back with `?code={authCode}`.
+6. InAppBrowser intercepts the custom-scheme redirect and returns the URL.
+7. `parseCodeFromUrl` extracts the `code` query parameter.
+8. The app calls `POST /auth/exchange` with `{ code }` to get tokens.
+9. `onLoginSuccess` receives the tokens and passes them to `AuthContext.login()`.
+
+```
+Mobile App           InAppBrowser         broccoliapps.com            Cognito
+  │                       │                       │                      │
+  │── open InAppBrowser ─>│                       │                      │
+  │                       │─ /auth?app&provider ─>│                      │
+  │                       │                       │- /oauth2/authorize ->│
+  │                       │                       │   (PKCE)             │
+  │                       │     user signs in with Google                │
+  │                       │<──── redirect + cognitoCode ──────────────── │
+  │                       │── /auth/callback ────>│                     │
+  │                       │                       │ exchange + verify    │
+  │                       │                       │ create authCode      │
+  │                       │<── tasquito://auth/callback?code={code} ─────│
+  │<── url result ────────│                       │                      │
+  │                                                                      │
+  │── POST /auth/exchange { code } ─────────────────────────────────────>│
+  │<── { accessToken, refreshToken, ... } ───────────────────────────────│
+```
+
+### Apple Sign-In Flow
+
+**iOS (native):**
+
+1. User taps "Continue with Apple".
+2. `appleAuth.performRequest()` presents the native Apple Sign-In sheet, requesting `EMAIL` and `FULL_NAME` scopes.
+3. After the user authenticates, `getCredentialStateForUser` confirms the state is `AUTHORIZED`.
+4. The app sends the `identityToken`, `authorizationCode`, `user` ID, and optional `fullName` to `POST /auth/verify-apple`.
+5. The backend verifies the Apple identity token and returns `AuthExchangeResponse`.
+
+```
+Mobile App              iOS Native             App Backend
+  │                       │                       │
+  │── performRequest() ──>│                       │
+  │  (LOGIN, EMAIL, NAME) │                       │
+  │                       │                       │
+  │   user authenticates via Face ID / password   │
+  │                       │                       │
+  │<── identityToken,     │                       │
+  │    authorizationCode, │                       │
+  │    user, fullName ────│                       │
+  │                                               │
+  │── POST /auth/verify-apple ───────────────────>│
+  │   { identityToken, authorizationCode,         │
+  │     user, fullName }                          │
+  │<── { accessToken, refreshToken, ... } ────────│
+```
+
+**Android (fallback):**
+
+Uses the same InAppBrowser OAuth flow as Google, but with `provider=apple`. The sequence is identical to the Google flow above.
+
+### Email Magic Link Flow
+
+1. User enters email and taps "Continue with Email".
+2. The app calls `POST /auth/send-magic-link` with `{ email, platform: "mobile" }`.
+3. broccoliapps.com sends an email containing a magic link to `https://www.broccoliapps.com/auth/email-callback?token={token}`.
+4. The UI shows a "Check your email" confirmation screen.
+5. When the user taps the link in their email, the browser opens broccoliapps.com.
+6. broccoliapps.com validates the token, creates an auth code, and redirects to `tasquito://auth/callback?code={authCode}`.
+7. The OS opens the app via the deep link.
+8. `AuthContext` handles the deep link (see Deep Link Handling below), extracts the `code`, and calls `POST /auth/exchange`.
+
+```
+Mobile App            App Backend          broccoliapps.com        Email
+  │                       │                       │                   │
+  │── POST /auth/send-magic-link ────────────────>│                   │
+  │   { email, platform: "mobile" }               │                   │
+  │                       │                       │── send email ────>│
+  │<── { success: true } ─────────────────────────│                   │
+  │                                                                   │
+  │  show "Check your email" screen                                   │
+  │                                                                   │
+  │   · · · user taps link in email · · ·                             │
+  │                                                                   │
+  │                Browser ──────────────────────>│                   │
+  │                  /auth/email-callback?token=  │                   │
+  │                                               │ validate token    │
+  │                                               │ create authCode   │
+  │<── redirect: tasquito://auth/callback?code={code} ────────────────│
+  │                                                                   │
+  │── POST /auth/exchange { code } ──────────────────────────────────>│
+  │<── { accessToken, refreshToken, ... } ────────────────────────────│
+```
+
+### Token Management
+
+**AuthContext lifecycle (`tasquito/mobile/src/auth/AuthContext.tsx`):**
+
+1. **On mount:** reads stored tokens from Keychain. If the refresh token is still valid (not expired), sets `isAuthenticated = true`. Otherwise clears storage.
+2. **`login(tokens)`:** saves tokens to Keychain and updates state.
+3. **`logout()`:** clears Keychain storage and resets state.
+4. **`getAccessToken()`:** returns the current access token if it expires more than 5 minutes from now. Otherwise attempts a refresh via `POST /auth/refresh`. If refresh fails, clears tokens and returns `undefined`.
+
+**Auto-refresh buffer:** `TOKEN_BUFFER_MS = 5 * 60 * 1000` (5 minutes). The access token is proactively refreshed before it actually expires to prevent requests from failing.
+
+**Keychain storage (`tasquito/mobile/src/auth/storage.ts`):**
+
+Tokens are stored in the iOS Keychain / Android Keystore via `react-native-keychain` under the service `com.broccoliapps.tasquito`. The stored shape:
+
+```typescript
+type StoredTokens = {
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpiresAt: number;   // ms since epoch
+  refreshTokenExpiresAt: number;  // ms since epoch
+};
+```
+
+### Deep Link Handling
+
+The `AuthContext` registers deep link listeners for `tasquito://auth/callback` to handle the email magic link callback.
+
+**Cold start** (app not running when link tapped):
+- `Linking.getInitialURL()` is called on mount to check if the app was opened via a deep link.
+
+**Warm start** (app in background when link tapped):
+- `Linking.addEventListener('url', ...)` fires when a deep link arrives while the app is running.
+
+Both paths call the same `handleDeepLink` function which:
+1. Checks the URL contains `auth/callback`.
+2. Extracts the `code` query parameter.
+3. Sets `isExchangingToken = true` (shows loading state).
+4. Calls `POST /auth/exchange` with the code.
+5. On success, stores the tokens via `login()`.
+
+URL scheme: `tasquito://auth/callback?code={authCode}`
+
+### API Contracts
+
+All contracts are defined in `framework/shared/src/auth.ts` with DTOs in `framework/shared/src/auth.dto.ts` (validated with `valibot`).
+
+| Endpoint | Method | Request | Response |
+|---|---|---|---|
+| `/auth/exchange` | POST | `{ code: string }` | `{ accessToken, accessTokenExpiresAt, refreshToken, refreshTokenExpiresAt, user }` |
+| `/auth/verify-apple` | POST | `{ identityToken, authorizationCode, user, fullName? }` | Same as `/auth/exchange` |
+| `/auth/send-magic-link` | POST | `{ email: string, platform?: "mobile" }` | `{ success: boolean }` |
+| `/auth/refresh` | POST | `{ refreshToken: string }` | `{ accessToken, accessTokenExpiresAt, refreshToken, refreshTokenExpiresAt }` |
+
+`user` object shape: `{ id, email, name, isNewUser }`
+
+### Key Files
+
+| File | Purpose |
+|---|---|
+| `framework/mobile/src/Login.tsx` | Reusable login component with all three sign-in methods |
+| `framework/mobile/src/types.ts` | `LoginProps` type definition |
+| `framework/mobile/src/theme.ts` | Login screen theming |
+| `tasquito/mobile/src/screens/LoginScreen.tsx` | Tasquito-specific screen wrapper, connects `Login` to `AuthContext` |
+| `tasquito/mobile/src/auth/AuthContext.tsx` | Auth state management, token refresh, deep link handling |
+| `tasquito/mobile/src/auth/storage.ts` | Keychain token storage (`react-native-keychain`) |
+| `tasquito/mobile/src/config.ts` | API base URL (`https://www.tasquito.com`) |
+| `framework/shared/src/auth.ts` | API contract definitions |
+| `framework/shared/src/auth.dto.ts` | Request/response DTOs with valibot validation |
+| `framework/shared/src/global-config.ts` | App base URLs and `mobileScheme` configuration |

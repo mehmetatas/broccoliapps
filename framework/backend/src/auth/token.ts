@@ -1,11 +1,12 @@
-import { ApiError, AppId, epoch, globalConfig, random } from "@broccoliapps/shared";
+import { AppId, epoch, globalConfig, random } from "@broccoliapps/shared";
 import { crypto } from "../crypto";
-import { tokens } from "../db/schemas/shared";
+import { tokens, users } from "../db/schemas/shared";
+import { HttpError } from "../http";
 import { log } from "../log";
 import { getAuthConfig } from "./config";
 import { jwt, JwtData } from "./jwt";
 
-export type AuthTokens = { accessToken: string; refreshToken: string, user: JwtData };
+export type AuthTokens = { accessToken: string; refreshToken: string; user: JwtData };
 
 const exchange = async (authCode: string): Promise<AuthTokens> => {
   const { appId } = getAuthConfig();
@@ -22,12 +23,10 @@ const exchange = async (authCode: string): Promise<AuthTokens> => {
 
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
-    throw new ApiError(resp.status ?? 500, err.message ?? "Unable to exchange auth token", err.details);
+    throw new HttpError(resp.status ?? 500, err.message ?? "Unable to exchange auth token");
   }
 
   const { user } = (await resp.json()) as { user: JwtData };
-
-  log.dbg("Auth exchange response", user);
 
   const accessToken = await createAccessToken(user);
   const refreshToken = await createRefreshToken(user.userId);
@@ -44,14 +43,25 @@ const verifyAuthCode = (app: AppId, encrypted: string) => {
   }
 };
 
-const refresh = async (refreshToken: string, dataProvider: (userId: string) => Promise<JwtData>): Promise<AuthTokens | undefined> => {
+const refresh = async (refreshToken: string): Promise<AuthTokens | undefined> => {
   const hash = crypto.sha256(refreshToken);
   const token = await tokens.get({ hash });
   if (!token || token.expiresAt < epoch.millis()) {
     return undefined;
   }
 
-  const user = await dataProvider(token.userId);
+  const dbUser = await users.get({ id: token.userId });
+  if (!dbUser) {
+    log.wrn("User not found for refresh token", { userId: token.userId });
+    return undefined;
+  }
+
+  const user: JwtData = {
+    userId: dbUser.id,
+    email: dbUser.email,
+    name: dbUser.name,
+    provider: dbUser.signInProvider,
+  };
 
   // if refresh token completed 80% of its life time refresh it too
   if ((token.expiresAt - epoch.millis()) / getAuthConfig().refreshTokenLifetime.toMilliseconds() < 0.2) {
@@ -64,7 +74,7 @@ const refresh = async (refreshToken: string, dataProvider: (userId: string) => P
 };
 
 const verifyAccessToken = async (accessToken: string): Promise<JwtData | undefined> => {
-  const decoded = jwt.verify(accessToken);
+  const decoded = await jwt.verify(accessToken);
   if (!decoded) {
     return undefined;
   }

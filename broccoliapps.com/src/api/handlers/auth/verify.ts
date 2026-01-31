@@ -1,5 +1,5 @@
 import { auth, HttpError, log } from "@broccoliapps/backend";
-import { authCodes } from "@broccoliapps/backend/dist/db/schemas/broccoliapps";
+import { authCodes } from "../../../db/schemas";
 import { AppId, isExpired } from "@broccoliapps/shared";
 import { verifyAuthToken } from "../../../shared/api-contracts";
 import { api } from "../../lambda";
@@ -7,8 +7,6 @@ import { api } from "../../lambda";
 api.register(verifyAuthToken, async (req, res) => {
   try {
     const code = auth.verifyAuthCode(req.app as AppId, req.code);
-
-    log.inf("REMOVE THIS LOG - Auth code verified", { code });
 
     if (!code) {
       log.wrn("Invalid auth code", { req });

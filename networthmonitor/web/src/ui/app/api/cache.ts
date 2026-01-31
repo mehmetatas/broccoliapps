@@ -7,8 +7,6 @@ export const CACHE_KEYS = {
   user: "cache:user",
   exchangeRates: "cache:exchange-rates",
   theme: "cache:theme",
-  accessToken: "cache:accessToken",
-  refreshToken: "cache:refreshToken",
 } as const;
 
-export const sessionStorage = { storage: "session" } as const;
+export const SESSION_TTL = () => Date.now() + 60 * 60 * 1000; // 1 hour

@@ -1,5 +1,5 @@
-import { db, HttpError, log } from "@broccoliapps/backend";
-import { magicLinkTokens } from "@broccoliapps/backend/dist/db/schemas/broccoliapps";
+import { HttpError, log } from "@broccoliapps/backend";
+import { authCodes, magicLinkTokens } from "../../../db/schemas";
 import { AppId, Duration, globalConfig, isExpired, random } from "@broccoliapps/shared";
 import * as v from "valibot";
 import { getOrCreateUser } from "../../../auth/users";
@@ -32,11 +32,11 @@ page
     const name = deriveNameFromEmail(magicLink.email);
 
     // 5. Look up or create user in central users table
-    const user = await getOrCreateUser(magicLink.email, name);
+    const user = await getOrCreateUser(magicLink.email, name, "email");
 
     // 6. Create authCode (same as OAuth flow, provider="email")
     const expires = Duration.minutes(1).fromNow();
-    const authCode = await db.broccoliapps.authCodes.put({
+    const authCode = await authCodes.put({
       code: random.token(),
       app: magicLink.app,
       email: magicLink.email,

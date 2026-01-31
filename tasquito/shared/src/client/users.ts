@@ -1,4 +1,4 @@
-import type { AuthUserDto } from "../api-contracts";
+import type { AuthUserDto } from "@broccoliapps/shared";
 import { CACHE_KEYS } from "./cache";
 import { getCache } from "./init";
 

@@ -1,14 +1,14 @@
+import { EmptyState, preferences } from "@broccoliapps/browser";
 import { Archive } from "lucide-preact";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import type { AccountDto } from "../../../shared/api-contracts/dto";
-import { getAccountHistory, getAccounts, getUserSync } from "../api";
-import { ArchivedAccountCard, EmptyState, PageHeader } from "../components";
+import { getAccountHistory, getAccounts } from "../api";
+import { ArchivedAccountCard, PageHeader } from "../components";
 import { useExchangeRates } from "../hooks/useExchangeRates";
 import { getUniqueCurrencies } from "../utils/currencyConversion";
 
 export const ArchivedAccountsPage = () => {
-  const user = getUserSync();
-  const targetCurrency = user?.targetCurrency || "USD";
+  const targetCurrency = (preferences.getAllSync()?.targetCurrency as string) || "USD";
 
   const [accounts, setAccounts] = useState<AccountDto[]>([]);
   const [maxValues, setMaxValues] = useState<Record<string, number>>({});

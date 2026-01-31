@@ -16,8 +16,8 @@ import { Line } from "react-chartjs-2";
 import { getCurrencySymbol } from "../../../shared/currency";
 import { formatMonthLabel } from "../utils/dateUtils";
 import { fillToCurrentMonth } from "../utils/historyUtils";
+import { EmptyState } from "@broccoliapps/browser";
 import { MoneyDisplay } from "./MoneyDisplay";
-import { NoDataPlaceholder } from "./NoDataPlaceholder";
 
 ChartJS.register(
   CategoryScale,
@@ -136,7 +136,7 @@ export const ValueChart = ({ data, variant = "default", currency = "USD" }: Valu
 
   // No data points - show empty state with subtle chart background
   if (entries.length === 0) {
-    return <NoDataPlaceholder />;
+    return <EmptyState title="No data" />;
   }
 
   let labels: string[];

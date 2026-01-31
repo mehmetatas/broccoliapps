@@ -45,21 +45,8 @@ export const userDto = {
   id: v.string(),
   name: v.string(),
   email: v.string(),
-  targetCurrency: v.string(),
 };
 export type UserDto = v.InferOutput<v.ObjectSchema<typeof userDto, undefined>>;
-
-// ============================================================================
-// Auth User DTO
-// ============================================================================
-export const authUserDto = {
-  id: v.string(),
-  email: v.string(),
-  name: v.string(),
-  isNewUser: v.boolean(),
-  targetCurrency: v.nullable(v.string()),
-};
-export type AuthUserDto = v.InferOutput<v.ObjectSchema<typeof authUserDto, undefined>>;
 
 // ============================================================================
 // Common schemas for reuse

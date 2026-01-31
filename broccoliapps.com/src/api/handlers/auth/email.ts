@@ -1,5 +1,5 @@
 import { auth, HttpError, log, rateLimiter } from "@broccoliapps/backend";
-import { magicLinkTokens } from "@broccoliapps/backend/dist/db/schemas/broccoliapps";
+import { magicLinkTokens } from "../../../db/schemas";
 import { AppId, Duration, random } from "@broccoliapps/shared";
 import { sendMagicLinkEmail } from "../../../email";
 import { sendMagicLink } from "../../../shared/api-contracts";

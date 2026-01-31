@@ -1,7 +1,6 @@
 import { LIMITS } from "@broccoliapps/tasquito-shared";
 import { useState } from "preact/hooks";
-import { Button } from "./Button";
-import { Input } from "./Input";
+import { Button, Input } from "@broccoliapps/browser";
 
 type ProjectFormProps = {
   onSubmit: (name: string) => Promise<unknown>;

@@ -8,7 +8,7 @@ import {
   postBucket as postBucketApi,
   putBucketAccounts as putBucketAccountsApi,
 } from "../../../shared/api-contracts";
-import { CACHE_KEYS, sessionStorage } from "./cache";
+import { CACHE_KEYS, SESSION_TTL } from "./cache";
 
 type DashboardResponse = Awaited<ReturnType<typeof getDashboardApi.invoke>>;
 type Bucket = DashboardResponse["buckets"][number];
@@ -19,28 +19,28 @@ type BucketAccountsResponse = Awaited<ReturnType<typeof getBucketAccountsApi.inv
 // GET /buckets - list all buckets
 export const getBuckets = async (): Promise<BucketsResponse> => {
   // Only use cache if dashboard was fetched (so we know we have all buckets)
-  const dashboardFetched = cache.get<boolean>(CACHE_KEYS.dashboardFetched, sessionStorage);
+  const dashboardFetched = cache.get<boolean>(CACHE_KEYS.dashboardFetched);
   if (dashboardFetched) {
-    const cached = cache.get<Bucket[]>(CACHE_KEYS.buckets, sessionStorage);
+    const cached = cache.get<Bucket[]>(CACHE_KEYS.buckets);
     if (cached) return { buckets: cached };
   }
 
   const data = await getBucketsApi.invoke();
-  cache.set(CACHE_KEYS.buckets, data.buckets, undefined, sessionStorage);
-  cache.set(CACHE_KEYS.dashboardFetched, true, undefined, sessionStorage);
+  cache.set(CACHE_KEYS.buckets, data.buckets, SESSION_TTL());
+  cache.set(CACHE_KEYS.dashboardFetched, true, SESSION_TTL());
   return data;
 };
 
 // GET /buckets/:id/accounts - get accounts in a bucket
 export const getBucketAccounts = async (id: string): Promise<BucketAccountsResponse> => {
-  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets, sessionStorage);
+  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets);
 
   if (buckets) {
     const bucket = buckets.find(b => b.id === id);
     if (bucket?.accountIds) {
       const bucketAccounts: Account[] = [];
       for (const accountId of bucket.accountIds) {
-        const account = cache.get<Account>(CACHE_KEYS.account(accountId), sessionStorage);
+        const account = cache.get<Account>(CACHE_KEYS.account(accountId));
         if (account) bucketAccounts.push(account);
       }
       if (bucketAccounts.length === bucket.accountIds.length) {
@@ -52,11 +52,11 @@ export const getBucketAccounts = async (id: string): Promise<BucketAccountsRespo
   const data = await getBucketAccountsApi.invoke({ id });
 
   // Update accountIds in buckets cache
-  const existing = cache.get<Bucket[]>(CACHE_KEYS.buckets, sessionStorage) ?? [];
+  const existing = cache.get<Bucket[]>(CACHE_KEYS.buckets) ?? [];
   const accountIds = data.accounts.map(a => a.id);
   cache.set(CACHE_KEYS.buckets, existing.map(b =>
     b.id === id ? { ...b, accountIds } : b
-  ), undefined, sessionStorage);
+  ), SESSION_TTL());
 
   return data;
 };
@@ -98,21 +98,21 @@ export const putBucketAccounts = async (
 
 // Helper functions
 const addBucketToCache = (bucket: Bucket) => {
-  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets, sessionStorage) ?? [];
-  cache.set(CACHE_KEYS.buckets, [...buckets, bucket], undefined, sessionStorage);
+  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets) ?? [];
+  cache.set(CACHE_KEYS.buckets, [...buckets, bucket], SESSION_TTL());
 };
 
 const updateBucketInCache = (bucket: Bucket) => {
-  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets, sessionStorage) ?? [];
-  cache.set(CACHE_KEYS.buckets, buckets.map(b => b.id === bucket.id ? bucket : b), undefined, sessionStorage);
+  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets) ?? [];
+  cache.set(CACHE_KEYS.buckets, buckets.map(b => b.id === bucket.id ? bucket : b), SESSION_TTL());
 };
 
 const removeBucketFromCache = (id: string) => {
-  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets, sessionStorage) ?? [];
-  cache.set(CACHE_KEYS.buckets, buckets.filter(b => b.id !== id), undefined, sessionStorage);
+  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets) ?? [];
+  cache.set(CACHE_KEYS.buckets, buckets.filter(b => b.id !== id), SESSION_TTL());
 };
 
 const updateBucketAccountIds = (id: string, accountIds: string[]) => {
-  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets, sessionStorage) ?? [];
-  cache.set(CACHE_KEYS.buckets, buckets.map(b => b.id === id ? { ...b, accountIds } : b), undefined, sessionStorage);
+  const buckets = cache.get<Bucket[]>(CACHE_KEYS.buckets) ?? [];
+  cache.set(CACHE_KEYS.buckets, buckets.map(b => b.id === id ? { ...b, accountIds } : b), SESSION_TTL());
 };

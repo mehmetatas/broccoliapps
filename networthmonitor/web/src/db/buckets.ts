@@ -1,4 +1,4 @@
-import { table } from "@broccoliapps/backend/dist/db/table";
+import { table } from "@broccoliapps/backend";
 
 export type Bucket = {
   userId: string;

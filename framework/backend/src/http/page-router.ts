@@ -144,13 +144,18 @@ export class PageRouter extends HttpRouter {
         }),
       };
     } else if (error instanceof HttpError) {
+      if (error.status >= 500) {
+        log.err("Page error:", { path: c.req.path, status: error.status, error });
+      } else {
+        log.wrn("Page error:", { path: c.req.path, status: error.status, message: error.message });
+      }
       pageError = {
         status: error.status,
         message: error.status >= 500 ? "Internal Server Error" : error.message,
       };
     } else {
       // Log the actual error for debugging, but don't expose to client
-      log.err("Page error:", { error });
+      log.err("Page error:", { path: c.req.path, status: 500, error });
       pageError = {
         status: 500,
         message: "Internal Server Error",
@@ -162,7 +167,7 @@ export class PageRouter extends HttpRouter {
       setCookies(c, response.cookies);
       return c.html(response.html ?? "", pageError.status as 400, response.headers);
     } catch (handlerError) {
-      log.err("Error handler failed:", { error: handlerError });
+      log.err("Error handler failed:", { path: c.req.path, error: handlerError });
       return handleError(c, error);
     }
   }
@@ -175,7 +180,7 @@ class PageRouteWithRequest<TReq extends Record<string, unknown>> {
   constructor(
     private router: PageRouter,
     private schema: Schema<TReq>
-  ) {}
+  ) { }
 
   handle(path: string, fn: PageHandlerFn<TReq>): PageRouter {
     this.router.registerRoute(path, this.schema, fn);

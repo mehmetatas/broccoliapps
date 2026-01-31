@@ -1,4 +1,4 @@
-import { UserMenu } from "./UserMenu";
+import { UserMenu } from "@broccoliapps/browser";
 
 export const Header = () => {
   return (

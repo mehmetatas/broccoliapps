@@ -1,5 +1,6 @@
+import { preferences } from "@broccoliapps/browser";
 import { getCurrencySymbol } from "../../../shared/currency";
-import { getAggregatedRates, getUserSync } from "../api";
+import { getAggregatedRates } from "../api";
 import { convertValue } from "../utils/currencyConversion";
 import { getCurrentMonth } from "../utils/dateUtils";
 
@@ -42,8 +43,7 @@ export const MoneyDisplay = ({
   onToggle,
 }: MoneyDisplayProps) => {
   const classes = sizeClasses[size];
-  const user = getUserSync();
-  const targetCurrency = user?.targetCurrency || "USD";
+  const targetCurrency = (preferences.getAllSync()?.targetCurrency as string) || "USD";
   const exchangeRates = getAggregatedRates();
 
   const canToggle = toggler && currency !== targetCurrency && exchangeRates;

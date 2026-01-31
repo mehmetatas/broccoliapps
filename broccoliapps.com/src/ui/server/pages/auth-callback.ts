@@ -1,5 +1,6 @@
-import { db, HttpError, log } from "@broccoliapps/backend";
+import { HttpError, log } from "@broccoliapps/backend";
 import { AppId, Cookie, Duration, globalConfig, random } from "@broccoliapps/shared";
+import { authCodes } from "../../../db/schemas";
 import * as v from "valibot";
 import { verifyAuthorizationCode } from "../../../auth/cognito-server";
 import { getOrCreateUser } from "../../../auth/users";
@@ -31,11 +32,11 @@ page
     }
 
     // Look up or create user in central users table
-    const user = await getOrCreateUser(result.email, result.name);
+    const user = await getOrCreateUser(result.email, result.name, result.provider);
 
     const expires = Duration.minutes(1).fromNow();
 
-    const authCode = await db.broccoliapps.authCodes.put({
+    const authCode = await authCodes.put({
       code: random.token(),
       app,
       email: result.email,

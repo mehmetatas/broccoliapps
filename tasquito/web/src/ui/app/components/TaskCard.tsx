@@ -3,10 +3,7 @@ import { Calendar, ChevronDown, ChevronRight, Pencil, Trash2, X } from "lucide-p
 import { useEffect, useRef, useState } from "preact/hooks";
 import autoAnimate, { type AnimationController } from "@formkit/auto-animate";
 import Sortable from "sortablejs";
-import { Card } from "./Card";
-import { Checkbox } from "./Checkbox";
-import { EditableText } from "./EditableText";
-import { Skeleton } from "./Skeleton";
+import { Card, Checkbox, EditableText, Skeleton } from "@broccoliapps/browser";
 
 type TaskWithSubtasks = TaskDto & {
   subtasks: TaskDto[];

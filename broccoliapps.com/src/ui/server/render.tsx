@@ -1,4 +1,4 @@
-import { PageResponse } from "@broccoliapps/backend/dist/http/response";
+import { PageResponse } from "@broccoliapps/backend";
 import type { Cookie } from "@broccoliapps/shared";
 import type { VNode } from "preact";
 import { render as renderToString } from "preact-render-to-string";

@@ -1,12 +1,12 @@
+import { type Theme, ThemeSettings, getStoredTheme, preferences } from "@broccoliapps/browser";
 import { useState } from "preact/hooks";
-import { getUserSync, patchUser, signOut } from "../api";
-import { PageHeader, TargetCurrencySettings, ThemeSettings } from "../components";
-import { type Theme, getStoredTheme } from "../utils/themeUtils";
+import { signOut } from "../api";
+import { PageHeader, TargetCurrencySettings } from "../components";
 
 export const SettingsPage = () => {
-  const user = getUserSync();
+  const prefs = preferences.getAllSync();
   const [theme, setTheme] = useState<Theme>(getStoredTheme);
-  const [currency, setCurrency] = useState(user?.targetCurrency || "USD");
+  const [currency, setCurrency] = useState((prefs?.targetCurrency as string) || "USD");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -15,7 +15,7 @@ export const SettingsPage = () => {
     setSaving(true);
     setSaved(false);
     try {
-      await patchUser({ targetCurrency: newCurrency });
+      await preferences.set("targetCurrency", newCurrency);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {

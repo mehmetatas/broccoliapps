@@ -13,5 +13,16 @@ function handler(event) {
     };
   }
 
+  // Redirect /privacy and /terms to broccoliapps.com
+  if (request.uri === "/privacy" || request.uri === "/terms") {
+    return {
+      statusCode: 301,
+      statusDescription: "Moved Permanently",
+      headers: {
+        location: { value: "https://www.broccoliapps.com" + request.uri },
+      },
+    };
+  }
+
   return request;
 }

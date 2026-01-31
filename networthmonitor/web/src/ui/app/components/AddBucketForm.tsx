@@ -1,5 +1,5 @@
+import { Button } from "@broccoliapps/browser";
 import { Loader2, Plus } from "lucide-preact";
-import { Button } from "./Button";
 
 type AddBucketFormProps = {
   value: string;

@@ -1,7 +1,7 @@
-import { ChevronDown, ChevronRight, Loader2, Pencil, Trash2 } from "lucide-preact";
+import { Check, ChevronDown, ChevronRight, Loader2, Pencil, Trash2, X } from "lucide-preact";
+import type { TargetedKeyboardEvent } from "preact";
 import type { AccountDto, BucketDto } from "../../../shared/api-contracts/dto";
 import { AccountTypeSection } from "./AccountTypeSection";
-import { InlineTextEditor } from "./InlineTextEditor";
 
 type BucketListItemProps = {
   bucket: BucketDto;
@@ -55,14 +55,38 @@ export const BucketListItem = ({
           </button>
 
           {isEditing ? (
-            <div class="flex-1">
-              <InlineTextEditor
+            <div class="flex-1 flex items-center gap-2">
+              <input
+                type="text"
                 value={editedName}
-                onChange={onEditNameChange}
-                onSave={onSaveName}
-                onCancel={onCancelEdit}
-                saving={savingName}
+                onInput={(e) => onEditNameChange((e.target as HTMLInputElement).value)}
+                class="flex-1 px-3 py-1.5 text-sm bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                autoFocus
+                onKeyDown={(e: TargetedKeyboardEvent<HTMLInputElement>) => {
+                  if (e.key === "Enter") onSaveName();
+                  else if (e.key === "Escape") onCancelEdit();
+                }}
               />
+              {savingName ? (
+                <span class="p-1.5 text-neutral-500">
+                  <Loader2 size={18} class="animate-spin" />
+                </span>
+              ) : (
+                <>
+                  <button
+                    onClick={onSaveName}
+                    class="p-1.5 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 rounded transition-colors"
+                  >
+                    <Check size={18} />
+                  </button>
+                  <button
+                    onClick={onCancelEdit}
+                    class="p-1.5 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded transition-colors"
+                  >
+                    <X size={18} />
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <>

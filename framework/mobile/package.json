@@ -1,0 +1,33 @@
+{
+  "name": "@broccoliapps/mobile",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "clean": "rm -rf dist/"
+  },
+  "peerDependencies": {
+    "@broccoliapps/shared": "*",
+    "@invertase/react-native-apple-authentication": ">=2.0.0",
+    "react": ">=18.0.0",
+    "react-native": ">=0.72.0",
+    "react-native-inappbrowser-reborn": ">=3.0.0",
+    "react-native-keychain": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@broccoliapps/shared": "*",
+    "@invertase/react-native-apple-authentication": "^2.5.1",
+    "@types/react": "^19.2.0",
+    "react": "19.2.4",
+    "react-native": "0.83.1",
+    "react-native-inappbrowser-reborn": "^3.7.0",
+    "react-native-keychain": "^10.0.0",
+    "typescript": "^5.9.3",
+    "valibot": "^1.0.0"
+  }
+}

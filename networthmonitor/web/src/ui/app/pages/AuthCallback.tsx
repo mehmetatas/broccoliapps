@@ -1,63 +1,18 @@
-import { cache } from "@broccoliapps/browser";
+import { AuthCallback as AuthCallbackBase, preferences } from "@broccoliapps/browser";
 import { route } from "preact-router";
-import { useEffect, useState } from "preact/hooks";
-import { authExchange } from "../../../shared/api-contracts";
-import { setUserFromAuth } from "../api";
-import { CACHE_KEYS } from "../api/cache";
 
 export const AuthCallback = () => {
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-
-    if (!code) {
-      setError("Missing auth code");
-      return;
-    }
-
-    authExchange
-      .invoke({ code })
-      .then(({ accessToken, accessTokenExpiresAt, refreshToken, refreshTokenExpiresAt, user }) => {
-        cache.set(CACHE_KEYS.accessToken, accessToken, accessTokenExpiresAt);
-        cache.set(CACHE_KEYS.refreshToken, refreshToken, refreshTokenExpiresAt);
-        setUserFromAuth(user);
-        // Route to onboarding if user hasn't set their currency yet
-        if (!user.targetCurrency) {
-          route("/app/onboarding");
-        } else {
-          route("/app");
-        }
-      })
-      .catch((err) => setError(err.message));
-  }, []);
-
-  if (error) {
-    return (
-      <div class="flex min-h-screen items-center justify-center bg-neutral-50 dark:bg-neutral-900">
-        <div class="rounded-lg bg-white dark:bg-neutral-800 p-8 shadow-md">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-            <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
-          <h2 class="mb-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Authentication Failed</h2>
-          <p class="mb-4 text-sm text-neutral-600 dark:text-neutral-400">{error}</p>
-          <a href="/" class="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-            Return to home
-          </a>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div class="flex min-h-screen items-center justify-center bg-neutral-50 dark:bg-neutral-900">
-      <div class="text-center">
-        <div class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-neutral-200 dark:border-neutral-700 border-t-blue-600 dark:border-t-blue-400" />
-        <p class="text-sm font-medium text-neutral-600 dark:text-neutral-400">Signing you in...</p>
-      </div>
-    </div>
+    <AuthCallbackBase
+      onSuccess={() => {
+        preferences.getAll().then((prefs) => {
+          if (!prefs.targetCurrency) {
+            route("/app/onboarding");
+          } else {
+            route("/app");
+          }
+        });
+      }}
+    />
   );
 };

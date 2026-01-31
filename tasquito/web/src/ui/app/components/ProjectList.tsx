@@ -1,6 +1,6 @@
 import type { ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
 import { Archive, Check, Clock, LayoutGrid, Loader } from "lucide-preact";
-import { EmptyState } from "./EmptyState";
+import { EmptyState } from "@broccoliapps/browser";
 import { ProjectCard } from "./ProjectCard";
 import { ProjectGridSkeleton } from "./Skeleton";
 

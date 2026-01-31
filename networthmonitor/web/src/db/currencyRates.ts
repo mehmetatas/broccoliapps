@@ -1,4 +1,4 @@
-import { table } from "@broccoliapps/backend/dist/db/table";
+import { table } from "@broccoliapps/backend";
 
 export type CurrencyRate = {
   date: string;      // "yyyy-mm-dd" for daily, "yyyy-mm" for monthly

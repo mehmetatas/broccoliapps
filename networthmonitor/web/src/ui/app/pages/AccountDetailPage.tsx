@@ -1,3 +1,4 @@
+import { Modal, preferences, useModal } from "@broccoliapps/browser";
 import { Trash2 } from "lucide-preact";
 import { route } from "preact-router";
 import { useEffect, useMemo, useState } from "preact/hooks";
@@ -6,7 +7,6 @@ import {
   deleteAccount,
   deleteHistoryItem,
   getAccountDetail,
-  getUserSync,
   patchAccount,
   postHistoryItem,
   putAccountBuckets,
@@ -15,14 +15,13 @@ import {
   AccountDetailSkeleton,
   AccountHeader,
   BucketPicker,
-  ConfirmActionModal,
   HistoryEditor,
   MoneyDisplay,
   PageHeader,
   RemoveAccountModal,
   ValueChart,
 } from "../components";
-import { useExchangeRates, useModal } from "../hooks";
+import { useExchangeRates } from "../hooks";
 import { convertValue, getEarliestMonth } from "../utils/currencyConversion";
 
 type AccountDetailPageProps = {
@@ -59,8 +58,7 @@ export const AccountDetailPage = ({ id }: AccountDetailPageProps) => {
 
   // Currency toggle state
   const [showConverted, setShowConverted] = useState(false);
-  const user = getUserSync();
-  const targetCurrency = user?.targetCurrency || "USD";
+  const targetCurrency = (preferences.getAllSync()?.targetCurrency as string) || "USD";
 
   // Get earliest month for exchange rates
   const earliestMonth = useMemo(() => {
@@ -431,14 +429,14 @@ export const AccountDetailPage = ({ id }: AccountDetailPageProps) => {
       />
 
       {/* Permanent Delete Modal - for archived accounts */}
-      <ConfirmActionModal
-        open={deleteModal.isOpen}
+      <Modal
+        isOpen={deleteModal.isOpen}
         onClose={deleteModal.close}
         onConfirm={handlePermanentDelete}
         title="Permanently Delete"
         confirmText="Delete"
         confirmVariant="danger"
-        loading={deleting}
+        isLoading={deleting}
       >
         <p class="mb-4">
           This will permanently erase all records of this {account.type === "asset" ? "asset" : "debt"}, as if it never existed.
@@ -446,7 +444,7 @@ export const AccountDetailPage = ({ id }: AccountDetailPageProps) => {
         <p>
           Are you sure? This action cannot be undone.
         </p>
-      </ConfirmActionModal>
+      </Modal>
     </div>
   );
 };

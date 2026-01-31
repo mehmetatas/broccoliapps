@@ -1,17 +1,6 @@
 import * as v from "valibot";
 
 // ============================================================================
-// Auth User DTO
-// ============================================================================
-export const authUserDto = {
-  id: v.string(),
-  email: v.string(),
-  name: v.string(),
-  isNewUser: v.boolean(),
-};
-export type AuthUserDto = v.InferOutput<v.ObjectSchema<typeof authUserDto, undefined>>;
-
-// ============================================================================
 // Task Status Schema
 // ============================================================================
 export const taskStatusSchema = v.picklist(["todo", "done"]);
