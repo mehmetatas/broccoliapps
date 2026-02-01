@@ -1,4 +1,8 @@
+import { isLambda } from "./env";
+
 type Printer = typeof console.debug | typeof console.info | typeof console.warn | typeof console.error;
+
+const isLambdaEnv = isLambda();
 
 const printLog = (
   print: Printer,
@@ -14,7 +18,7 @@ const printLog = (
     };
   }
 
-  const isRunningOnLocalhost = !process.env.LAMBDA_TASK_ROOT;
+  const isRunningOnLocalhost = !isLambdaEnv;
 
   if (isRunningOnLocalhost) {
     print(level.toUpperCase(), new Date().toISOString(), message, data ? JSON.stringify(data, null, 2) : "");

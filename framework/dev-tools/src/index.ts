@@ -1,3 +1,6 @@
+export * from "./build";
+export * from "./dependency-verification";
+
 import { serve as honoServe } from "@hono/node-server";
 import { Hono } from "hono";
 

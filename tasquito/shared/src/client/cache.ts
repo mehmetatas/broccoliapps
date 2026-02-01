@@ -1,3 +1,5 @@
+export { CACHE_TTL, getCacheExpiry } from "@broccoliapps/shared";
+
 // Cache keys for tasquito
 export const CACHE_KEYS = {
   // Projects
@@ -18,8 +20,3 @@ export const CACHE_KEYS = {
   // Theme
   theme: "cache:theme",
 } as const;
-
-// Cache TTL: 1 hour in milliseconds
-export const CACHE_TTL = 3600000;
-
-export const getCacheExpiry = (): number => Date.now() + CACHE_TTL;

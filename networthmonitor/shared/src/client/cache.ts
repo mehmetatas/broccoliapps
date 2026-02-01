@@ -1,3 +1,5 @@
+export { CACHE_TTL, getCacheExpiry } from "@broccoliapps/shared";
+
 export const CACHE_KEYS = {
   accountPrefix: "cache:account:",
   account: (id: string) => `cache:account:${id}` as const,
@@ -7,8 +9,3 @@ export const CACHE_KEYS = {
   exchangeRates: "cache:exchange-rates",
   theme: "cache:theme",
 } as const;
-
-// Cache TTL: 1 hour in milliseconds
-export const CACHE_TTL = 3600000;
-
-export const getCacheExpiry = (): number => Date.now() + CACHE_TTL;

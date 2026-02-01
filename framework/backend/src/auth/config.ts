@@ -1,4 +1,5 @@
 import { AppId, Duration, globalConfig } from "@broccoliapps/shared";
+import { env } from "../env";
 import { HttpError } from "../http";
 
 export type AuthConfig = {
@@ -22,11 +23,11 @@ const defaultLifetimes = () => ({
 export const getAuthConfig = (): AuthConfig => {
   if (config) return config;
 
-  const envAppId = process.env.BA_APP_ID as AppId | undefined;
-  if (envAppId && envAppId in globalConfig.apps) {
+  const envAppId = env().BA_APP_ID as AppId;
+  if (envAppId in globalConfig.apps) {
     config = { appId: envAppId, ...defaultLifetimes() };
     return config;
   }
 
-  throw new HttpError(500, "Auth config is not set. Set the BA_APP_ID env var.");
+  throw new HttpError(500, `Invalid BA_APP_ID: "${envAppId}". Must be one of: ${Object.keys(globalConfig.apps).join(", ")}`);
 };
