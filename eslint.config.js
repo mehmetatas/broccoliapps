@@ -20,6 +20,12 @@ export default tseslint.config(
       // Require braces for all control statements
       curly: ["error", "all"],
 
+      // Disallow single-line braced blocks (e.g. if (x) { return; })
+      "brace-style": ["error", "1tbs", { allowSingleLine: false }],
+
+      // Max 1 consecutive empty line
+      "no-multiple-empty-lines": ["error", { max: 1 }],
+
       // Disable base rules (let unused-imports handle it)
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "off",

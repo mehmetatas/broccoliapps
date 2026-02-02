@@ -1,8 +1,8 @@
-import {useTheme} from '@broccoliapps/mobile';
-import type {NativeStackScreenProps} from '@react-navigation/native-stack';
+import { useTheme } from '@broccoliapps/mobile';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import type {RootStackParamList} from '../navigation/types';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 

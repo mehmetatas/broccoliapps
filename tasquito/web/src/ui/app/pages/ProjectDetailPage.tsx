@@ -1,9 +1,8 @@
+import { ArchiveConfirmModal, DeleteConfirmModal, EditableText, EmptyState, IconButton, useDragAndDrop, useModal } from "@broccoliapps/browser";
 import { LIMITS, type TaskDto } from "@broccoliapps/tasquito-shared";
+import autoAnimate, { type AnimationController } from "@formkit/auto-animate";
 import { Archive, ArchiveRestore, ArrowLeft, CheckSquare, ChevronDown, ChevronRight, Trash2, X } from "lucide-preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
-import autoAnimate, { type AnimationController } from "@formkit/auto-animate";
-import { ArchiveConfirmModal, DeleteConfirmModal, EditableText, EmptyState, IconButton, useModal } from "@broccoliapps/browser";
-import { useDragAndDrop } from "@broccoliapps/browser";
 import { ProjectDetailSkeleton, TaskCard, TaskCardSkeleton, TaskForm } from "../components";
 import { useProject } from "../hooks";
 import { AppLink } from "../SpaApp";
@@ -152,19 +151,24 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
 
   // Calculate days until deletion for archived projects
   const getDaysUntilDeletion = () => {
-    if (!project?.archivedAt) return null;
+    if (!project?.archivedAt) {
+return null;
+}
     const twoWeeksMs = 14 * 24 * 60 * 60 * 1000;
     const deletionTime = project.archivedAt + twoWeeksMs;
     const now = Date.now();
     const daysRemaining = Math.ceil((deletionTime - now) / (24 * 60 * 60 * 1000));
+
     return Math.max(0, daysRemaining);
   };
 
-  const handleDeleteTask = async () => {
-    if (!deleteTaskModal.data) return;
+  const handleDeleteTask = () => {
+    if (!deleteTaskModal.data) {
+ return; 
+}
     setIsDeletingTask(true);
     try {
-      await removeTask(deleteTaskModal.data.id);
+      removeTask(deleteTaskModal.data.id);
       deleteTaskModal.close();
     } catch {
       // Keep modal open on error

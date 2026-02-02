@@ -1,6 +1,6 @@
+import { Button, Input } from "@broccoliapps/browser";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
 import { useState } from "preact/hooks";
-import { Button, Input } from "@broccoliapps/browser";
 
 type ProjectFormProps = {
   onSubmit: (name: string) => Promise<unknown>;
@@ -24,6 +24,7 @@ export const ProjectForm = ({ onSubmit }: ProjectFormProps) => {
       await onSubmit(name.trim());
       setName("");
     } catch (err) {
+      console.error(err);
       setError("Failed to create project");
     } finally {
       setIsSubmitting(false);
