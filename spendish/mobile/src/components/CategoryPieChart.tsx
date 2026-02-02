@@ -51,7 +51,7 @@ export function CategoryPieChart({
   // Transform data for pie chart - include value in the name for display
   const pieData = data.map((d, index) => {
     const category = categoriesById[d.category];
-    const percentage = total > 0 ? (d.amount / total) * 100 : 0;
+    const percentage = total > 0 ? d.amount / total * 100 : 0;
     const label = category?.label ?? d.category;
     const valueLabel = showPercentage
       ? `${percentage.toFixed(0)}%`

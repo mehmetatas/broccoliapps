@@ -28,9 +28,9 @@ export const AccountCard = ({
         : "bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400"
       }`}>
         {account.type === "asset" ? <TrendingUp size={24} /> : <CreditCard size={24} />}
-        {needsUpdate && (
+        {needsUpdate &&
           <span class="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full" />
-        )}
+        }
       </div>
       <div class="flex-1 min-w-0">
         <div class="flex items-center justify-between gap-2">

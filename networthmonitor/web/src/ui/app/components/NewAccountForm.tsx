@@ -203,9 +203,9 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
             </span>
           </label>
 
-          {error && (
+          {error &&
             <p class="text-sm text-red-600 dark:text-red-400">{error}</p>
-          )}
+          }
 
           <Button
             onClick={handleQuickCreate}
@@ -266,9 +266,9 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
             </p>
           </div>
 
-          {error && (
+          {error &&
             <p class="text-sm text-red-600 dark:text-red-400">{error}</p>
-          )}
+          }
 
           <Button
             onClick={handleNext}
@@ -308,9 +308,9 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
             Enter at least 1 value. You can complete the history later.
           </p>
 
-          {error && (
+          {error &&
             <p class="text-sm text-red-600 dark:text-red-400">{error}</p>
-          )}
+          }
 
           <div class="flex gap-3">
             <Button
@@ -347,9 +347,9 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
             />
           </div>
 
-          {error && (
+          {error &&
             <p class="text-sm text-red-600 dark:text-red-400">{error}</p>
-          )}
+          }
 
           <div class="flex gap-3">
             <Button

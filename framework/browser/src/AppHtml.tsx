@@ -15,7 +15,7 @@ export const AppHtml = ({
   const buildId = typeof __BUILD_ID__ !== "undefined" ? __BUILD_ID__ : "";
 
   // Dev mode: use NODE_ENV or check if running without build ID
-  const isDevMode = process.env.NODE_ENV === "development" || (!buildId && typeof window === "undefined");
+  const isDevMode = process.env.NODE_ENV === "development" || !buildId && typeof window === "undefined";
 
   // CSS is always loaded (built by PostCSS for Tailwind 4)
   // In dev mode, Vite serves JS with HMR; in prod, load from static path

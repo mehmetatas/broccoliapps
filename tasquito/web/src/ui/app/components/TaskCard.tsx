@@ -235,9 +235,9 @@ export const TaskCard = ({
             maxLength={LIMITS.MAX_TASK_TITLE_LENGTH}
             textClassName={`text-lg font-medium ${isDone ? "line-through text-neutral-400 dark:text-neutral-500" : "text-neutral-900 dark:text-neutral-100"}`}
           />
-          {(task.subtasks.length > 0 || pendingSubtaskCount > 0) && (
+          {(task.subtasks.length > 0 || pendingSubtaskCount > 0) &&
             <span class="text-xs text-neutral-400 dark:text-neutral-500">({doneSubtasks.length}/{task.subtasks.length + pendingSubtaskCount})</span>
-          )}
+          }
         </div>
         {/* Date badge - only show if has date or in edit mode */}
         {(task.dueDate || isEditMode) && (

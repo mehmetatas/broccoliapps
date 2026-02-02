@@ -6,7 +6,7 @@ const id = () => {
 };
 
 const token = (length = 32) => {
-  const bytes = new Uint8Array(Math.ceil((length * Math.log2(36)) / 8));
+  const bytes = new Uint8Array(Math.ceil(length * Math.log2(36) / 8));
   crypto.getRandomValues(bytes);
 
   const num = bytes.reduce((acc, b) => acc * 256n + BigInt(b), 0n);

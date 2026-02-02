@@ -69,9 +69,9 @@ export const CurrencyPicker = ({ value, onChange, placeholder = "Select currency
                 </button>
               </li>
             ))}
-            {sortedCurrencies.length === 0 && (
+            {sortedCurrencies.length === 0 &&
               <li class="px-4 py-2 text-sm text-neutral-400 dark:text-neutral-500">No currencies found</li>
-            )}
+            }
           </ul>
         </div>
       )}

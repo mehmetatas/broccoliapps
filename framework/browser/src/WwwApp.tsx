@@ -2,8 +2,8 @@ import type { ComponentChildren, ComponentType } from "preact";
 import Router, { type RoutableProps } from "preact-router";
 
 type WwwAppConfig = {
-  routesWithLayout: Record<string, ComponentType<any>>;
-  routesWithoutLayout?: Record<string, ComponentType<any>>;
+  routesWithLayout: Record<string, ComponentType<unknown>>;
+  routesWithoutLayout?: Record<string, ComponentType<unknown>>;
   Layout: ComponentType<{ children: ComponentChildren; skip?: boolean }>;
   ErrorPage: ComponentType<{ status: number; message: string; details?: string[] }>;
 };
@@ -23,7 +23,7 @@ export function createWwwApp(config: WwwAppConfig): ComponentType<AppProps> {
     withLayout = true,
     ...routeParams
   }: RoutableProps & {
-    component: ComponentType<any>;
+    component: ComponentType<unknown>;
     pageProps: Record<string, unknown>;
     withLayout?: boolean;
   }) => {
@@ -47,12 +47,12 @@ export function createWwwApp(config: WwwAppConfig): ComponentType<AppProps> {
 
     return (
       <Router>
-        {Object.entries(routesWithLayout).map(([path, component]) => (
+        {Object.entries(routesWithLayout).map(([path, component]) =>
           <Route key={path} path={path} component={component} pageProps={pageProps} withLayout={true} />
-        ))}
-        {Object.entries(routesWithoutLayout).map(([path, component]) => (
+        )}
+        {Object.entries(routesWithoutLayout).map(([path, component]) =>
           <Route key={path} path={path} component={component} pageProps={pageProps} withLayout={false} />
-        ))}
+        )}
         <Route default component={ClientNotFound} pageProps={pageProps} withLayout={false} />
       </Router>
     );

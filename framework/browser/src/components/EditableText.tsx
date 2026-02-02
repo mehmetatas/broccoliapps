@@ -1,3 +1,4 @@
+import { RefObject } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 
 type EditableTextProps = {
@@ -76,7 +77,7 @@ export const EditableText = ({
       return (
         <div>
           <textarea
-            ref={inputRef as any}
+            ref={inputRef as RefObject<HTMLTextAreaElement>}
             value={editValue}
             onInput={(e) => setEditValue((e.target as HTMLTextAreaElement).value)}
             onBlur={handleSave}
@@ -93,7 +94,7 @@ export const EditableText = ({
     return (
       <div>
         <input
-          ref={inputRef as any}
+          ref={inputRef as RefObject<HTMLInputElement>}
           type="text"
           value={editValue}
           onInput={(e) => setEditValue((e.target as HTMLInputElement).value)}

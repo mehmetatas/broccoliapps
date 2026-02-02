@@ -84,7 +84,7 @@ export const registerAuthHandlers = (api: ApiRouter, options?: UseAuthOptions) =
     const { appId } = getAuthConfig();
 
     await centralSendEmail.invoke(
-      { app: appId, email: req.email, ...(req.platform && { platform: req.platform }) },
+      { app: appId, email: req.email, ...req.platform && { platform: req.platform } },
       { baseUrl: globalConfig.apps["broccoliapps-com"].baseUrl }
     );
 

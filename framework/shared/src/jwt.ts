@@ -12,7 +12,7 @@ const decodeBase64Url = (base64Url: string): string => {
   const base64 = base64Url
     .replace(/-/g, "+")
     .replace(/_/g, "/")
-    .padEnd(base64Url.length + ((4 - (base64Url.length % 4)) % 4), "=");
+    .padEnd(base64Url.length + (4 - base64Url.length % 4) % 4, "=");
   const binary = atob(base64);
   return new TextDecoder().decode(Uint8Array.from(binary, (c) => c.charCodeAt(0)));
 };

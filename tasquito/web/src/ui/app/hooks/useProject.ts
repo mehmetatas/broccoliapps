@@ -80,6 +80,7 @@ export const useProject = (id: string) => {
       const data = await getProject(id);
       setProject(data.project);
     } catch (err) {
+      console.error(err);
       setError("Failed to load project");
     } finally {
       setIsLoading(false);
@@ -96,7 +97,7 @@ export const useProject = (id: string) => {
       return;
     }
     await patchProject({ id: project.id, name });
-    setProject((prev) => (prev ? { ...prev, name } : null));
+    setProject((prev) => prev ? { ...prev, name } : null);
   };
 
   const remove = async () => {
@@ -179,7 +180,7 @@ export const useProject = (id: string) => {
             }
             return {
               ...prev,
-              tasks: prev.tasks.map((t) => (t.id === item.taskId ? { ...t, status: item.originalStatus } : t)),
+              tasks: prev.tasks.map((t) => t.id === item.taskId ? { ...t, status: item.originalStatus } : t),
             };
           });
         })
@@ -250,7 +251,7 @@ export const useProject = (id: string) => {
       }
       return {
         ...prev,
-        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, status } : t)),
+        tasks: prev.tasks.map((t) => t.id === taskId ? { ...t, status } : t),
       };
     });
 
@@ -278,7 +279,7 @@ export const useProject = (id: string) => {
       }
       return {
         ...prev,
-        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, title } : t)),
+        tasks: prev.tasks.map((t) => t.id === taskId ? { ...t, title } : t),
       };
     });
   };
@@ -294,7 +295,7 @@ export const useProject = (id: string) => {
       }
       return {
         ...prev,
-        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, description } : t)),
+        tasks: prev.tasks.map((t) => t.id === taskId ? { ...t, description } : t),
       };
     });
   };
@@ -310,7 +311,7 @@ export const useProject = (id: string) => {
       }
       return {
         ...prev,
-        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, dueDate } : t)),
+        tasks: prev.tasks.map((t) => t.id === taskId ? { ...t, dueDate } : t),
       };
     });
   };
@@ -372,7 +373,7 @@ export const useProject = (id: string) => {
         ...prev,
         tasks: prev.tasks.map((t) =>
           t.id === taskId
-            ? { ...t, subtasks: t.subtasks.map((st) => (st.id === subtaskId ? { ...st, status } : st)) }
+            ? { ...t, subtasks: t.subtasks.map((st) => st.id === subtaskId ? { ...st, status } : st) }
             : t
         ),
       };
@@ -408,7 +409,7 @@ export const useProject = (id: string) => {
         ...prev,
         tasks: prev.tasks.map((t) =>
           t.id === taskId
-            ? { ...t, subtasks: t.subtasks.map((st) => (st.id === subtaskId ? { ...st, title } : st)) }
+            ? { ...t, subtasks: t.subtasks.map((st) => st.id === subtaskId ? { ...st, title } : st) }
             : t
         ),
       };
@@ -517,7 +518,7 @@ export const useProject = (id: string) => {
               ...prev,
               tasks: prev.tasks.map((t) =>
                 t.id === taskId
-                  ? { ...t, subtasks: t.subtasks.map((st) => (st.id === item.subtaskId ? { ...st, status: item.originalStatus } : st)) }
+                  ? { ...t, subtasks: t.subtasks.map((st) => st.id === item.subtaskId ? { ...st, status: item.originalStatus } : st) }
                   : t
               ),
             };
@@ -602,7 +603,7 @@ export const useProject = (id: string) => {
       if (!prev) {
         return null;
       }
-      const updatedTasks = prev.tasks.map((t) => (t.id === taskId ? { ...t, sortOrder: newSortOrder } : t));
+      const updatedTasks = prev.tasks.map((t) => t.id === taskId ? { ...t, sortOrder: newSortOrder } : t);
 
       return {
         ...prev,
@@ -614,6 +615,7 @@ export const useProject = (id: string) => {
     try {
       await patchTask({ projectId: project.id, id: taskId, sortOrder: newSortOrder });
     } catch (err) {
+      console.error(err);
       // Revert on error
       load();
     }

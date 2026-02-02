@@ -18,7 +18,7 @@ const main = async () => {
     console.error(error);
     process.exit(1);
   }
-}
+};
 
 main();
 

@@ -30,11 +30,11 @@ export const AddBucketForm = ({
           }}
         />
         <Button onClick={onSubmit} disabled={!value.trim() || isLoading}>
-          {isLoading ? (
+          {isLoading ?
             <Loader2 size={18} class="animate-spin" />
-          ) : (
+            :
             <Plus size={18} />
-          )}
+          }
         </Button>
       </div>
     </div>

@@ -67,9 +67,9 @@ export const HomePage = () => {
                 Go to App
               </button>
             </div>
-          ) : (
+          ) :
             <AuthCard appId="tasquito" accent={ACCENT} />
-          )}
+          }
         </div>
       </div>
 

@@ -293,7 +293,7 @@ api.register(postAccount, async (req, res, ctx) => {
     currency: req.currency,
     createdAt: Date.now(),
     nextUpdate,
-    ...(req.updateFrequency && { updateFrequency: req.updateFrequency }),
+    ...req.updateFrequency && { updateFrequency: req.updateFrequency },
   });
 
   // Create history items from Record

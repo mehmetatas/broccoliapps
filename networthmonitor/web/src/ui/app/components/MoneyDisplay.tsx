@@ -61,7 +61,7 @@ export const MoneyDisplay = ({
   const roundedAmount = Math.round(displayAmount);
   const formattedAmount = Math.abs(roundedAmount).toLocaleString();
   const isNegative = roundedAmount < 0;
-  const sign = showSign ? (isNegative ? "-" : "+") : isNegative ? "-" : "";
+  const sign = showSign ? isNegative ? "-" : "+" : isNegative ? "-" : "";
 
   const handleToggle = () => {
     if (canToggle && onToggle) {

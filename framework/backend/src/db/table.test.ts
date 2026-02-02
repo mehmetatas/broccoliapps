@@ -740,6 +740,7 @@ describe("table", () => {
 
       // Pass an SK filter with a field that's not in the SK definition
       // This tests the case where lastFieldIndex stays -1
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (users.query as any)({ id: "123" }, { nonexistentField: "value" }).execute();
 
       // The query should still work, just without SK condition

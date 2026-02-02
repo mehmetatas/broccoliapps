@@ -10,6 +10,9 @@ import {
 } from "./crud";
 import type { TableBuilder, TableConfig } from "./types";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Any = any;
+
 export const table = <T>(typeName: string, tableName = process.env.TABLE_NAME as string): TableBuilder<T> => {
   const config: TableConfig = {
     typeName,
@@ -19,7 +22,7 @@ export const table = <T>(typeName: string, tableName = process.env.TABLE_NAME as
     gsis: {},
   };
 
-  const builder: TableBuilder<T, any, any, any> = {
+  const builder: TableBuilder<T, Any, Any, Any> = {
     key: (pk: string[], sk?: string[]) => {
       config.pk = pk;
       config.sk = sk ?? [];
@@ -52,14 +55,14 @@ export const table = <T>(typeName: string, tableName = process.env.TABLE_NAME as
     },
 
     build: () => ({
-      query: createQueryFn<T>(config) as any,
+      query: createQueryFn<T>(config),
       put: createPutFn<T>(config),
       putIfNotExists: createPutIfNotExistsFn<T>(config),
       batchPut: createBatchPutFn<T>(config),
-      get: createGetFn<T>(config) as any,
-      delete: createDeleteFn(config) as any,
-      batchGet: createBatchGetFn<T>(config) as any,
-      batchDelete: createBatchDeleteFn(config) as any,
+      get: createGetFn<T>(config),
+      delete: createDeleteFn(config),
+      batchGet: createBatchGetFn<T>(config),
+      batchDelete: createBatchDeleteFn(config),
     }),
   };
 

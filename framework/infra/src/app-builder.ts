@@ -204,7 +204,7 @@ class AppBuilder {
   // Derive resource name from path pattern: "/api/*" -> "api", "/*" -> "default"
   private nameFromPath(pathPattern: string): string {
     if (pathPattern === "/*") {
-      return "default"; 
+      return "default";
     }
     const match = pathPattern.match(/^\/([^/*]+)/);
     return match?.[1] ?? "origin";
@@ -261,7 +261,7 @@ class AppBuilder {
     // Merge Cognito env vars with user-provided config
     const environment: Record<string, string> = {
       BA_APP_ID: this.appName,
-      ...(config?.environment ?? defaultConfig.lambda.environment),
+      ...config?.environment ?? defaultConfig.lambda.environment,
     };
     if (cognitoConfig) {
       environment.COGNITO_USER_POOL_ID = cognitoConfig.userPoolId;
@@ -441,7 +441,7 @@ class AppBuilder {
       enabled: true,
       httpVersion: cloudfront.HttpVersion.HTTP2,
       certificate: this.getSslCert(),
-      domainNames: subdomains.map((sd) => (sd === "" ? domain : `${sd}.${domain}`)),
+      domainNames: subdomains.map((sd) => sd === "" ? domain : `${sd}.${domain}`),
       defaultRootObject: "",
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
     });

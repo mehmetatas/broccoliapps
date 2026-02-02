@@ -1,7 +1,7 @@
 import { cognitoClient, type CognitoIdentityProvider } from "@broccoliapps/browser";
 import { useEffect } from "preact/hooks";
 
-type AuthPageProps = {
+export type AuthPageProps = {
   app: string;
   provider: CognitoIdentityProvider;
   platform?: "mobile";

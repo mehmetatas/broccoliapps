@@ -100,7 +100,7 @@ export const useBuckets = () => {
     setSavingName(true);
     try {
       const { bucket: updated } = await patchBucket({ id: bucketId, name: editedName.trim() });
-      setBuckets((prev) => prev.map((b) => (b.id === bucketId ? updated : b)));
+      setBuckets((prev) => prev.map((b) => b.id === bucketId ? updated : b));
       setEditingBucketId(null);
       setEditedName("");
     } catch (err) {

@@ -13,7 +13,6 @@ type SendMagicLinkEmailParams = {
 };
 
 export const sendMagicLinkEmail = async ({ to, app, token }: SendMagicLinkEmailParams): Promise<void> => {
-  const appConfig = globalConfig.apps[app];
   const appName = formatAppName(app);
   const magicLinkUrl = `${globalConfig.apps["broccoliapps-com"].baseUrl}/auth/email-callback?token=${token}`;
 

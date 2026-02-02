@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockSend = vi.fn();
 
@@ -34,7 +34,7 @@ describe("client error handling", () => {
     await expect(
       executePutIfNotExists({
         tableName: "test-table",
-        item: { pk: "test", sk: "test", _type: "test" } as any,
+        item: { pk: "test", sk: "test", _type: "test" }
       })
     ).rejects.toThrow("Some other DynamoDB error");
   });
@@ -48,7 +48,7 @@ describe("client error handling", () => {
 
     const result = await executePutIfNotExists({
       tableName: "test-table",
-      item: { pk: "test", sk: "test", _type: "test" } as any,
+      item: { pk: "test", sk: "test", _type: "test" },
     });
 
     expect(result).toBe(false);
@@ -61,7 +61,7 @@ describe("client error handling", () => {
 
     const result = await executePutIfNotExists({
       tableName: "test-table",
-      item: { pk: "test", sk: "test", _type: "test" } as any,
+      item: { pk: "test", sk: "test", _type: "test" },
     });
 
     expect(result).toBe(true);

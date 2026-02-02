@@ -133,7 +133,7 @@ export const HomePage = () => {
   const hasFilteredAccounts = filteredAccounts.length > 0;
   const months = Object.keys(netWorthData).sort((a, b) => b.localeCompare(a));
   const latestMonth = months[0];
-  const currentNetWorth = latestMonth ? (netWorthData[latestMonth] ?? 0) : 0;
+  const currentNetWorth = latestMonth ? netWorthData[latestMonth] ?? 0 : 0;
   const isNegative = currentNetWorth < 0;
 
   return (

@@ -128,9 +128,9 @@ export const AuthCard = ({ appId, accent, onClose }: AuthCardProps) => {
         >
           {emailStatus === "sending" ? "Sending..." : "Continue with Email"}
         </button>
-        {error && (
+        {error &&
           <p class="text-sm text-red-600">{error}</p>
-        )}
+        }
       </div>
 
       <p class="mt-6 text-center text-xs text-gray-500">

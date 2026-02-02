@@ -15,6 +15,9 @@ export type DdbItem<T> = T & {
   _type: string;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+type EmptyObject = {};
+
 // Operator types for SK conditions
 export type SKOperator<V> = { beginsWith: V } | { gte: V } | { lte: V } | { gt: V } | { lt: V };
 
@@ -82,7 +85,7 @@ export type SKEmpty<T, Fields extends readonly (keyof T)[]> = {
 export type SKPrefixExact<
   T,
   Fields extends readonly (keyof T)[],
-  Required extends object = {},
+  Required extends object = EmptyObject,
   AllFields extends keyof T = Fields[number],
 > = Fields extends readonly []
   ? never
@@ -105,7 +108,7 @@ export type SKPrefixExact<
 export type SKPrefixWithOperator<
   T,
   Fields extends readonly (keyof T)[],
-  Required extends object = {},
+  Required extends object = EmptyObject,
   AllFields extends keyof T = Fields[number],
 > = Fields extends readonly []
   ? never
@@ -276,7 +279,7 @@ export interface TableBuilder<
   T,
   PKFields extends readonly (keyof T)[] = readonly [],
   SKFields extends readonly (keyof T)[] = readonly [],
-  GSIs = {},
+  GSIs = EmptyObject,
 > {
   // Set key with just PK fields
   key<const PK extends readonly (keyof T)[]>(pk: PK): TableBuilder<T, PK, readonly [], GSIs>;

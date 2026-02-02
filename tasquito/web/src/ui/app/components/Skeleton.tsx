@@ -12,9 +12,9 @@ export const ProjectCardSkeleton = () => {
 export const ProjectGridSkeleton = ({ count = 6 }: { count?: number }) => {
   return (
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: count }).map((_, i) => (
+      {Array.from({ length: count }).map((_, i) =>
         <ProjectCardSkeleton key={i} />
-      ))}
+      )}
     </div>
   );
 };

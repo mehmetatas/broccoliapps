@@ -168,7 +168,7 @@ api.register(patchProject, async (req, res, ctx) => {
 
   const updatedProject = {
     ...project,
-    ...(req.name !== undefined && { name: req.name }),
+    ...req.name !== undefined && { name: req.name },
     updatedAt: Date.now(),
   };
 

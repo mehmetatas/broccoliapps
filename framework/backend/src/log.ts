@@ -31,7 +31,7 @@ const printLog = (
   }
 
   // See: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-logging.html
-  print({ text: message, ...(data ?? {}) });
+  print({ text: message, ...data ?? {} });
 };
 
 export const dbg = (message: string, data?: Record<string, unknown>) => {
@@ -55,8 +55,8 @@ const startTimer = (timerId: string, startData?: Record<string, unknown>) => {
   return {
     stop: (stopData?: Record<string, unknown>) => {
       inf(timerId, {
-        ...(startData ?? {}),
-        ...(stopData ?? {}),
+        ...startData ?? {},
+        ...stopData ?? {},
         __duration: Date.now() - startTime,
         __timer: timerId,
         __logType: "timer",

@@ -1,5 +1,5 @@
 import { hydrate } from "preact";
-import { AuthPage } from "./pages";
+import { AuthPage, AuthPageProps } from "./pages";
 
 if (import.meta.env.DEV) {
   import("./app.css");
@@ -17,7 +17,7 @@ const hydrateApp = () => {
     return;
   }
   const props = window.__PAGE_PROPS__ ?? {};
-  hydrate(<AuthPage {...(props as any)} />, el);
+  hydrate(<AuthPage {...(props as AuthPageProps)} />, el);
 };
 
 if (document.readyState === "loading") {

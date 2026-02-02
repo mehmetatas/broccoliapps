@@ -161,7 +161,8 @@ export const buildApp = async (options: BuildAppOptions): Promise<void> => {
 /** Walk up from rootDir to find the monorepo root (directory containing the root package.json with workspaces). */
 const findMonorepoRoot = (startDir: string): string => {
   let dir = startDir;
-  while (true) {
+  let parent;
+  do {
     const pkgPath = path.join(dir, "package.json");
     if (fs.existsSync(pkgPath)) {
       const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
@@ -169,10 +170,13 @@ const findMonorepoRoot = (startDir: string): string => {
         return dir;
       }
     }
-    const parent = path.dirname(dir);
+
+    parent = path.dirname(dir);
     if (parent === dir) {
-      throw new Error("Could not find monorepo root");
+      break;
     }
     dir = parent;
-  }
+  } while (dir);
+
+  throw new Error("Could not find monorepo root");
 };

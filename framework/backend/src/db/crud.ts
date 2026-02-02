@@ -22,6 +22,7 @@ export const createQueryFn = <T>(config: TableConfig) => {
   };
 
   for (const [name, gsiConfig] of Object.entries(gsis)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (queryFn as any)[name] = (pkValue: Record<string, unknown>, skFilter?: Record<string, unknown>) =>
       buildQueryForKey<T>(config, gsiConfig.pk, gsiConfig.sk, gsiConfig.index, pkValue, skFilter);
   }
@@ -84,7 +85,7 @@ export const createBatchGetFn = <T>(config: ItemConfig) => {
       // For PK+SK tables: key is { pk: {...}, sk: {...} }
       // For PK-only or SK-only tables: key is flat { field1, field2, ... }
       const pkValue = hasPK && hasSK ? (key.pk as Record<string, unknown>) : hasPK ? key : {};
-      const skValue = hasPK && hasSK ? ((key.sk as Record<string, unknown>) ?? {}) : hasSK ? key : {};
+      const skValue = hasPK && hasSK ? (key.sk as Record<string, unknown>) ?? {} : hasSK ? key : {};
 
       const pk = buildPK(config.typeName, config.pk, pkValue);
       const sk = buildSK(config.typeName, config.sk, skValue);
@@ -143,7 +144,7 @@ export const createBatchDeleteFn = (config: ItemConfig) => {
       // For PK+SK tables: key is { pk: {...}, sk: {...} }
       // For PK-only or SK-only tables: key is flat { field1, field2, ... }
       const pkValue = hasPK && hasSK ? (key.pk as Record<string, unknown>) : hasPK ? key : {};
-      const skValue = hasPK && hasSK ? ((key.sk as Record<string, unknown>) ?? {}) : hasSK ? key : {};
+      const skValue = hasPK && hasSK ? (key.sk as Record<string, unknown>) ?? {} : hasSK ? key : {};
 
       return {
         pk: buildPK(config.typeName, config.pk, pkValue),

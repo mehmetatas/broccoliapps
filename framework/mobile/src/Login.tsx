@@ -229,17 +229,17 @@ export function Login({
             ]}
             onPress={onGooglePress}
             disabled={loading !== null}>
-            {loading === "google" ? (
+            {loading === "google" ?
               <ActivityIndicator color={colors.activityIndicator} />
-            ) : (
-              <Text
-                style={[
-                  styles.googleButtonText,
-                  { color: colors.googleButtonText },
-                ]}>
+              : (
+                <Text
+                  style={[
+                    styles.googleButtonText,
+                    { color: colors.googleButtonText },
+                  ]}>
                 Continue with Google
-              </Text>
-            )}
+                </Text>
+              )}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -249,17 +249,17 @@ export function Login({
             ]}
             onPress={onApplePress}
             disabled={loading !== null}>
-            {loading === "apple" ? (
+            {loading === "apple" ?
               <ActivityIndicator color={colors.appleButtonText} />
-            ) : (
-              <Text
-                style={[
-                  styles.appleButtonText,
-                  { color: colors.appleButtonText },
-                ]}>
+              : (
+                <Text
+                  style={[
+                    styles.appleButtonText,
+                    { color: colors.appleButtonText },
+                  ]}>
                 Continue with Apple
-              </Text>
-            )}
+                </Text>
+              )}
           </TouchableOpacity>
 
           <View style={styles.divider}>
@@ -308,19 +308,19 @@ export function Login({
             ]}
             onPress={onEmailPress}
             disabled={loading !== null || !email.trim()}>
-            {loading === "email" ? (
+            {loading === "email" ?
               <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.emailButtonText}>
+              : (
+                <Text style={styles.emailButtonText}>
                 Continue with Email
-              </Text>
-            )}
+                </Text>
+              )}
           </TouchableOpacity>
         </View>
 
-        {error && (
+        {error &&
           <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
-        )}
+        }
 
         <Text style={[styles.terms, { color: colors.textTertiary }]}>
           By continuing, you agree to our{" "}

@@ -96,9 +96,9 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
           <MoreHorizontal size={18} />
         </button>
       </div>
-      {title.length >= LIMITS.MAX_TASK_TITLE_LENGTH && (
+      {title.length >= LIMITS.MAX_TASK_TITLE_LENGTH &&
         <p class="mt-1 text-xs text-neutral-400">Character limit reached</p>
-      )}
+      }
 
       {/* Expanded section: Description, Due Date, Subtasks, Create Button */}
       {isExpanded && (
@@ -113,9 +113,9 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
               rows={3}
               class="w-full px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 placeholder-neutral-400 dark:placeholder-neutral-500 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg resize-none outline-none focus:border-blue-300 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-300 dark:focus:ring-blue-500"
             />
-            {description.length >= LIMITS.MAX_TASK_DESCRIPTION_LENGTH && (
+            {description.length >= LIMITS.MAX_TASK_DESCRIPTION_LENGTH &&
               <p class="mt-1 text-xs text-neutral-400">Character limit reached</p>
-            )}
+            }
           </div>
 
           {/* Due Date */}
@@ -173,9 +173,9 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
                   onKeyDown={handleSubtaskKeyDown}
                   class="w-full text-sm text-neutral-600 dark:text-neutral-300 placeholder-neutral-400 dark:placeholder-neutral-500 bg-transparent border-none outline-none focus:ring-0 p-0 py-1"
                 />
-                {newSubtaskTitle.length >= LIMITS.MAX_SUBTASK_TITLE_LENGTH && (
+                {newSubtaskTitle.length >= LIMITS.MAX_SUBTASK_TITLE_LENGTH &&
                   <p class="mt-1 text-xs text-neutral-400">Character limit reached</p>
-                )}
+                }
               </div>
             )}
           </div>

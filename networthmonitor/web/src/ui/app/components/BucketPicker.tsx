@@ -1,6 +1,6 @@
+import type { BucketDto } from "@broccoliapps/nwm-shared";
 import { Check, Loader2, Plus } from "lucide-preact";
 import { useEffect, useState } from "preact/hooks";
-import type { BucketDto } from "@broccoliapps/nwm-shared";
 import { getBuckets, postBucket } from "../api";
 import { AppLink } from "../SpaApp";
 
@@ -25,7 +25,6 @@ export const BucketPicker = ({
   const [isLoading, setIsLoading] = useState(!preloadedBuckets);
   const [newBucketName, setNewBucketName] = useState("");
   const [creatingBucket, setCreatingBucket] = useState(false);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (preloadedBuckets) {
@@ -93,9 +92,7 @@ export const BucketPicker = ({
             <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
               Buckets
             </h2>
-            {(saving || creatingBucket) && (
-              <Loader2 size={16} class="animate-spin text-neutral-400" />
-            )}
+            {creatingBucket && <Loader2 size={16} class="animate-spin text-neutral-400" />}
           </div>
           {showManageLink && (
             <AppLink

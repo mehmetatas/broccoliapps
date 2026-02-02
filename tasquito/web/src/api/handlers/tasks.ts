@@ -219,11 +219,11 @@ api.register(patchTask, async (req, res, ctx) => {
 
   const updatedTask = {
     ...task,
-    ...(req.title !== undefined && { title: req.title }),
-    ...(req.description !== undefined && { description: req.description }),
-    ...(req.dueDate !== undefined && { dueDate: req.dueDate ?? undefined }),
-    ...(req.status !== undefined && { status: req.status }),
-    ...(req.sortOrder !== undefined && { sortOrder: req.sortOrder }),
+    ...req.title !== undefined && { title: req.title },
+    ...req.description !== undefined && { description: req.description },
+    ...req.dueDate !== undefined && { dueDate: req.dueDate ?? undefined },
+    ...req.status !== undefined && { status: req.status },
+    ...req.sortOrder !== undefined && { sortOrder: req.sortOrder },
     updatedAt: Date.now(),
   };
 

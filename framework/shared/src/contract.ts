@@ -129,7 +129,7 @@ export class ApiContract<TReq extends Record<string, unknown>, TRes> {
       if (!s2sProvider) {
         throw new ApiError(500, "S2S provider not configured");
       }
-      
+
       const timestamp = String(Date.now());
       const payload: Record<string, string> = { appId: s2sProvider.appId, path: this.path, timestamp };
       if (body !== undefined) {

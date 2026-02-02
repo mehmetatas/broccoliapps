@@ -14,7 +14,7 @@ export const OnboardingPage = () => {
 
   const handleContinue = async () => {
     if (!currency) {
-      return; 
+      return;
     }
 
     setSaving(true);
@@ -44,9 +44,9 @@ export const OnboardingPage = () => {
           <CurrencyPicker value={currency} onChange={setCurrency} />
         </div>
 
-        {error && (
+        {error &&
           <p class="text-red-600 dark:text-red-400 text-sm mb-4">{error}</p>
-        )}
+        }
 
         <Button
           onClick={handleContinue}

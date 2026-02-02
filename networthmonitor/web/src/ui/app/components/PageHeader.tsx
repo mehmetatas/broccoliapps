@@ -69,9 +69,9 @@ export const PageHeader = ({
           <h1 class="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
             {title}
           </h1>
-          {subtitle && (
+          {subtitle &&
             <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">{subtitle}</div>
-          )}
+          }
         </div>
       </div>
       {action && (

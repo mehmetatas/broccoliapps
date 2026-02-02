@@ -21,7 +21,7 @@ export const Html = ({
   children,
 }: HtmlProps) => {
   const buildId = typeof __BUILD_ID__ !== "undefined" ? __BUILD_ID__ : "";
-  const isDevMode = process.env.NODE_ENV === "development" || (!buildId && typeof window === "undefined");
+  const isDevMode = process.env.NODE_ENV === "development" || !buildId && typeof window === "undefined";
 
   const cssFile = buildId ? `/static/app.${buildId}.css` : "/static/app.css";
   const jsFile = isDevMode

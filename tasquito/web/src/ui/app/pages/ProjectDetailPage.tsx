@@ -164,7 +164,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
 
   const handleDeleteTask = () => {
     if (!deleteTaskModal.data) {
-      return; 
+      return;
     }
     setIsDeletingTask(true);
     try {
@@ -309,9 +309,9 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
             <div ref={todoContainerRef} class="space-y-4">
               {todoTasks.map(renderTaskCard)}
               {/* Pending Task Skeletons at bottom */}
-              {Array.from({ length: pendingTaskCount }).map((_, i) => (
+              {Array.from({ length: pendingTaskCount }).map((_, i) =>
                 <TaskCardSkeleton key={`pending-${i}`} />
-              ))}
+              )}
             </div>
           )}
 

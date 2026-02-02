@@ -178,4 +178,4 @@ export const formatCurrency = (value: number, currency: string): string => {
 
 export const getCurrencies = () => {
   return Object.keys(currencySymbols);
-}
+};

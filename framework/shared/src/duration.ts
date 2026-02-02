@@ -56,7 +56,7 @@ export class Duration {
   }
 
   toMonths(): number {
-    return Math.round(this.milliseconds / ((365.25 / 12) * 24 * 60 * 60 * 1000));
+    return Math.round(this.milliseconds / (365.25 / 12 * 24 * 60 * 60 * 1000));
   }
 
   toYears(): number {

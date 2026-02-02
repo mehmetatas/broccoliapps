@@ -1,5 +1,5 @@
-import { useEffect, useState } from "preact/hooks";
 import type { ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
+import { useEffect, useState } from "preact/hooks";
 import { archiveProject, deleteProject, getProjects, invalidateProjectsCache, postProject } from "../api";
 
 export const useProjects = () => {
@@ -18,6 +18,7 @@ export const useProjects = () => {
       const sorted = [...data.projects].sort((a, b) => a.name.localeCompare(b.name));
       setProjects(sorted);
     } catch (err) {
+      console.error(err);
       setError("Failed to load projects");
     } finally {
       setIsLoading(false);

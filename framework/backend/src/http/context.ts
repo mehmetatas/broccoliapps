@@ -9,7 +9,7 @@ import { HttpError } from "./page-router";
  * Wraps Hono's Context to provide a cleaner API and hide implementation details.
  */
 export class RequestContext {
-  private user: JwtData | undefined
+  private user: JwtData | undefined;
 
   constructor(private ctx: Context) { }
 
@@ -43,5 +43,5 @@ export class RequestContext {
     }
 
     return this.user;
-  }
+  };
 }

@@ -196,7 +196,7 @@ export function HomeScreen(): React.JSX.Element {
       const thresholdsCrossed = Math.floor(distance / STEP_THRESHOLD);
 
       if (thresholdsCrossed > 0) {
-        const scale = (thresholdsCrossed * STEP_THRESHOLD) / distance;
+        const scale = thresholdsCrossed * STEP_THRESHOLD / distance;
         lastPos.current.x += deltaX * scale;
         lastPos.current.y += deltaY * scale;
 
@@ -321,11 +321,11 @@ export function HomeScreen(): React.JSX.Element {
                   onPress={() => handleCategoryPress(id)}
                   activeOpacity={0.7}
                 >
-                  {isConfirmed ? (
+                  {isConfirmed ?
                     <Check size={24} color={iconColor} />
-                  ) : (
+                    :
                     Icon && <Icon size={24} color={iconColor} />
-                  )}
+                  }
                   {!isConfirmed && (
                     <Text style={[styles.categoryLabel, { color: iconColor }]}>
                       {label}

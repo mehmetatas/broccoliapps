@@ -1,4 +1,3 @@
-export type HomeProps = {};
 
 const AppleIcon = () => (
   <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
@@ -6,11 +5,11 @@ const AppleIcon = () => (
   </svg>
 );
 
-const PlayStoreIcon = () => (
+const PlayStoreIcon = () =>
   <svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0,0h24v24H0V0z"></path><g><path d="M11.82,11.52L2.58,21.18c0,0,0,0,0,0c0.3,1.02,1.26,1.8,2.4,1.8c0.48,0,0.9-0.12,1.26-0.36l0,0l10.44-5.94L11.82,11.52z" fill="#EA4335"></path><path d="M21.18,9.84L21.18,9.84l-4.5-2.58l-5.04,4.44l5.1,4.98l4.5-2.52c0.78-0.42,1.32-1.26,1.32-2.16C22.5,11.1,21.96,10.26,21.18,9.84z" fill="#FBBC04"></path><path d="M2.58,2.82C2.52,3,2.52,3.24,2.52,3.48v17.1c0,0.24,0,0.42,0.06,0.66l9.6-9.42L2.58,2.82z" fill="#4285F4"></path><path d="M11.88,12l4.8-4.74L6.3,1.38C5.94,1.14,5.46,1.02,4.98,1.02c-1.14,0-2.16,0.78-2.4,1.8c0,0,0,0,0,0L11.88,12z" fill="#34A853"></path></g></svg>
-);
+;
 
-export const HomePage = ({}: HomeProps) => {
+export const HomePage = () => {
   return (
     <div class="w-full">
       {/* Hero */}

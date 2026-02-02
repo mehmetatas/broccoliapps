@@ -66,9 +66,9 @@ export const HomePage = () => {
                 Go to App
               </button>
             </div>
-          ) : (
+          ) :
             <AuthCard appId="networthmonitor" accent={ACCENT} />
-          )}
+          }
         </div>
       </div>
 

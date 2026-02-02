@@ -103,9 +103,9 @@ export const BucketListItem = ({
                   {debtCount > 0 && `${debtCount} ${debtCount === 1 ? "debt" : "debts"}`}
                   {assetCount === 0 && debtCount === 0 && "empty"}
                 </span>
-                {savingAccounts && (
+                {savingAccounts &&
                   <Loader2 size={14} class="animate-spin text-neutral-400" />
-                )}
+                }
               </div>
               <button
                 onClick={onStartEdit}
