@@ -10,7 +10,6 @@ export const currencyRates = table<CurrencyRate>("currencyRate")
   .key([], ["date", "currency"])
   .build();
 
-
 // NEW FORMAT - same entity, different key structure
 
 export type ExchangeRate = {

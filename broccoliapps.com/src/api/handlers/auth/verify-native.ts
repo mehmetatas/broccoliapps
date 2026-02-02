@@ -1,4 +1,4 @@
-import { HttpError, log } from "@broccoliapps/backend";
+import { log } from "@broccoliapps/backend";
 import { centralVerifyNative as verifyNative } from "@broccoliapps/shared";
 import { getOrCreateUser } from "../../../auth/users";
 import { api } from "../../lambda";

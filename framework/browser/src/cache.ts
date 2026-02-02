@@ -12,7 +12,9 @@ const set = <T>(key: string, value: T, expiresAt?: number): void => {
 
 const get = <T>(key: string): T | null => {
   const raw = localStorage.getItem(key);
-  if (!raw) {return null;}
+  if (!raw) {
+    return null;
+  }
 
   try {
     const cacheValue: CacheValue<T> = JSON.parse(raw);

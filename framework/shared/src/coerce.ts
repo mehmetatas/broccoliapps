@@ -24,8 +24,12 @@ export const coerceBoolean = () =>
   v.pipe(
     v.string(),
     v.transform((val: string) => {
-      if (val === "true" || val === "1") {return true;}
-      if (val === "false" || val === "0") {return false;}
+      if (val === "true" || val === "1") {
+        return true;
+      }
+      if (val === "false" || val === "0") {
+        return false;
+      }
       throw new Error(`Cannot convert "${val}" to boolean`);
     }),
     v.boolean()

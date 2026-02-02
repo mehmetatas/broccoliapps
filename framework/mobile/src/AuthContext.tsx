@@ -6,15 +6,15 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import {Linking} from 'react-native';
+} from "react";
+import {Linking} from "react-native";
 import {
   refreshToken as refreshTokenContract,
   authExchange,
   type CacheProvider,
-} from '@broccoliapps/shared';
-import {initializeMobileClient} from './client';
-import {type StoredTokens, type TokenStorage} from './storage';
+} from "@broccoliapps/shared";
+import {initializeMobileClient} from "./client";
+import {type StoredTokens, type TokenStorage} from "./storage";
 
 type AuthContextType = {
   isLoading: boolean;
@@ -128,11 +128,17 @@ export const AuthProvider = ({apiBaseUrl, storage, onInitClient, children}: Auth
     };
 
     const handleDeepLink = async (url: string) => {
-      if (!url.includes('auth/callback')) return;
-      const searchPart = url.split('?')[1];
-      if (!searchPart) return;
-      const code = new URLSearchParams(searchPart).get('code');
-      if (!code) return;
+      if (!url.includes("auth/callback")) {
+        return;
+      }
+      const searchPart = url.split("?")[1];
+      if (!searchPart) {
+        return;
+      }
+      const code = new URLSearchParams(searchPart).get("code");
+      if (!code) {
+        return;
+      }
 
       setIsExchangingToken(true);
       try {
@@ -144,7 +150,7 @@ export const AuthProvider = ({apiBaseUrl, storage, onInitClient, children}: Auth
           refreshTokenExpiresAt: result.refreshTokenExpiresAt,
         });
       } catch (e) {
-        console.error('[auth] deep link exchange error:', e);
+        console.error("[auth] deep link exchange error:", e);
       } finally {
         setIsExchangingToken(false);
       }
@@ -152,11 +158,13 @@ export const AuthProvider = ({apiBaseUrl, storage, onInitClient, children}: Auth
 
     // Handle cold start (app not running when link tapped)
     Linking.getInitialURL().then(url => {
-      if (url) handleDeepLink(url);
+      if (url) {
+        handleDeepLink(url);
+      }
     });
 
     // Handle warm start (app in background when link tapped)
-    const sub = Linking.addEventListener('url', ({url}) =>
+    const sub = Linking.addEventListener("url", ({url}) =>
       handleDeepLink(url),
     );
     return () => sub.remove();
@@ -185,7 +193,7 @@ export const AuthProvider = ({apiBaseUrl, storage, onInitClient, children}: Auth
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

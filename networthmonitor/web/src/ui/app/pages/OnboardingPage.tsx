@@ -13,7 +13,9 @@ export const OnboardingPage = () => {
   const firstName = user?.name?.split(" ")[0] || "there";
 
   const handleContinue = async () => {
-    if (!currency) { return; }
+    if (!currency) {
+      return; 
+    }
 
     setSaving(true);
     setError(null);

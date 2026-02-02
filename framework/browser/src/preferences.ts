@@ -7,7 +7,9 @@ type PreferenceMap = Record<string, string | number | boolean>;
 
 const getAll = async (): Promise<PreferenceMap> => {
   const cached = cache.get<PreferenceMap>(CACHE_KEY);
-  if (cached) return cached;
+  if (cached) {
+    return cached;
+  }
 
   const { preferences } = await getUserPreferences.invoke();
   cache.set(CACHE_KEY, preferences);

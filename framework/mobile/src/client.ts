@@ -1,5 +1,5 @@
-import {setBaseUrl, setTokenProvider} from '@broccoliapps/shared';
-import type {CacheProvider} from '@broccoliapps/shared';
+import {setBaseUrl, setTokenProvider} from "@broccoliapps/shared";
+import type {CacheProvider} from "@broccoliapps/shared";
 
 class MemoryCacheProvider implements CacheProvider {
   private store = new Map<string, {value: unknown; expiresAt?: number}>();

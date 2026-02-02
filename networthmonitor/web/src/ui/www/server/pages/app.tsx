@@ -3,5 +3,5 @@ import { AppHtml } from "../../client/layout/AppHtml";
 import { www } from "../lambda";
 
 www.handle("/app/*", async () => ({
-    html: renderToString(<AppHtml />),
+  html: renderToString(<AppHtml />),
 }));

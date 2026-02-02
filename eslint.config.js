@@ -17,6 +17,9 @@ export default tseslint.config(
       // Enforce arrow functions for callbacks
       "prefer-arrow-callback": "error",
 
+      // Enforce consistent indentation
+      indent: ["error", 2],
+
       // Require braces for all control statements
       curly: ["error", "all"],
 

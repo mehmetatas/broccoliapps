@@ -24,7 +24,9 @@ export const useDragAndDrop = <T extends DragItem>({
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     // Destroy existing instance if any
     if (sortableRef.current) {
@@ -33,7 +35,9 @@ export const useDragAndDrop = <T extends DragItem>({
     }
 
     // Don't create sortable when disabled
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
 
     sortableRef.current = Sortable.create(container, {
       filter: "input, textarea, button, [contenteditable], .no-drag",
@@ -58,7 +62,9 @@ export const useDragAndDrop = <T extends DragItem>({
         }
 
         const draggedId = draggedEl.getAttribute("data-drag-id");
-        if (!draggedId) return;
+        if (!draggedId) {
+          return;
+        }
 
         // After SortableJS moves the element, the DOM is in the new order
         // Query only direct children to avoid including nested elements (like subtasks)
@@ -69,7 +75,9 @@ export const useDragAndDrop = <T extends DragItem>({
           (el) => el.getAttribute("data-drag-id") === draggedId
         );
 
-        if (draggedIndex === -1) return;
+        if (draggedIndex === -1) {
+          return;
+        }
 
         const prevEl = elements[draggedIndex - 1];
         const nextEl = elements[draggedIndex + 1];

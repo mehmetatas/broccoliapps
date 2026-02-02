@@ -4,9 +4,9 @@ import {
   sendMagicLink,
   verifyApple,
   type AuthExchangeResponse,
-} from '@broccoliapps/shared';
-import { appleAuth } from '@invertase/react-native-apple-authentication';
-import { useState } from 'react';
+} from "@broccoliapps/shared";
+import { appleAuth } from "@invertase/react-native-apple-authentication";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Linking,
@@ -16,17 +16,19 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
-import InAppBrowser from 'react-native-inappbrowser-reborn';
-import { useLoginTheme } from './theme';
-import type { LoginProps } from './types';
+} from "react-native";
+import InAppBrowser from "react-native-inappbrowser-reborn";
+import { useLoginTheme } from "./theme";
+import type { LoginProps } from "./types";
 
 const parseCodeFromUrl = (url: string): string | null => {
   try {
-    const urlWithoutFragment = url.split('#')[0] ?? '';
-    const searchPart = urlWithoutFragment.split('?')[1];
-    if (!searchPart) return null;
-    return new URLSearchParams(searchPart).get('code');
+    const urlWithoutFragment = url.split("#")[0] ?? "";
+    const searchPart = urlWithoutFragment.split("?")[1];
+    if (!searchPart) {
+      return null;
+    }
+    return new URLSearchParams(searchPart).get("code");
   } catch {
     return null;
   }
@@ -40,21 +42,21 @@ export function Login({
   colors: colorOverrides,
 }: LoginProps) {
   const { colors } = useLoginTheme(colorOverrides);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
-  const [loading, setLoading] = useState<'google' | 'apple' | 'email' | null>(
+  const [loading, setLoading] = useState<"google" | "apple" | "email" | null>(
     null,
   );
   const [error, setError] = useState<string | null>(null);
 
   const appConfig = globalConfig.apps[appId];
   const baseUrl = appConfig.baseUrl;
-  const broccoliappsBaseUrl = globalConfig.apps['broccoliapps-com'].baseUrl;
+  const broccoliappsBaseUrl = globalConfig.apps["broccoliapps-com"].baseUrl;
   const mobileScheme =
-    'mobileScheme' in appConfig ? appConfig.mobileScheme : appId;
+    "mobileScheme" in appConfig ? appConfig.mobileScheme : appId;
 
   const handleOAuthBrowser = async (
-    provider: 'google' | 'apple',
+    provider: "google" | "apple",
   ): Promise<AuthExchangeResponse | null> => {
     const authUrl = `${broccoliappsBaseUrl}/auth?app=${appId}&provider=${provider}&platform=mobile`;
     const available = await InAppBrowser.isAvailable();
@@ -73,7 +75,7 @@ export function Login({
       },
     );
 
-    if (result.type === 'success' && result.url) {
+    if (result.type === "success" && result.url) {
       const code = parseCodeFromUrl(result.url);
       if (code) {
         return authExchange.invoke({ code }, { baseUrl, skipAuth: true });
@@ -84,14 +86,14 @@ export function Login({
 
   const onGooglePress = async () => {
     setError(null);
-    setLoading('google');
+    setLoading("google");
     try {
-      const result = await handleOAuthBrowser('google');
+      const result = await handleOAuthBrowser("google");
       if (result) {
         await onLoginSuccess(result);
       }
     } catch {
-      setError('Google sign-in failed. Please try again.');
+      setError("Google sign-in failed. Please try again.");
     } finally {
       setLoading(null);
     }
@@ -99,10 +101,10 @@ export function Login({
 
   const onApplePress = async () => {
     setError(null);
-    setLoading('apple');
+    setLoading("apple");
     try {
       // Native Apple Sign In on iOS
-      if (Platform.OS === 'ios' && appleAuth.isSupported) {
+      if (Platform.OS === "ios" && appleAuth.isSupported) {
         const appleAuthResponse = await appleAuth.performRequest({
           requestedOperation: appleAuth.Operation.LOGIN,
           requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
@@ -112,13 +114,16 @@ export function Login({
           appleAuthResponse.user,
         );
 
-        if (credentialState !== appleAuth.State.AUTHORIZED) return;
+        if (credentialState !== appleAuth.State.AUTHORIZED) {
+          return;
+        }
 
         if (
           !appleAuthResponse.identityToken ||
           !appleAuthResponse.authorizationCode
-        )
+        ) {
           return;
+        }
 
         const result = await verifyApple.invoke(
           {
@@ -139,33 +144,35 @@ export function Login({
       }
 
       // InAppBrowser fallback for Android
-      const result = await handleOAuthBrowser('apple');
+      const result = await handleOAuthBrowser("apple");
       if (result) {
         await onLoginSuccess(result);
       }
     } catch {
-      setError('Apple sign-in failed. Please try again.');
+      setError("Apple sign-in failed. Please try again.");
     } finally {
       setLoading(null);
     }
   };
 
   const onEmailPress = async () => {
-    if (!email.trim()) return;
+    if (!email.trim()) {
+      return;
+    }
     setError(null);
-    setLoading('email');
+    setLoading("email");
     try {
       const result = await sendMagicLink.invoke(
-        { email: email.trim(), platform: 'mobile' },
+        { email: email.trim(), platform: "mobile" },
         { baseUrl, skipAuth: true },
       );
       if (result.success) {
         setEmailSent(true);
       } else {
-        setError('Failed to send email. Please try again.');
+        setError("Failed to send email. Please try again.");
       }
     } catch {
-      setError('Failed to send email. Please try again.');
+      setError("Failed to send email. Please try again.");
     } finally {
       setLoading(null);
     }
@@ -179,7 +186,7 @@ export function Login({
             Check your email
           </Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            We sent a sign-in link to{'\n'}
+            We sent a sign-in link to{"\n"}
             <Text style={[styles.emailHighlight, { color: colors.inputText }]}>
               {email}
             </Text>
@@ -188,7 +195,7 @@ export function Login({
             style={styles.backButton}
             onPress={() => {
               setEmailSent(false);
-              setEmail('');
+              setEmail("");
             }}>
             <Text style={[styles.backButtonText, { color: colors.accent }]}>
               Back to sign in
@@ -222,7 +229,7 @@ export function Login({
             ]}
             onPress={onGooglePress}
             disabled={loading !== null}>
-            {loading === 'google' ? (
+            {loading === "google" ? (
               <ActivityIndicator color={colors.activityIndicator} />
             ) : (
               <Text
@@ -242,7 +249,7 @@ export function Login({
             ]}
             onPress={onApplePress}
             disabled={loading !== null}>
-            {loading === 'apple' ? (
+            {loading === "apple" ? (
               <ActivityIndicator color={colors.appleButtonText} />
             ) : (
               <Text
@@ -301,7 +308,7 @@ export function Login({
             ]}
             onPress={onEmailPress}
             disabled={loading !== null || !email.trim()}>
-            {loading === 'email' ? (
+            {loading === "email" ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.emailButtonText}>
@@ -316,13 +323,13 @@ export function Login({
         )}
 
         <Text style={[styles.terms, { color: colors.textTertiary }]}>
-          By continuing, you agree to our{' '}
+          By continuing, you agree to our{" "}
           <Text
             style={styles.link}
             onPress={() => Linking.openURL(`${baseUrl}/terms`)}>
             Terms of Service
-          </Text>{' '}
-          and{' '}
+          </Text>{" "}
+          and{" "}
           <Text
             style={styles.link}
             onPress={() => Linking.openURL(`${baseUrl}/privacy`)}>
@@ -341,26 +348,26 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 32,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   logoArea: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 48,
   },
   title: {
     fontSize: 36,
-    fontFamily: 'Nunito-Bold',
+    fontFamily: "Nunito-Bold",
     marginBottom: 8,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: 'Nunito-Regular',
-    textAlign: 'center',
+    fontFamily: "Nunito-Regular",
+    textAlign: "center",
     lineHeight: 24,
   },
   emailHighlight: {
-    fontFamily: 'Nunito-SemiBold',
+    fontFamily: "Nunito-SemiBold",
   },
   authButtons: {
     gap: 12,
@@ -369,26 +376,26 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 8,
     borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   googleButtonText: {
     fontSize: 16,
-    fontFamily: 'Nunito-SemiBold',
+    fontFamily: "Nunito-SemiBold",
   },
   appleButton: {
     height: 48,
     borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   appleButtonText: {
     fontSize: 16,
-    fontFamily: 'Nunito-SemiBold',
+    fontFamily: "Nunito-SemiBold",
   },
   divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 4,
   },
   dividerLine: {
@@ -398,7 +405,7 @@ const styles = StyleSheet.create({
   dividerText: {
     paddingHorizontal: 16,
     fontSize: 14,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: "Nunito-Regular",
   },
   emailInput: {
     height: 48,
@@ -406,18 +413,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 16,
     fontSize: 16,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: "Nunito-Regular",
   },
   emailButton: {
     height: 48,
     borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   emailButtonText: {
     fontSize: 16,
-    fontFamily: 'Nunito-SemiBold',
-    color: '#ffffff',
+    fontFamily: "Nunito-SemiBold",
+    color: "#ffffff",
   },
   backButton: {
     marginTop: 24,
@@ -425,23 +432,23 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 16,
-    fontFamily: 'Nunito-SemiBold',
-    textAlign: 'center',
+    fontFamily: "Nunito-SemiBold",
+    textAlign: "center",
   },
   error: {
     marginTop: 16,
     fontSize: 14,
-    fontFamily: 'Nunito-Regular',
-    textAlign: 'center',
+    fontFamily: "Nunito-Regular",
+    textAlign: "center",
   },
   terms: {
     marginTop: 32,
     fontSize: 12,
-    fontFamily: 'Nunito-Regular',
-    textAlign: 'center',
+    fontFamily: "Nunito-Regular",
+    textAlign: "center",
     lineHeight: 18,
   },
   link: {
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
 });

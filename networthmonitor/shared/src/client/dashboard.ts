@@ -19,7 +19,9 @@ export const getDashboard = async (): Promise<DashboardResponse> => {
       const accounts: Account[] = [];
       for (const key of accountKeys) {
         const account = getCache().get<Account>(key);
-        if (account) accounts.push(account);
+        if (account) {
+          accounts.push(account);
+        }
       }
       return { accounts, buckets };
     }

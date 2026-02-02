@@ -15,7 +15,6 @@ export type Account = {
   bucketIds?: string[];
 };
 
-
 export type HistoryItem = {
   userId: string;
   accountId: string;

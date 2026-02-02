@@ -1,4 +1,4 @@
-import * as Keychain from 'react-native-keychain';
+import * as Keychain from "react-native-keychain";
 
 export type StoredTokens = {
   accessToken: string;
@@ -15,7 +15,7 @@ export type TokenStorage = {
 
 export const createTokenStorage = (service: string): TokenStorage => ({
   save: async (tokens: StoredTokens) => {
-    await Keychain.setGenericPassword('tokens', JSON.stringify(tokens), {
+    await Keychain.setGenericPassword("tokens", JSON.stringify(tokens), {
       service,
     });
   },

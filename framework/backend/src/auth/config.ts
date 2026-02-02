@@ -21,7 +21,9 @@ const defaultLifetimes = () => ({
  * Auto-initializes from BA_APP_ID env var on first access.
  */
 export const getAuthConfig = (): AuthConfig => {
-  if (config) return config;
+  if (config) {
+    return config;
+  }
 
   const envAppId = env().BA_APP_ID as AppId;
   if (envAppId in globalConfig.apps) {

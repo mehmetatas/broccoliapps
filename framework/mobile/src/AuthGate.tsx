@@ -1,9 +1,9 @@
-import React from 'react';
-import {ActivityIndicator, StyleSheet, Text, View} from 'react-native';
-import {useAuth} from './AuthContext';
-import type {AppColors} from './types';
+import React from "react";
+import {ActivityIndicator, StyleSheet, Text, View} from "react-native";
+import {useAuth} from "./AuthContext";
+import type {AppColors} from "./types";
 
-type AuthGateColors = Pick<AppColors, 'background' | 'accent' | 'textMuted'>;
+type AuthGateColors = Pick<AppColors, "background" | "accent" | "textMuted">;
 
 type AuthGateProps = {
   colors: AuthGateColors;
@@ -43,8 +43,8 @@ export function AuthGate({colors, loginScreen, children}: AuthGateProps) {
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   signingInText: {
     marginTop: 16,

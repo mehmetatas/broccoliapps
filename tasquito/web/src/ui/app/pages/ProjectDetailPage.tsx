@@ -152,8 +152,8 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
   // Calculate days until deletion for archived projects
   const getDaysUntilDeletion = () => {
     if (!project?.archivedAt) {
-return null;
-}
+      return null;
+    }
     const twoWeeksMs = 14 * 24 * 60 * 60 * 1000;
     const deletionTime = project.archivedAt + twoWeeksMs;
     const now = Date.now();
@@ -164,8 +164,8 @@ return null;
 
   const handleDeleteTask = () => {
     if (!deleteTaskModal.data) {
- return; 
-}
+      return; 
+    }
     setIsDeletingTask(true);
     try {
       removeTask(deleteTaskModal.data.id);

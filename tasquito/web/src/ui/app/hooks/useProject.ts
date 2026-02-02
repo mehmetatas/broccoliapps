@@ -92,23 +92,31 @@ export const useProject = (id: string) => {
 
   // Project actions
   const updateName = async (name: string) => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
     await patchProject({ id: project.id, name });
     setProject((prev) => (prev ? { ...prev, name } : null));
   };
 
   const remove = async () => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
     await deleteProject(project.id);
   };
 
   const archive = async () => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
     await archiveProject(project.id);
   };
 
   const unarchive = async () => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
     try {
       await unarchiveProject(project.id);
       await load();
@@ -124,7 +132,9 @@ export const useProject = (id: string) => {
 
   // Process task queue sequentially
   const processTaskQueue = () => {
-    if (isProcessingTaskRef.current || taskQueueRef.current.length === 0) return;
+    if (isProcessingTaskRef.current || taskQueueRef.current.length === 0) {
+      return;
+    }
 
     isProcessingTaskRef.current = true;
     const item = taskQueueRef.current.shift()!;
@@ -139,7 +149,9 @@ export const useProject = (id: string) => {
       })
         .then((result) => {
           setProject((prev) => {
-            if (!prev) return null;
+            if (!prev) {
+              return null;
+            }
             return {
               ...prev,
               tasks: [{ ...result.task, subtasks: result.subtasks ?? [] }, ...prev.tasks],
@@ -162,7 +174,9 @@ export const useProject = (id: string) => {
         .catch((err) => {
           console.error("Failed to update task status, reverting", err);
           setProject((prev) => {
-            if (!prev) return null;
+            if (!prev) {
+              return null;
+            }
             return {
               ...prev,
               tasks: prev.tasks.map((t) => (t.id === item.taskId ? { ...t, status: item.originalStatus } : t)),
@@ -178,7 +192,9 @@ export const useProject = (id: string) => {
         .catch((err) => {
           console.error("Failed to delete task, restoring", err);
           setProject((prev) => {
-            if (!prev) return null;
+            if (!prev) {
+              return null;
+            }
             return {
               ...prev,
               tasks: [...prev.tasks, item.taskToRestore],
@@ -194,7 +210,9 @@ export const useProject = (id: string) => {
 
   // Task actions
   const createTask = (data: { title: string; description?: string; dueDate?: string; subtasks?: string[] }) => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
 
     // Show skeleton immediately
     setPendingTaskCount((c) => c + 1);
@@ -214,16 +232,22 @@ export const useProject = (id: string) => {
   };
 
   const updateTaskStatus = (taskId: string, status: TaskStatus) => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
 
     // Save original status for potential rollback
     const originalTask = project.tasks.find((t) => t.id === taskId);
-    if (!originalTask) return;
+    if (!originalTask) {
+      return;
+    }
     const originalStatus = originalTask.status;
 
     // Optimistic update - move immediately
     setProject((prev) => {
-      if (!prev) return null;
+      if (!prev) {
+        return null;
+      }
       return {
         ...prev,
         tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, status } : t)),
@@ -244,10 +268,14 @@ export const useProject = (id: string) => {
   };
 
   const updateTaskTitle = async (taskId: string, title: string) => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
     await patchTask({ projectId: project.id, id: taskId, title });
     setProject((prev) => {
-      if (!prev) return null;
+      if (!prev) {
+        return null;
+      }
       return {
         ...prev,
         tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, title } : t)),
@@ -256,10 +284,14 @@ export const useProject = (id: string) => {
   };
 
   const updateTaskDescription = async (taskId: string, description: string) => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
     await patchTask({ projectId: project.id, id: taskId, description });
     setProject((prev) => {
-      if (!prev) return null;
+      if (!prev) {
+        return null;
+      }
       return {
         ...prev,
         tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, description } : t)),
@@ -268,10 +300,14 @@ export const useProject = (id: string) => {
   };
 
   const updateTaskDueDate = async (taskId: string, dueDate: string | undefined) => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
     await patchTask({ projectId: project.id, id: taskId, dueDate: dueDate ?? null });
     setProject((prev) => {
-      if (!prev) return null;
+      if (!prev) {
+        return null;
+      }
       return {
         ...prev,
         tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, dueDate } : t)),
@@ -280,15 +316,21 @@ export const useProject = (id: string) => {
   };
 
   const removeTask = (taskId: string) => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
 
     // Find the task to save for potential restoration
     const taskToDelete = project.tasks.find((t) => t.id === taskId);
-    if (!taskToDelete) return;
+    if (!taskToDelete) {
+      return;
+    }
 
     // Optimistic update - remove immediately
     setProject((prev) => {
-      if (!prev) return null;
+      if (!prev) {
+        return null;
+      }
       return {
         ...prev,
         tasks: prev.tasks.filter((t) => t.id !== taskId),
@@ -309,17 +351,23 @@ export const useProject = (id: string) => {
 
   // Subtask actions
   const updateSubtaskStatus = (taskId: string, subtaskId: string, status: TaskStatus) => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
 
     // Save original status for potential rollback
     const parentTask = project.tasks.find((t) => t.id === taskId);
     const originalSubtask = parentTask?.subtasks.find((st) => st.id === subtaskId);
-    if (!originalSubtask) return;
+    if (!originalSubtask) {
+      return;
+    }
     const originalStatus = originalSubtask.status;
 
     // Optimistic update - move immediately
     setProject((prev) => {
-      if (!prev) return null;
+      if (!prev) {
+        return null;
+      }
       return {
         ...prev,
         tasks: prev.tasks.map((t) =>
@@ -348,10 +396,14 @@ export const useProject = (id: string) => {
   };
 
   const updateSubtaskTitle = async (taskId: string, subtaskId: string, title: string) => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
     await patchTask({ projectId: project.id, id: subtaskId, title });
     setProject((prev) => {
-      if (!prev) return null;
+      if (!prev) {
+        return null;
+      }
       return {
         ...prev,
         tasks: prev.tasks.map((t) =>
@@ -364,16 +416,22 @@ export const useProject = (id: string) => {
   };
 
   const removeSubtask = (taskId: string, subtaskId: string) => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
 
     // Find the subtask to save for potential restoration
     const parentTask = project.tasks.find((t) => t.id === taskId);
     const subtaskToDelete = parentTask?.subtasks.find((st) => st.id === subtaskId);
-    if (!subtaskToDelete) return;
+    if (!subtaskToDelete) {
+      return;
+    }
 
     // Optimistic update - remove immediately
     setProject((prev) => {
-      if (!prev) return null;
+      if (!prev) {
+        return null;
+      }
       return {
         ...prev,
         tasks: prev.tasks.map((t) =>
@@ -400,10 +458,14 @@ export const useProject = (id: string) => {
 
   // Process subtask queue for a specific task sequentially
   const processSubtaskQueue = (taskId: string) => {
-    if (processingSubtasksRef.current.has(taskId)) return;
+    if (processingSubtasksRef.current.has(taskId)) {
+      return;
+    }
 
     const queue = subtaskQueuesRef.current.get(taskId);
-    if (!queue || queue.length === 0) return;
+    if (!queue || queue.length === 0) {
+      return;
+    }
 
     processingSubtasksRef.current.add(taskId);
     const item = queue.shift()!;
@@ -412,7 +474,9 @@ export const useProject = (id: string) => {
       postSubtask(item.projectId, item.taskId, item.title)
         .then((result) => {
           setProject((prev) => {
-            if (!prev) return null;
+            if (!prev) {
+              return null;
+            }
             return {
               ...prev,
               tasks: prev.tasks.map((t) =>
@@ -446,7 +510,9 @@ export const useProject = (id: string) => {
         .catch((err) => {
           console.error("Failed to update subtask status, reverting", err);
           setProject((prev) => {
-            if (!prev) return null;
+            if (!prev) {
+              return null;
+            }
             return {
               ...prev,
               tasks: prev.tasks.map((t) =>
@@ -466,7 +532,9 @@ export const useProject = (id: string) => {
         .catch((err) => {
           console.error("Failed to delete subtask, restoring", err);
           setProject((prev) => {
-            if (!prev) return null;
+            if (!prev) {
+              return null;
+            }
             return {
               ...prev,
               tasks: prev.tasks.map((t) =>
@@ -483,7 +551,9 @@ export const useProject = (id: string) => {
   };
 
   const createSubtask = (taskId: string, title: string) => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
 
     // Show skeleton immediately
     setPendingSubtaskCounts((prev) => {
@@ -529,7 +599,9 @@ export const useProject = (id: string) => {
 
     // Optimistic update
     setProject((prev) => {
-      if (!prev) return null;
+      if (!prev) {
+        return null;
+      }
       const updatedTasks = prev.tasks.map((t) => (t.id === taskId ? { ...t, sortOrder: newSortOrder } : t));
 
       return {
@@ -554,13 +626,19 @@ export const useProject = (id: string) => {
     afterId: string | null,
     beforeId: string | null
   ) => {
-    if (!project) return;
+    if (!project) {
+      return;
+    }
 
     const parentTask = project.tasks.find((t) => t.id === parentId);
-    if (!parentTask) return;
+    if (!parentTask) {
+      return;
+    }
 
     const subtask = parentTask.subtasks.find((st) => st.id === subtaskId);
-    if (!subtask) return;
+    if (!subtask) {
+      return;
+    }
 
     // Get the sortOrders of the adjacent subtasks
     const afterSubtask = afterId ? parentTask.subtasks.find((st) => st.id === afterId) : null;
@@ -573,7 +651,9 @@ export const useProject = (id: string) => {
 
     // Optimistic update
     setProject((prev) => {
-      if (!prev) return null;
+      if (!prev) {
+        return null;
+      }
       return {
         ...prev,
         tasks: prev.tasks.map((t) =>

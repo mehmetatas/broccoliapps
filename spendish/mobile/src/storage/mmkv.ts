@@ -1,4 +1,4 @@
-import { createMMKV, MMKV } from 'react-native-mmkv';
+import { createMMKV, MMKV } from "react-native-mmkv";
 
 let _storage: MMKV | null = null;
 

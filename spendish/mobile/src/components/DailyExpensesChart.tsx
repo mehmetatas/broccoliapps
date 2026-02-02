@@ -1,7 +1,7 @@
-import React from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
-import { useTheme } from '../theme/ThemeContext';
+import React from "react";
+import { Dimensions, StyleSheet, View } from "react-native";
+import { LineChart } from "react-native-chart-kit";
+import { useTheme } from "../theme/ThemeContext";
 
 interface ChartDataPoint {
   date: string;
@@ -12,10 +12,10 @@ interface DailyExpensesChartProps {
   data: ChartDataPoint[];
 }
 
-const screenWidth = Dimensions.get('window').width;
+const screenWidth = Dimensions.get("window").width;
 
 function formatDayLabel(dateString: string): string {
-  return new Date(dateString + 'T00:00:00').getDate().toString();
+  return new Date(dateString + "T00:00:00").getDate().toString();
 }
 
 export function DailyExpensesChart({
@@ -37,7 +37,7 @@ export function DailyExpensesChart({
   // Show every nth label to avoid overcrowding
   const labelStep = data.length > 10 ? Math.ceil(data.length / 7) : 1;
   const filteredLabels = chartData.labels.map((label, index) =>
-    index % labelStep === 0 ? label : '',
+    index % labelStep === 0 ? label : "",
   );
 
   const chartConfig = {
@@ -54,13 +54,13 @@ export function DailyExpensesChart({
     },
     labelColor: () => theme.textSecondary,
     propsForDots: {
-      r: '4',
-      strokeWidth: '2',
+      r: "4",
+      strokeWidth: "2",
       stroke: theme.accent,
     },
     propsForBackgroundLines: {
-      strokeDasharray: '',
-      stroke: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+      strokeDasharray: "",
+      stroke: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
     },
   };
 
@@ -88,7 +88,7 @@ export function DailyExpensesChart({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   chart: {
     borderRadius: 12,

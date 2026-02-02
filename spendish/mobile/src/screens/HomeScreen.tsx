@@ -1,5 +1,5 @@
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   Car,
   Check,
@@ -18,8 +18,8 @@ import {
   Tv,
   Utensils,
   Zap,
-} from 'lucide-react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+} from "lucide-react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   ScrollView,
@@ -27,27 +27,27 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+} from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 import Animated, {
   FadeIn,
   FadeOut,
   LinearTransition,
-} from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { RootStackParamList } from '../navigation/types';
-import { getCategories } from '../storage/categories';
+} from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { RootStackParamList } from "../navigation/types";
+import { getCategories } from "../storage/categories";
 import {
   deleteSpendRecord,
   getRecentSpendRecords,
   saveSpendRecord,
-} from '../storage/spendRecords';
-import { useTheme } from '../theme/ThemeContext';
-import { SpendRecord } from '../types/spendRecord';
+} from "../storage/spendRecords";
+import { useTheme } from "../theme/ThemeContext";
+import { SpendRecord } from "../types/spendRecord";
 
-const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 const STEP_THRESHOLD = SCREEN_HEIGHT * 0.03;
 const SWIPE_DELETE_THRESHOLD = SCREEN_WIDTH * 0.5;
 const RECENT_SPENDS_LIMIT = 10;
@@ -58,39 +58,53 @@ const hapticOptions = {
 };
 
 function triggerHaptic() {
-  ReactNativeHapticFeedback.trigger('selection', hapticOptions);
+  ReactNativeHapticFeedback.trigger("selection", hapticOptions);
 }
 
 function triggerSuccessHaptic() {
-  ReactNativeHapticFeedback.trigger('notificationSuccess', hapticOptions);
+  ReactNativeHapticFeedback.trigger("notificationSuccess", hapticOptions);
 }
 
-const SUCCESS_COLOR = '#4CAF50';
+const SUCCESS_COLOR = "#4CAF50";
 
 function getLocalDateString(): string {
   const now = new Date();
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
 function formatDate(dateString: string): string {
-  const date = new Date(dateString + 'T00:00:00');
-  const month = date.toLocaleDateString('en-US', { month: 'short' });
+  const date = new Date(dateString + "T00:00:00");
+  const month = date.toLocaleDateString("en-US", { month: "short" });
   const day = date.getDate();
-  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
+  const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
   return `${month} ${day}, ${weekday}`;
 }
 
 function getStepValue(amount: number): number {
-  if (amount < 10) return 1;
-  if (amount < 50) return 2;
-  if (amount < 100) return 5;
-  if (amount < 500) return 10;
-  if (amount < 1000) return 25;
-  if (amount < 5000) return 50;
-  if (amount < 10000) return 100;
+  if (amount < 10) {
+    return 1;
+  }
+  if (amount < 50) {
+    return 2;
+  }
+  if (amount < 100) {
+    return 5;
+  }
+  if (amount < 500) {
+    return 10;
+  }
+  if (amount < 1000) {
+    return 25;
+  }
+  if (amount < 5000) {
+    return 50;
+  }
+  if (amount < 10000) {
+    return 100;
+  }
   return 1000;
 }
 
@@ -109,7 +123,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Gift,
 };
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Home">;
 
 export function HomeScreen(): React.JSX.Element {
   const { theme } = useTheme();
@@ -210,12 +224,12 @@ export function HomeScreen(): React.JSX.Element {
     <GestureDetector gesture={panGesture}>
       <SafeAreaView
         style={[styles.container, { backgroundColor: theme.background }]}
-        edges={['top']}
+        edges={["top"]}
       >
         <View style={styles.amountRow}>
           <TouchableOpacity
             style={styles.headerButton}
-            onPress={() => navigation.navigate('Dashboard')}
+            onPress={() => navigation.navigate("Dashboard")}
             activeOpacity={0.7}
           >
             <PieChart size={24} color={theme.text} />
@@ -223,7 +237,7 @@ export function HomeScreen(): React.JSX.Element {
           <Text style={[styles.amount, { color: theme.text }]}>${amount}</Text>
           <TouchableOpacity
             style={styles.headerButton}
-            onPress={() => navigation.navigate('Settings')}
+            onPress={() => navigation.navigate("Settings")}
             activeOpacity={0.7}
           >
             <Settings size={24} color={theme.text} />
@@ -269,7 +283,7 @@ export function HomeScreen(): React.JSX.Element {
                       <Text
                         style={[styles.spendCategory, { color: theme.text }]}
                       >
-                        {category?.label ?? 'Unknown'}
+                        {category?.label ?? "Unknown"}
                       </Text>
                       <Text
                         style={[
@@ -298,7 +312,7 @@ export function HomeScreen(): React.JSX.Element {
               const backgroundColor = isConfirmed
                 ? SUCCESS_COLOR
                 : theme.surface;
-              const iconColor = isConfirmed ? '#FFFFFF' : theme.text;
+              const iconColor = isConfirmed ? "#FFFFFF" : theme.text;
 
               return (
                 <TouchableOpacity
@@ -330,13 +344,13 @@ export function HomeScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignContent: 'flex-start',
-    justifyContent: 'flex-start',
+    alignContent: "flex-start",
+    justifyContent: "flex-start",
   },
   amountRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
@@ -345,36 +359,36 @@ const styles = StyleSheet.create({
   },
   amount: {
     fontSize: 48,
-    fontWeight: '300',
-    textAlign: 'center',
+    fontWeight: "300",
+    textAlign: "center",
   },
   categoriesContent: {
     paddingHorizontal: 16,
-    boxShadow: '0 0 10px 0 rgba(128, 128, 128, 0.5)',
+    boxShadow: "0 0 10px 0 rgba(128, 128, 128, 0.5)",
   },
   categoriesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    alignContent: 'flex-start',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    alignContent: "flex-start",
     marginBottom: 16,
   },
   categoryButton: {
-    width: '31%',
+    width: "31%",
     padding: 12,
     borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 12,
   },
   categoryLabel: {
     fontSize: 12,
     marginTop: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   spendTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 8,
     marginTop: 16,
     paddingHorizontal: 16,
@@ -383,8 +397,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   spendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 12,
     borderRadius: 12,
     marginBottom: 8,
@@ -393,8 +407,8 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   spendInfo: {
@@ -409,20 +423,20 @@ const styles = StyleSheet.create({
   },
   spendAmount: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   deleteActionContainer: {
     flex: 1,
-    backgroundColor: '#FF3B30',
+    backgroundColor: "#FF3B30",
     borderRadius: 12,
     marginBottom: 8,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
+    justifyContent: "center",
+    alignItems: "flex-end",
   },
   deleteAction: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     width: 80,
-    height: '100%',
+    height: "100%",
   },
 });

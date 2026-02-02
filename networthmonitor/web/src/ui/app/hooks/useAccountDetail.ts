@@ -50,7 +50,9 @@ export const useAccountDetail = (id: string | undefined) => {
 
   // Helper: Save a single history item to server
   const saveHistoryItem = async (month: string, value: number) => {
-    if (!account) return;
+    if (!account) {
+      return;
+    }
 
     setSavingMonths((prev) => ({ ...prev, [month]: true }));
 
@@ -66,7 +68,9 @@ export const useAccountDetail = (id: string | undefined) => {
 
   // Helper: Delete a single history item from server
   const deleteHistoryItemFromServer = async (month: string) => {
-    if (!account) return;
+    if (!account) {
+      return;
+    }
 
     setSavingMonths((prev) => ({ ...prev, [month]: true }));
 
@@ -85,7 +89,9 @@ export const useAccountDetail = (id: string | undefined) => {
   };
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
     const fetchData = async () => {
       try {
@@ -121,14 +127,22 @@ export const useAccountDetail = (id: string | undefined) => {
   };
 
   const handleBlur = async (month: string) => {
-    if (!account) return;
+    if (!account) {
+      return;
+    }
 
     const currentValue = editedHistory[month];
     const originalValue = originalHistory[month];
 
-    if (currentValue === originalValue) return;
-    if (currentValue === undefined && originalValue === undefined) return;
-    if (currentValue === undefined) return;
+    if (currentValue === originalValue) {
+      return;
+    }
+    if (currentValue === undefined && originalValue === undefined) {
+      return;
+    }
+    if (currentValue === undefined) {
+      return;
+    }
 
     try {
       await saveHistoryItem(month, currentValue);
@@ -138,7 +152,9 @@ export const useAccountDetail = (id: string | undefined) => {
   };
 
   const handleArchive = async () => {
-    if (!account) return;
+    if (!account) {
+      return;
+    }
 
     setRemoving(true);
     try {
@@ -153,7 +169,9 @@ export const useAccountDetail = (id: string | undefined) => {
   };
 
   const handleUnarchive = async () => {
-    if (!account) return;
+    if (!account) {
+      return;
+    }
 
     setUnarchiving(true);
     try {
@@ -167,7 +185,9 @@ export const useAccountDetail = (id: string | undefined) => {
   };
 
   const handleDelete = async () => {
-    if (!account) return;
+    if (!account) {
+      return;
+    }
 
     setRemoving(true);
     try {
@@ -181,7 +201,9 @@ export const useAccountDetail = (id: string | undefined) => {
   };
 
   const handlePermanentDelete = async () => {
-    if (!account) return;
+    if (!account) {
+      return;
+    }
 
     setDeleting(true);
     try {
@@ -195,7 +217,9 @@ export const useAccountDetail = (id: string | undefined) => {
   };
 
   const handleStartEditName = () => {
-    if (!account) return;
+    if (!account) {
+      return;
+    }
     setEditedName(account.name);
     setEditingName(true);
   };
@@ -206,7 +230,9 @@ export const useAccountDetail = (id: string | undefined) => {
   };
 
   const handleSaveName = async () => {
-    if (!account || !editedName.trim()) return;
+    if (!account || !editedName.trim()) {
+      return;
+    }
 
     setSavingName(true);
     try {
@@ -222,7 +248,9 @@ export const useAccountDetail = (id: string | undefined) => {
   };
 
   const handleBucketsChange = async (newBucketIds: Set<string>) => {
-    if (!account) return;
+    if (!account) {
+      return;
+    }
 
     const previousBucketIds = accountBucketIds;
     setAccountBucketIds(newBucketIds);

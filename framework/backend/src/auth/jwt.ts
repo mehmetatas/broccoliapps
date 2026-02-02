@@ -17,7 +17,9 @@ const publicKeyCache = new Map<AppId, CryptoKey>();
 
 const getPrivateKey = async (appId: AppId): Promise<CryptoKey> => {
   const cached = privateKeyCache.get(appId);
-  if (cached) return cached;
+  if (cached) {
+    return cached;
+  }
 
   const pem = await params.getAppKey(appId);
   const key = await jose.importPKCS8(pem, ALGORITHM);
@@ -27,7 +29,9 @@ const getPrivateKey = async (appId: AppId): Promise<CryptoKey> => {
 
 const getPublicKey = async (appId: AppId): Promise<CryptoKey> => {
   const cached = publicKeyCache.get(appId);
-  if (cached) return cached;
+  if (cached) {
+    return cached;
+  }
 
   const pem = globalConfig.apps[appId].publicKey;
   const key = await jose.importSPKI(pem, ALGORITHM);

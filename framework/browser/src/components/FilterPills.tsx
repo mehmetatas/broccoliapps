@@ -24,7 +24,9 @@ export const FilterPills = <T extends string>({
     onSelect(value);
     // Scroll the selected pill to center
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
     const scrollLeft = el.offsetLeft - container.clientWidth / 2 + el.offsetWidth / 2;
     container.scrollTo({ left: scrollLeft, behavior: "smooth" });
   }, [onSelect]);

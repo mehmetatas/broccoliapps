@@ -7,6 +7,8 @@ export function initClient(provider: CacheProvider) {
 }
 
 export function getCache(): CacheProvider {
-  if (!cacheProvider) throw new Error("Client not initialized. Call initClient() first.");
+  if (!cacheProvider) {
+    throw new Error("Client not initialized. Call initClient() first.");
+  }
   return cacheProvider;
 }

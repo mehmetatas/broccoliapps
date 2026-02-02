@@ -28,7 +28,9 @@ export const BucketPicker = ({
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (preloadedBuckets) {return;}
+    if (preloadedBuckets) {
+      return;
+    }
     const fetchBuckets = async () => {
       try {
         const { buckets: result } = await getBuckets();
@@ -53,7 +55,9 @@ export const BucketPicker = ({
   };
 
   const handleCreateBucket = async () => {
-    if (!newBucketName.trim()) {return;}
+    if (!newBucketName.trim()) {
+      return;
+    }
 
     setCreatingBucket(true);
     try {
@@ -109,7 +113,9 @@ export const BucketPicker = ({
             .sort((a, b) => {
               const aSelected = selectedBucketIds.has(a.id);
               const bSelected = selectedBucketIds.has(b.id);
-              if (aSelected !== bSelected) {return bSelected ? 1 : -1;}
+              if (aSelected !== bSelected) {
+                return bSelected ? 1 : -1;
+              }
               return a.name.localeCompare(b.name);
             })
             .map((bucket) => {
@@ -144,7 +150,9 @@ export const BucketPicker = ({
             placeholder="Create new bucket..."
             class="flex-1 px-3 py-2 text-sm bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600 rounded-full text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-neutral-700"
             onKeyDown={(e) => {
-              if (e.key === "Enter") {handleCreateBucket();}
+              if (e.key === "Enter") {
+                handleCreateBucket();
+              }
             }}
           />
           <button

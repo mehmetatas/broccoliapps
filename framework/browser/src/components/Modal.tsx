@@ -48,7 +48,9 @@ export const Modal = ({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div class="fixed inset-0 z-50 flex items-center justify-center">

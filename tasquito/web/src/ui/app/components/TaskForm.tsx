@@ -91,7 +91,7 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
           class={`p-2 rounded-lg border transition-colors ${isExpanded
             ? "bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 text-blue-600 dark:text-blue-400"
             : "border-neutral-200 dark:border-neutral-600 text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:border-neutral-300 dark:hover:border-neutral-500"
-            }`}
+          }`}
         >
           <MoreHorizontal size={18} />
         </button>

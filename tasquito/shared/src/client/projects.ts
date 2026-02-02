@@ -19,7 +19,9 @@ const getAllProjectsFromCache = (): ProjectSummaryDto[] => {
   const projects: ProjectSummaryDto[] = [];
   for (const key of keys) {
     const project = getCache().get<ProjectSummaryDto>(key);
-    if (project) projects.push(project);
+    if (project) {
+      projects.push(project);
+    }
   }
   return projects;
 };
@@ -50,7 +52,9 @@ export const setProjectCountsInCache = (
   totalTaskCount: number
 ): void => {
   const existing = getCache().get<ProjectSummaryDto>(CACHE_KEYS.project(projectId));
-  if (!existing) return;
+  if (!existing) {
+    return;
+  }
   getCache().set(CACHE_KEYS.project(projectId), { ...existing, openTaskCount, totalTaskCount }, getCacheExpiry());
 };
 
@@ -59,7 +63,9 @@ export const getProjects = async (): Promise<{ projects: ProjectSummaryDto[] }> 
   const projectsFetched = getCache().get<boolean>(CACHE_KEYS.projectsFetched);
   if (projectsFetched) {
     const projects = getAllProjectsFromCache();
-    if (projects.length > 0) return { projects };
+    if (projects.length > 0) {
+      return { projects };
+    }
   }
 
   const data = await getProjectsApi.invoke({});

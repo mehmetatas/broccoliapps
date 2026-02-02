@@ -1,25 +1,25 @@
-import { Category } from '../types/category';
-import { getStorage } from './mmkv';
+import { Category } from "../types/category";
+import { getStorage } from "./mmkv";
 
 function generateId(): string {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 }
 
-const CATEGORIES_KEY = 'categories';
+const CATEGORIES_KEY = "categories";
 
-const DEFAULT_CATEGORIES: Omit<Category, 'id'>[] = [
-  { label: 'Debt', icon: 'CreditCard' },
-  { label: 'Saving', icon: 'PiggyBank' },
-  { label: 'Housing', icon: 'Home' },
-  { label: 'Utilities', icon: 'Zap' },
-  { label: 'Groceries', icon: 'ShoppingCart' },
-  { label: 'Transportation', icon: 'Car' },
-  { label: 'Eat Out', icon: 'Utensils' },
-  { label: 'Entertainment', icon: 'Tv' },
-  { label: 'Holiday', icon: 'Plane' },
-  { label: 'Health', icon: 'Heart' },
-  { label: 'Personal Care', icon: 'Sparkles' },
-  { label: 'Gift & Donation', icon: 'Gift' },
+const DEFAULT_CATEGORIES: Omit<Category, "id">[] = [
+  { label: "Debt", icon: "CreditCard" },
+  { label: "Saving", icon: "PiggyBank" },
+  { label: "Housing", icon: "Home" },
+  { label: "Utilities", icon: "Zap" },
+  { label: "Groceries", icon: "ShoppingCart" },
+  { label: "Transportation", icon: "Car" },
+  { label: "Eat Out", icon: "Utensils" },
+  { label: "Entertainment", icon: "Tv" },
+  { label: "Holiday", icon: "Plane" },
+  { label: "Health", icon: "Heart" },
+  { label: "Personal Care", icon: "Sparkles" },
+  { label: "Gift & Donation", icon: "Gift" },
 ];
 
 export function initializeCategories(): void {

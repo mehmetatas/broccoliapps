@@ -6,7 +6,9 @@ import { getCache } from "./init";
 // Read-through cache: check cache → call API if miss → cache → return
 export const getUser = async (): Promise<UserDto> => {
   const cached = getCache().get<UserDto>(CACHE_KEYS.user);
-  if (cached) return cached;
+  if (cached) {
+    return cached;
+  }
 
   const { user } = await getUserApi.invoke({});
   getCache().set(CACHE_KEYS.user, user);

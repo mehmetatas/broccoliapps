@@ -8,8 +8,12 @@ type ProjectStatusIndicatorProps = {
 };
 
 const getStatus = (openTaskCount: number, totalTaskCount: number): ProjectStatus => {
-  if (totalTaskCount === 0) return "todo";
-  if (openTaskCount === 0) return "done";
+  if (totalTaskCount === 0) {
+    return "todo";
+  }
+  if (openTaskCount === 0) {
+    return "done";
+  }
   return "in_progress";
 };
 

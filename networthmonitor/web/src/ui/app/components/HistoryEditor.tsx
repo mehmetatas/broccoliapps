@@ -70,8 +70,12 @@ export const HistoryEditor = ({
   }, [sortedMonths.length]);
 
   const getMonthStatus = (month: string): "saving" | "saved" | undefined => {
-    if (savingMonths[month]) {return "saving";}
-    if (savedMonths[month]) {return "saved";}
+    if (savingMonths[month]) {
+      return "saving";
+    }
+    if (savedMonths[month]) {
+      return "saved";
+    }
     return undefined;
   };
 

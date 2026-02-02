@@ -41,7 +41,7 @@ export const buildApp = async (options: BuildAppOptions): Promise<void> => {
     minify: false,
     metafile: true,
     banner: {
-      js: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`,
+      js: "import { createRequire } from 'module';const require = createRequire(import.meta.url);",
     },
   };
 
@@ -165,10 +165,14 @@ const findMonorepoRoot = (startDir: string): string => {
     const pkgPath = path.join(dir, "package.json");
     if (fs.existsSync(pkgPath)) {
       const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
-      if (pkg.workspaces) return dir;
+      if (pkg.workspaces) {
+        return dir;
+      }
     }
     const parent = path.dirname(dir);
-    if (parent === dir) throw new Error("Could not find monorepo root");
+    if (parent === dir) {
+      throw new Error("Could not find monorepo root");
+    }
     dir = parent;
   }
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Modal,
   View,
@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
-} from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { useTheme } from '../theme/ThemeContext';
+} from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useTheme } from "../theme/ThemeContext";
 
 interface DateRangeModalProps {
   visible: boolean;
@@ -28,8 +28,8 @@ export function DateRangeModal({
   const { theme, isDark } = useTheme();
   const [startDate, setStartDate] = useState(initialStartDate || new Date());
   const [endDate, setEndDate] = useState(initialEndDate || new Date());
-  const [showStartPicker, setShowStartPicker] = useState(Platform.OS === 'ios');
-  const [showEndPicker, setShowEndPicker] = useState(Platform.OS === 'ios');
+  const [showStartPicker, setShowStartPicker] = useState(Platform.OS === "ios");
+  const [showEndPicker, setShowEndPicker] = useState(Platform.OS === "ios");
 
   const handleConfirm = () => {
     // Ensure end date is not before start date
@@ -38,7 +38,7 @@ export function DateRangeModal({
   };
 
   const onStartChange = (_event: unknown, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
+    if (Platform.OS === "android") {
       setShowStartPicker(false);
     }
     if (selectedDate) {
@@ -47,7 +47,7 @@ export function DateRangeModal({
   };
 
   const onEndChange = (_event: unknown, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
+    if (Platform.OS === "android") {
       setShowEndPicker(false);
     }
     if (selectedDate) {
@@ -56,10 +56,10 @@ export function DateRangeModal({
   };
 
   const formatDisplayDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
@@ -81,7 +81,7 @@ export function DateRangeModal({
             <Text style={[styles.dateLabel, { color: theme.textSecondary }]}>
               Start Date
             </Text>
-            {Platform.OS === 'android' && !showStartPicker && (
+            {Platform.OS === "android" && !showStartPicker && (
               <TouchableOpacity
                 style={[styles.dateButton, { backgroundColor: theme.background }]}
                 onPress={() => setShowStartPicker(true)}
@@ -95,9 +95,9 @@ export function DateRangeModal({
               <DateTimePicker
                 value={startDate}
                 mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                display={Platform.OS === "ios" ? "spinner" : "default"}
                 onChange={onStartChange}
-                themeVariant={isDark ? 'dark' : 'light'}
+                themeVariant={isDark ? "dark" : "light"}
               />
             )}
           </View>
@@ -107,7 +107,7 @@ export function DateRangeModal({
             <Text style={[styles.dateLabel, { color: theme.textSecondary }]}>
               End Date
             </Text>
-            {Platform.OS === 'android' && !showEndPicker && (
+            {Platform.OS === "android" && !showEndPicker && (
               <TouchableOpacity
                 style={[styles.dateButton, { backgroundColor: theme.background }]}
                 onPress={() => setShowEndPicker(true)}
@@ -121,10 +121,10 @@ export function DateRangeModal({
               <DateTimePicker
                 value={endDate}
                 mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                display={Platform.OS === "ios" ? "spinner" : "default"}
                 onChange={onEndChange}
                 minimumDate={startDate}
-                themeVariant={isDark ? 'dark' : 'light'}
+                themeVariant={isDark ? "dark" : "light"}
               />
             )}
           </View>
@@ -159,20 +159,20 @@ export function DateRangeModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 24,
   },
   content: {
-    width: '100%',
+    width: "100%",
     borderRadius: 16,
     padding: 20,
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
     marginBottom: 20,
   },
   dateSection: {
@@ -190,8 +190,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 12,
     gap: 12,
   },
@@ -199,10 +199,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 14,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

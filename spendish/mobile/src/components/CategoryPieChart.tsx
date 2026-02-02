@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Dimensions,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
-} from 'react-native';
-import { PieChart } from 'react-native-chart-kit';
-import { getCategories } from '../storage/categories';
-import { useTheme } from '../theme/ThemeContext';
+} from "react-native";
+import { PieChart } from "react-native-chart-kit";
+import { getCategories } from "../storage/categories";
+import { useTheme } from "../theme/ThemeContext";
 
 interface CategoryDataPoint {
   category: string;
@@ -19,23 +18,23 @@ interface CategoryPieChartProps {
   data: CategoryDataPoint[];
 }
 
-const screenWidth = Dimensions.get('window').width;
+const screenWidth = Dimensions.get("window").width;
 const CHART_WIDTH = screenWidth - 32;
 
 // Distinct colors for categories
 const CATEGORY_COLORS = [
-  '#FF6B6B', // Red
-  '#4ECDC4', // Teal
-  '#45B7D1', // Blue
-  '#96CEB4', // Green
-  '#FFEAA7', // Yellow
-  '#DDA0DD', // Plum
-  '#98D8C8', // Mint
-  '#F7DC6F', // Gold
-  '#BB8FCE', // Purple
-  '#85C1E9', // Light Blue
-  '#F8B500', // Orange
-  '#58D68D', // Emerald
+  "#FF6B6B", // Red
+  "#4ECDC4", // Teal
+  "#45B7D1", // Blue
+  "#96CEB4", // Green
+  "#FFEAA7", // Yellow
+  "#DDA0DD", // Plum
+  "#98D8C8", // Mint
+  "#F7DC6F", // Gold
+  "#BB8FCE", // Purple
+  "#85C1E9", // Light Blue
+  "#F8B500", // Orange
+  "#58D68D", // Emerald
 ];
 
 export function CategoryPieChart({
@@ -79,7 +78,7 @@ export function CategoryPieChart({
     >
       {/* Hint text */}
       <Text style={[styles.hint, { color: theme.textSecondary }]}>
-        Tap to show {showPercentage ? '$' : '%'}
+        Tap to show {showPercentage ? "$" : "%"}
       </Text>
 
       {/* Pie Chart with built-in legend */}
@@ -100,12 +99,12 @@ export function CategoryPieChart({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   hint: {
     fontSize: 11,
     marginBottom: 4,
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     paddingRight: 8,
   },
 });

@@ -61,9 +61,9 @@ export const CurrencyPicker = ({ value, onChange, placeholder = "Select currency
                   type="button"
                   onClick={() => handleSelect(currency)}
                   class={`w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-700 ${value === currency
-                      ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-medium"
-                      : "text-neutral-700 dark:text-neutral-300"
-                    }`}
+                    ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-medium"
+                    : "text-neutral-700 dark:text-neutral-300"
+                  }`}
                 >
                   {currency}
                 </button>

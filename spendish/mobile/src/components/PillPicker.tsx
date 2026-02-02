@@ -1,12 +1,12 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from "react";
 import {
   FlatList,
   TouchableOpacity,
   Text,
   StyleSheet,
   View,
-} from 'react-native';
-import { useTheme } from '../theme/ThemeContext';
+} from "react-native";
+import { useTheme } from "../theme/ThemeContext";
 
 export type PillPickerProps = {
   items: Record<string, string>;
@@ -114,10 +114,10 @@ const styles = StyleSheet.create({
   },
   pillText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   pillTextSmall: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });

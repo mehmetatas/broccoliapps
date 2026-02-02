@@ -26,7 +26,9 @@ export const Header = () => {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
     getDashboard().then((data) => {
       const needsUpdate = data.accounts.filter(
         (account) => !account.archivedAt && hasMissedUpdate(account.nextUpdate)

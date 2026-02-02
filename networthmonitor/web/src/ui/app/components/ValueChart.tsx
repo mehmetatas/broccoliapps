@@ -88,7 +88,9 @@ export const ValueChart = ({ data, variant = "default", currency = "USD" }: Valu
   const externalTooltipHandler = (context: { chart: ChartJS; tooltip: TooltipModel<"line"> }) => {
     const { chart, tooltip } = context;
     const tooltipEl = tooltipRef.current;
-    if (!tooltipEl) return;
+    if (!tooltipEl) {
+      return;
+    }
 
     // Hide if no tooltip
     if (tooltip.opacity === 0) {

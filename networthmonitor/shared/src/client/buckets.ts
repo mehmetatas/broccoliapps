@@ -20,7 +20,9 @@ export const getBuckets = async (): Promise<BucketsResponse> => {
   const dashboardFetched = getCache().get<boolean>(CACHE_KEYS.dashboardFetched);
   if (dashboardFetched) {
     const cached = getCache().get<Bucket[]>(CACHE_KEYS.buckets);
-    if (cached) return { buckets: cached };
+    if (cached) {
+      return { buckets: cached };
+    }
   }
 
   const data = await getBucketsApi.invoke();
@@ -39,7 +41,9 @@ export const getBucketAccounts = async (id: string): Promise<BucketAccountsRespo
       const bucketAccounts: Account[] = [];
       for (const accountId of bucket.accountIds) {
         const account = getCache().get<Account>(CACHE_KEYS.account(accountId));
-        if (account) bucketAccounts.push(account);
+        if (account) {
+          bucketAccounts.push(account);
+        }
       }
       if (bucketAccounts.length === bucket.accountIds.length) {
         return { accounts: bucketAccounts };

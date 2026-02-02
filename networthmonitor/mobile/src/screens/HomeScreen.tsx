@@ -1,10 +1,10 @@
-import {useTheme} from '@broccoliapps/mobile';
-import type {NativeStackScreenProps} from '@react-navigation/native-stack';
-import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import type {RootStackParamList} from '../navigation/types';
+import {useTheme} from "@broccoliapps/mobile";
+import type {NativeStackScreenProps} from "@react-navigation/native-stack";
+import React from "react";
+import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import type {RootStackParamList} from "../navigation/types";
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
 export function HomeScreen({navigation}: Props) {
   const {colors} = useTheme();
@@ -17,7 +17,7 @@ export function HomeScreen({navigation}: Props) {
       </Text>
       <TouchableOpacity
         style={[styles.button, {backgroundColor: colors.accent}]}
-        onPress={() => navigation.navigate('Details')}>
+        onPress={() => navigation.navigate("Details")}>
         <Text style={styles.buttonText}>Go to Details</Text>
       </TouchableOpacity>
     </View>
@@ -27,17 +27,17 @@ export function HomeScreen({navigation}: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
     fontSize: 32,
-    fontFamily: 'Nunito-Bold',
+    fontFamily: "Nunito-Bold",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 18,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: "Nunito-Regular",
     marginBottom: 32,
   },
   button: {
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
-    fontFamily: 'Nunito-SemiBold',
-    color: '#ffffff',
+    fontFamily: "Nunito-SemiBold",
+    color: "#ffffff",
   },
 });

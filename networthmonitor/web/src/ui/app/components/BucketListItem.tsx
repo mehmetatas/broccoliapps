@@ -63,8 +63,11 @@ export const BucketListItem = ({
                 class="flex-1 px-3 py-1.5 text-sm bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-lg text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 autoFocus
                 onKeyDown={(e: TargetedKeyboardEvent<HTMLInputElement>) => {
-                  if (e.key === "Enter") onSaveName();
-                  else if (e.key === "Escape") onCancelEdit();
+                  if (e.key === "Enter") {
+                    onSaveName();
+                  } else if (e.key === "Escape") {
+                    onCancelEdit();
+                  }
                 }}
               />
               {savingName ? (

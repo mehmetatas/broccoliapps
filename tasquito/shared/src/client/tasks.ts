@@ -19,7 +19,9 @@ const getAllTasksFromCache = (projectId: string): Task[] => {
   const tasks: Task[] = [];
   for (const key of keys) {
     const task = getCache().get<Task>(key);
-    if (task) tasks.push(task);
+    if (task) {
+      tasks.push(task);
+    }
   }
   return tasks;
 };
@@ -43,7 +45,9 @@ export const getTasks = async (projectId: string): Promise<{ tasks: Task[] }> =>
   const tasksFetched = getCache().get<boolean>(CACHE_KEYS.tasksFetched(projectId));
   if (tasksFetched) {
     const tasks = getAllTasksFromCache(projectId);
-    if (tasks.length > 0) return { tasks };
+    if (tasks.length > 0) {
+      return { tasks };
+    }
   }
 
   const data = await getTasksApi.invoke({ projectId });

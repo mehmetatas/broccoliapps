@@ -1,10 +1,10 @@
-import { useAuth, useTheme } from '@broccoliapps/mobile';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import type { RootStackParamList } from '../navigation/types';
+import { useAuth, useTheme } from "@broccoliapps/mobile";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import type { RootStackParamList } from "../navigation/types";
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Details'>;
+type Props = NativeStackScreenProps<RootStackParamList, "Details">;
 
 export function DetailsScreen({ navigation }: Props) {
   const { logout } = useAuth();
@@ -33,17 +33,17 @@ export function DetailsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
     fontSize: 28,
-    fontFamily: 'Nunito-Bold',
+    fontFamily: "Nunito-Bold",
     marginBottom: 8,
   },
   body: {
     fontSize: 16,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: "Nunito-Regular",
     marginBottom: 32,
   },
   button: {
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
-    fontFamily: 'Nunito-SemiBold',
-    color: '#ffffff',
+    fontFamily: "Nunito-SemiBold",
+    color: "#ffffff",
   },
 });

@@ -14,7 +14,9 @@ export const cachedQuery = async <T>(
   fetchFn: () => Promise<T>,
 ): Promise<T> => {
   const cached = cache.get<T>(key);
-  if (cached !== null) return cached;
+  if (cached !== null) {
+    return cached;
+  }
   const result = await fetchFn();
   cache.set(key, result, getCacheExpiry());
   return result;

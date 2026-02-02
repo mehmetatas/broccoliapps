@@ -62,7 +62,7 @@ export const MoneyInput = ({
             placeholder={placeholder}
             disabled={disabled}
             class={`w-full h-10 pl-3 ${value !== undefined && status ? "pr-16" : "pr-9"} border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-colors ${prefix && currency ? "" : prefix ? "rounded-r-lg" : currency ? "rounded-l-lg" : "rounded-lg"
-              } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+            } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
           />
           {!status && value !== undefined && !disabled && (
             <button

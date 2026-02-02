@@ -13,7 +13,9 @@ declare global {
 
 const hydrateApp = () => {
   const el = document.getElementById("app");
-  if (!el) return;
+  if (!el) {
+    return;
+  }
   const props = window.__PAGE_PROPS__ ?? {};
   hydrate(<AuthPage {...(props as any)} />, el);
 };

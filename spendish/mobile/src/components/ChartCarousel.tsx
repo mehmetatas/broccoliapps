@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Dimensions,
   NativeScrollEvent,
@@ -6,17 +6,17 @@ import {
   ScrollView,
   StyleSheet,
   View,
-} from 'react-native';
-import { useTheme } from '../theme/ThemeContext';
-import { CategoryPieChart } from './CategoryPieChart';
-import { DailyExpensesChart } from './DailyExpensesChart';
+} from "react-native";
+import { useTheme } from "../theme/ThemeContext";
+import { CategoryPieChart } from "./CategoryPieChart";
+import { DailyExpensesChart } from "./DailyExpensesChart";
 
 interface ChartCarouselProps {
   dailyData: { date: string; amount: number }[];
   categoryData: { category: string; amount: number }[];
 }
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get("window");
 const CHART_WIDTH = screenWidth - 32;
 
 export function ChartCarousel({
@@ -81,12 +81,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   chartPage: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   dotsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 12,
     gap: 6,
   },

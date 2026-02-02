@@ -32,7 +32,9 @@ export const AuthCard = ({ appId, accent, onClose }: AuthCardProps) => {
   };
 
   const handleEmailSignIn = async () => {
-    if (!email) return;
+    if (!email) {
+      return;
+    }
 
     setEmailStatus("sending");
     setError("");

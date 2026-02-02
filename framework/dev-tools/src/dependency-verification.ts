@@ -26,7 +26,9 @@ const findImportChain = (metafile: esbuild.Metafile, forbiddenFile: string, entr
 
   while (queue.length > 0) {
     const { file, chain } = queue.shift()!;
-    if (visited.has(file)) continue;
+    if (visited.has(file)) {
+      continue;
+    }
     visited.add(file);
 
     if (file.includes(entryFile)) {

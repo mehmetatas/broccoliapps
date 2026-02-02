@@ -16,12 +16,16 @@ export const AccountTypeSection = ({
   onToggleAccount,
   selectedColor,
 }: AccountTypeSectionProps) => {
-  if (accounts.length === 0) {return null;}
+  if (accounts.length === 0) {
+    return null;
+  }
 
   const sortedAccounts = [...accounts].sort((a, b) => {
     const aSelected = selectedAccountIds.includes(a.id);
     const bSelected = selectedAccountIds.includes(b.id);
-    if (aSelected !== bSelected) {return bSelected ? 1 : -1;}
+    if (aSelected !== bSelected) {
+      return bSelected ? 1 : -1;
+    }
     return a.name.localeCompare(b.name);
   });
 

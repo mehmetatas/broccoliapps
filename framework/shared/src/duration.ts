@@ -112,10 +112,18 @@ export class Duration {
     const ms = Math.abs(this.milliseconds);
     const sign = this.milliseconds < 0 ? "-" : "";
 
-    if (ms < 1000) {return `${sign}${ms}ms`;}
-    if (ms < 60_000) {return `${sign}${ms / 1000}s`;}
-    if (ms < 3_600_000) {return `${sign}${ms / 60_000}m`;}
-    if (ms < 86_400_000) {return `${sign}${ms / 3_600_000}h`;}
+    if (ms < 1000) {
+      return `${sign}${ms}ms`;
+    }
+    if (ms < 60_000) {
+      return `${sign}${ms / 1000}s`;
+    }
+    if (ms < 3_600_000) {
+      return `${sign}${ms / 60_000}m`;
+    }
+    if (ms < 86_400_000) {
+      return `${sign}${ms / 3_600_000}h`;
+    }
     return `${sign}${ms / 86_400_000}d`;
   }
 }

@@ -16,9 +16,15 @@ const filterOptions: { value: ProjectFilter; label: string; icon?: preact.JSX.El
 ];
 
 const getProjectStatus = (project: ProjectSummaryDto): "pending" | "active" | "done" | "archived" => {
-  if (project.isArchived) return "archived";
-  if (project.totalTaskCount === 0) return "pending";
-  if (project.openTaskCount === 0) return "done";
+  if (project.isArchived) {
+    return "archived";
+  }
+  if (project.totalTaskCount === 0) {
+    return "pending";
+  }
+  if (project.openTaskCount === 0) {
+    return "done";
+  }
   return "active";
 };
 
@@ -36,7 +42,9 @@ export const HomePage = () => {
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
       const status = getProjectStatus(project);
-      if (filter === "all") return status !== "archived";
+      if (filter === "all") {
+        return status !== "archived";
+      }
       return status === filter;
     });
   }, [projects, filter]);

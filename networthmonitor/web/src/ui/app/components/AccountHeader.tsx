@@ -50,8 +50,12 @@ export const AccountHeader = ({
               class="flex-1 text-2xl font-bold bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg px-3 py-1 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               autoFocus
               onKeyDown={(e) => {
-                if (e.key === "Enter") {onSave();}
-                if (e.key === "Escape") {onCancelEdit();}
+                if (e.key === "Enter") {
+                  onSave();
+                }
+                if (e.key === "Escape") {
+                  onCancelEdit();
+                }
               }}
             />
             {saving ? (

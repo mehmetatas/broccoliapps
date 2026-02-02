@@ -1,5 +1,5 @@
-import { SpendRecord } from '../types/spendRecord';
-import { getStorage } from './mmkv';
+import { SpendRecord } from "../types/spendRecord";
+import { getStorage } from "./mmkv";
 
 // time sorted ids with second precision with a 4 character random string suffix
 // example value: 00b2dmqs35 = 00b2dm + qs35
@@ -10,7 +10,7 @@ function generateId(): string {
   return (
     Math.round((Date.now() - timeIdOffset) / 1000)
       .toString(36)
-      .padStart(TIME_ID_LENGTH, '0') +
+      .padStart(TIME_ID_LENGTH, "0") +
     Math.random()
       .toString(36)
       .substring(2, 2 + RANDOM_ID_LENGTH) // 2 to remove '0.' from the beginning
@@ -35,7 +35,7 @@ export function getRecentSpendRecords(count = 10): SpendRecord[] {
   const storage = getStorage();
   const keys = storage
     .getAllKeys()
-    .filter(key => key.startsWith('spend:'))
+    .filter(key => key.startsWith("spend:"))
     .sort((a, b) => b.localeCompare(a)); // newest first. reverse sorted by key which is yyyy-mm
 
   const records: SpendRecord[] = [];
@@ -59,7 +59,7 @@ export function getRecentSpendRecords(count = 10): SpendRecord[] {
   return records;
 }
 
-export function saveSpendRecord(record: Omit<SpendRecord, 'id'>): SpendRecord {
+export function saveSpendRecord(record: Omit<SpendRecord, "id">): SpendRecord {
   const storage = getStorage();
   const yearMonth = record.date.substring(0, 7);
   const key = getStorageKey(yearMonth);

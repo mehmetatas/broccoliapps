@@ -65,7 +65,9 @@ export const useBuckets = () => {
   }, []);
 
   const create = async () => {
-    if (!newBucketName.trim()) return;
+    if (!newBucketName.trim()) {
+      return;
+    }
 
     setCreatingBucket(true);
     try {
@@ -91,7 +93,9 @@ export const useBuckets = () => {
   };
 
   const saveName = async (bucketId: string) => {
-    if (!editedName.trim()) return;
+    if (!editedName.trim()) {
+      return;
+    }
 
     setSavingName(true);
     try {
@@ -107,7 +111,9 @@ export const useBuckets = () => {
   };
 
   const remove = async () => {
-    if (!deleteModal.data) return;
+    if (!deleteModal.data) {
+      return;
+    }
 
     setDeleting(true);
     try {

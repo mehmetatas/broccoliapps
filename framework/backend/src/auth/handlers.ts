@@ -15,7 +15,9 @@ export type UseAuthOptions = {
 
 const ensureUser = async (data: JwtData): Promise<boolean> => {
   const existing = await users.get({ id: data.userId });
-  if (existing) return false;
+  if (existing) {
+    return false;
+  }
 
   const now = epoch.millis();
   await users.put({

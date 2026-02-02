@@ -26,7 +26,9 @@ export const getAccounts = async (): Promise<AccountsResponse> => {
   const dashboardFetched = getCache().get<boolean>(CACHE_KEYS.dashboardFetched);
   if (dashboardFetched) {
     const accounts = getAllAccountsFromCache();
-    if (accounts.length > 0) return { accounts };
+    if (accounts.length > 0) {
+      return { accounts };
+    }
   }
 
   const data = await getAccountsApi.invoke({});
@@ -148,7 +150,9 @@ const getAllAccountsFromCache = (): Account[] => {
   const accounts: Account[] = [];
   for (const key of keys) {
     const account = getCache().get<Account>(key);
-    if (account) accounts.push(account);
+    if (account) {
+      accounts.push(account);
+    }
   }
   return accounts;
 };

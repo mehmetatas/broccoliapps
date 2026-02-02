@@ -74,7 +74,9 @@ export const TaskCard = ({
   // Subtask drag and drop with SortableJS
   useEffect(() => {
     const container = subtasksContainerRef.current;
-    if (!container || !onSubtaskReorder || disabled || isDone) return;
+    if (!container || !onSubtaskReorder || disabled || isDone) {
+      return;
+    }
 
     if (subtaskSortableRef.current) {
       subtaskSortableRef.current.destroy();
@@ -102,7 +104,9 @@ export const TaskCard = ({
         }
 
         const draggedId = draggedEl.getAttribute("data-drag-id");
-        if (!draggedId) return;
+        if (!draggedId) {
+          return;
+        }
 
         // After SortableJS moves the element, the DOM is in the new order
         // Query the DOM directly to find neighbors
@@ -111,7 +115,9 @@ export const TaskCard = ({
           (el) => el.getAttribute("data-drag-id") === draggedId
         );
 
-        if (draggedIndex === -1) return;
+        if (draggedIndex === -1) {
+          return;
+        }
 
         const prevEl = elements[draggedIndex - 1];
         const nextEl = elements[draggedIndex + 1];
@@ -242,9 +248,9 @@ export const TaskCard = ({
               disabled={disabled}
               class={`flex items-center gap-1 px-2 py-0.5 text-base rounded-full
                 ${task.dueDate
-                  ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                  : "text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700"
-                } disabled:opacity-50`}
+            ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+            : "text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+          } disabled:opacity-50`}
             >
               <Calendar size={12} />
               <span class="text-sm">{task.dueDate ? formatDate(task.dueDate) : "No date"}</span>

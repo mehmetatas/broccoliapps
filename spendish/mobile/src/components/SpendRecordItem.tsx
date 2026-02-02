@@ -13,26 +13,26 @@ import {
   Tv,
   Utensils,
   Zap,
-} from 'lucide-react-native';
-import React, { useCallback } from 'react';
+} from "lucide-react-native";
+import React, { useCallback } from "react";
 import {
   Dimensions,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+} from "react-native";
+import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Animated, {
   FadeIn,
   FadeOut,
   LinearTransition,
-} from 'react-native-reanimated';
-import { getCategories } from '../storage/categories';
-import { useTheme } from '../theme/ThemeContext';
-import { SpendRecord } from '../types/spendRecord';
+} from "react-native-reanimated";
+import { getCategories } from "../storage/categories";
+import { useTheme } from "../theme/ThemeContext";
+import { SpendRecord } from "../types/spendRecord";
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SWIPE_DELETE_THRESHOLD = SCREEN_WIDTH * 0.5;
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -51,10 +51,10 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 function formatDate(dateString: string): string {
-  const date = new Date(dateString + 'T00:00:00');
-  const month = date.toLocaleDateString('en-US', { month: 'short' });
+  const date = new Date(dateString + "T00:00:00");
+  const month = date.toLocaleDateString("en-US", { month: "short" });
   const day = date.getDate();
-  const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
+  const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
   return `${month} ${day}, ${weekday}`;
 }
 
@@ -111,7 +111,7 @@ export function SpendRecordItem({
           </View>
           <View style={styles.spendInfo}>
             <Text style={[styles.spendCategory, { color: theme.text }]}>
-              {category?.label ?? 'Unknown'}
+              {category?.label ?? "Unknown"}
             </Text>
             <Text style={[styles.spendDate, { color: theme.textSecondary }]}>
               {formatDate(record.date)}
@@ -128,8 +128,8 @@ export function SpendRecordItem({
 
 const styles = StyleSheet.create({
   spendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 12,
     borderRadius: 12,
     marginBottom: 8,
@@ -138,8 +138,8 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   spendInfo: {
@@ -154,20 +154,20 @@ const styles = StyleSheet.create({
   },
   spendAmount: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   deleteActionContainer: {
     flex: 1,
-    backgroundColor: '#FF3B30',
+    backgroundColor: "#FF3B30",
     borderRadius: 12,
     marginBottom: 8,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
+    justifyContent: "center",
+    alignItems: "flex-end",
   },
   deleteAction: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     width: 80,
-    height: '100%',
+    height: "100%",
   },
 });
