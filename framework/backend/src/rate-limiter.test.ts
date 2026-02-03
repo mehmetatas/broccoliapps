@@ -340,7 +340,8 @@ describe("Rate Limiter Integration Tests", () => {
       };
       const context = { userId: `${TEST_PREFIX}-user-same-window` };
 
-      let currentTime = Date.now();
+      // Align to the start of an hour window so +30min stays within the same window
+      let currentTime = Math.floor(Date.now() / HOUR) * HOUR;
       const now = () => currentTime;
 
       // Use up the limit

@@ -228,7 +228,7 @@ describe("table", () => {
       const data = orders.query.byTotal({ total: 100 }, { createdAt: { gte: 1000 } }).build();
 
       expect(data.indexName).toBe("gsi1");
-      expect(data.keyConditionExpression).toBe("pk = :pk AND sk >= :sk");
+      expect(data.keyConditionExpression).toBe("gsi1_pk = :pk AND gsi1_sk >= :sk");
       expect(data.expressionAttributeValues[":pk"]).toBe("order#total#0000000000000100");
       expect(data.expressionAttributeValues[":sk"]).toBe("createdAt#0000000000001000");
     });

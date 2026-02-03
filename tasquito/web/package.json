@@ -12,6 +12,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck",
     "dev": "export AWS_PROFILE=appi && export TABLE_NAME=tasquito && export BA_APP_ID=tasquito && concurrently --kill-others-on-fail -n hono,vite,tsc -c blue,magenta,yellow \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:typecheck\"",
     "dev:typecheck": "tsc --watch --noEmit --preserveWatchOutput",
     "dev:server": "NODE_ENV=development tsx watch scripts/dev-server/main.ts",

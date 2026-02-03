@@ -101,10 +101,16 @@ export const createBatchGetFn = <T>(config: ItemConfig) => {
       }
     }
 
-    // Reorder to match input order
+    // Reorder to match input order, deduplicating keys
+    const seen = new Set<string>();
     const results: T[] = [];
     for (const key of ddbKeys) {
-      const item = resultsMap.get(`${key.pk}:${key.sk}`);
+      const keyId = `${key.pk}:${key.sk}`;
+      if (seen.has(keyId)) {
+        continue;
+      }
+      seen.add(keyId);
+      const item = resultsMap.get(keyId);
       if (item) {
         results.push(item);
       }
