@@ -1,10 +1,10 @@
-import { emptySchema, type EmptyRequest, type Schema } from "@broccoliapps/shared";
+import { type EmptyRequest, emptySchema, type Schema } from "@broccoliapps/shared";
 import type { Context } from "hono";
 import * as v from "valibot";
 import { log } from "../log";
 import { RequestContext } from "./context";
 import { deserializeRequest } from "./deserializer";
-import { handleError, HttpRouter, setCookies } from "./http-router";
+import { HttpRouter, handleError, setCookies } from "./http-router";
 import { PageResponse } from "./response";
 
 /**
@@ -18,7 +18,7 @@ import { PageResponse } from "./response";
 export class HttpError extends Error {
   constructor(
     public readonly status: number,
-    message: string
+    message: string,
   ) {
     super(message);
     this.name = "HttpError";
@@ -64,9 +64,7 @@ export class PageRouter extends HttpRouter {
   /**
    * Define request schema for typed params
    */
-  withRequest<TReq extends v.ObjectEntries>(
-    entries: TReq
-  ): PageRouteWithRequest<v.InferOutput<v.ObjectSchema<TReq, undefined>>> {
+  withRequest<TReq extends v.ObjectEntries>(entries: TReq): PageRouteWithRequest<v.InferOutput<v.ObjectSchema<TReq, undefined>>> {
     const schema = v.object(entries);
     return new PageRouteWithRequest(this, schema);
   }
@@ -179,8 +177,8 @@ export class PageRouter extends HttpRouter {
 class PageRouteWithRequest<TReq extends Record<string, unknown>> {
   constructor(
     private router: PageRouter,
-    private schema: Schema<TReq>
-  ) { }
+    private schema: Schema<TReq>,
+  ) {}
 
   handle(path: string, fn: PageHandlerFn<TReq>): PageRouter {
     this.router.registerRoute(path, this.schema, fn);

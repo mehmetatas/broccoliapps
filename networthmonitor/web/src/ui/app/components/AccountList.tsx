@@ -10,13 +10,7 @@ type AccountListProps = {
   displayCurrency: string; // Target currency for display
 };
 
-export const AccountList = ({
-  title,
-  accounts,
-  latestValues,
-  originalValues,
-  displayCurrency,
-}: AccountListProps) => {
+export const AccountList = ({ title, accounts, latestValues, originalValues, displayCurrency }: AccountListProps) => {
   if (accounts.length === 0) {
     return null;
   }
@@ -34,18 +28,12 @@ export const AccountList = ({
   return (
     <div>
       <div class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 p-4 mb-3">
-        <h2 class="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-1">
-          {title}
-        </h2>
+        <h2 class="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-1">{title}</h2>
         <MoneyDisplay amount={total} currency={displayCurrency} size="lg" />
       </div>
       <div class="space-y-2">
         {sortedAccounts.map((account) => (
-          <AccountCard
-            key={account.id}
-            account={account}
-            value={originalValues[account.id]}
-          />
+          <AccountCard key={account.id} account={account} value={originalValues[account.id]} />
         ))}
       </div>
     </div>

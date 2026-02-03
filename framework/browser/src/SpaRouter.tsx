@@ -3,7 +3,10 @@ import Router, { type RoutableProps } from "preact-router";
 import { AUTH_CACHE_KEYS } from "./auth-cache";
 import { cache } from "./cache";
 
-type RouteConfig = { page: ComponentType<unknown>; withLayout?: boolean };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyComponent = ComponentType<any>;
+
+type RouteConfig = { page: AnyComponent; withLayout?: boolean };
 
 type SpaRouterConfig = {
   routes: Record<string, RouteConfig>;
@@ -22,7 +25,7 @@ const AppRoute = ({
   layout: Layout,
   ...routeParams
 }: RoutableProps & {
-  page: ComponentType<unknown>;
+  page: AnyComponent;
   withLayout?: boolean;
   layout: ComponentType<{ children: ComponentChildren }>;
 }) =>
@@ -30,10 +33,9 @@ const AppRoute = ({
     <Layout>
       <Page {...routeParams} />
     </Layout>
-  ) :
+  ) : (
     <Page {...routeParams} />
-  ;
-
+  );
 export function createSpaRouter(config: SpaRouterConfig): {
   App: ComponentType;
   AppLink: ComponentType<AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }>;
@@ -58,9 +60,9 @@ export function createSpaRouter(config: SpaRouterConfig): {
 
     return (
       <Router>
-        {Object.entries(routes).map(([path, { page, withLayout }]) =>
+        {Object.entries(routes).map(([path, { page, withLayout }]) => (
           <AppRoute key={appPath(path)} path={appPath(path)} page={page} withLayout={withLayout} layout={Layout} />
-        )}
+        ))}
       </Router>
     );
   };

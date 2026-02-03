@@ -48,7 +48,7 @@ const buildSKValue = (skFields: string[], skValue: Record<string, unknown>): str
 const buildSKCondition = (
   skFields: string[],
   skFilter: Record<string, unknown> | undefined,
-  skAttr: string = "sk"
+  skAttr: string = "sk",
 ): { expression: string; values: Record<string, unknown> } | null => {
   if (!skFilter || Object.keys(skFilter).length === 0) {
     return null;
@@ -93,16 +93,16 @@ const buildSKCondition = (
 
   if (operatorType !== null) {
     switch (operatorType) {
-    case "beginsWith":
-      return { expression: `begins_with(${skAttr}, :sk)`, values: { ":sk": skValue } };
-    case "gte":
-      return { expression: `${skAttr} >= :sk`, values: { ":sk": skValue } };
-    case "lte":
-      return { expression: `${skAttr} <= :sk`, values: { ":sk": skValue } };
-    case "gt":
-      return { expression: `${skAttr} > :sk`, values: { ":sk": skValue } };
-    case "lt":
-      return { expression: `${skAttr} < :sk`, values: { ":sk": skValue } };
+      case "beginsWith":
+        return { expression: `begins_with(${skAttr}, :sk)`, values: { ":sk": skValue } };
+      case "gte":
+        return { expression: `${skAttr} >= :sk`, values: { ":sk": skValue } };
+      case "lte":
+        return { expression: `${skAttr} <= :sk`, values: { ":sk": skValue } };
+      case "gt":
+        return { expression: `${skAttr} > :sk`, values: { ":sk": skValue } };
+      case "lt":
+        return { expression: `${skAttr} < :sk`, values: { ":sk": skValue } };
     }
   }
 
@@ -120,9 +120,7 @@ const isFilterOperator = (value: unknown): value is Record<FilterOperatorName, u
   return keys.length === 1 && FILTER_OPERATORS.includes(keys[0] as FilterOperatorName);
 };
 
-const buildFilterExpression = (
-  filter: Record<string, unknown>
-): { expression: string; names: Record<string, string>; values: Record<string, unknown> } => {
+const buildFilterExpression = (filter: Record<string, unknown>): { expression: string; names: Record<string, string>; values: Record<string, unknown> } => {
   const conditions: string[] = [];
   const names: Record<string, string> = {};
   const values: Record<string, unknown> = {};
@@ -141,33 +139,33 @@ const buildFilterExpression = (
       const val = (value as Record<string, unknown>)[op];
 
       switch (op) {
-      case "beginsWith":
-        conditions.push(`begins_with(${nameKey}, ${valueKey})`);
-        values[valueKey] = val;
-        break;
-      case "gte":
-        conditions.push(`${nameKey} >= ${valueKey}`);
-        values[valueKey] = val;
-        break;
-      case "lte":
-        conditions.push(`${nameKey} <= ${valueKey}`);
-        values[valueKey] = val;
-        break;
-      case "gt":
-        conditions.push(`${nameKey} > ${valueKey}`);
-        values[valueKey] = val;
-        break;
-      case "lt":
-        conditions.push(`${nameKey} < ${valueKey}`);
-        values[valueKey] = val;
-        break;
-      case "between": {
-        const [min, max] = val as [unknown, unknown];
-        conditions.push(`${nameKey} BETWEEN ${valueKey}_min AND ${valueKey}_max`);
-        values[`${valueKey}_min`] = min;
-        values[`${valueKey}_max`] = max;
-        break;
-      }
+        case "beginsWith":
+          conditions.push(`begins_with(${nameKey}, ${valueKey})`);
+          values[valueKey] = val;
+          break;
+        case "gte":
+          conditions.push(`${nameKey} >= ${valueKey}`);
+          values[valueKey] = val;
+          break;
+        case "lte":
+          conditions.push(`${nameKey} <= ${valueKey}`);
+          values[valueKey] = val;
+          break;
+        case "gt":
+          conditions.push(`${nameKey} > ${valueKey}`);
+          values[valueKey] = val;
+          break;
+        case "lt":
+          conditions.push(`${nameKey} < ${valueKey}`);
+          values[valueKey] = val;
+          break;
+        case "between": {
+          const [min, max] = val as [unknown, unknown];
+          conditions.push(`${nameKey} BETWEEN ${valueKey}_min AND ${valueKey}_max`);
+          values[`${valueKey}_min`] = min;
+          values[`${valueKey}_max`] = max;
+          break;
+        }
       }
     } else {
       conditions.push(`${nameKey} = ${valueKey}`);
@@ -267,7 +265,7 @@ export const buildQueryForKey = <T>(
   skFields: string[],
   indexName: string | undefined,
   pkValue: Record<string, unknown>,
-  skFilter?: Record<string, unknown>
+  skFilter?: Record<string, unknown>,
 ): Query<T> => {
   // Determine the correct key attribute names based on index
   const pkAttr = indexName ? `${indexName}_pk` : "pk";

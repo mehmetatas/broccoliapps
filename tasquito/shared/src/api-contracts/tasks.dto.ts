@@ -1,13 +1,13 @@
 import * as v from "valibot";
-import { taskDto, taskStatusSchema } from "./dto";
 import { LIMITS } from "../limits";
+import { taskDto, taskStatusSchema } from "./dto";
 
 // Shared schema for project counts returned by task mutations
 const projectCountsSchema = v.optional(
   v.object({
     openTaskCount: v.number(),
     totalTaskCount: v.number(),
-  })
+  }),
 );
 
 // ============================================================================

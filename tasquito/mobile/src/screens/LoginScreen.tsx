@@ -1,5 +1,4 @@
-import { Login, useAuth, useTheme, type AuthExchangeResponse } from "@broccoliapps/mobile";
-import React from "react";
+import { type AuthExchangeResponse, Login, useAuth, useTheme } from "@broccoliapps/mobile";
 import { StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -19,12 +18,7 @@ export function LoginScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
-      <Login
-        title="Tasquito"
-        slogan="Simple, fast task management"
-        appId="tasquito"
-        onLoginSuccess={onLoginSuccess}
-      />
+      <Login title="Tasquito" slogan="Simple, fast task management" appId="tasquito" onLoginSuccess={onLoginSuccess} />
     </SafeAreaView>
   );
 }

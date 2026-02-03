@@ -1,8 +1,8 @@
 import { HttpError, log } from "@broccoliapps/backend";
-import { authCodes, magicLinkTokens } from "../../../db/schemas";
 import { AppId, Duration, globalConfig, isExpired, random } from "@broccoliapps/shared";
 import * as v from "valibot";
 import { getOrCreateUser } from "../../../auth/users";
+import { authCodes, magicLinkTokens } from "../../../db/schemas";
 import { page } from "../lambda";
 
 page
@@ -52,9 +52,10 @@ page
     // 7. Redirect to mobile deep link or web URL
     const appConfig = globalConfig.apps[magicLink.app as AppId];
     const mobileScheme = "mobileScheme" in appConfig ? appConfig.mobileScheme : undefined;
-    const redirectUrl = magicLink.platform === "mobile" && mobileScheme
-      ? `${mobileScheme}://auth/callback?code=${authCode.code}`
-      : `${appConfig.baseUrl}/app/auth/callback?code=${authCode.code}`;
+    const redirectUrl =
+      magicLink.platform === "mobile" && mobileScheme
+        ? `${mobileScheme}://auth/callback?code=${authCode.code}`
+        : `${appConfig.baseUrl}/app/auth/callback?code=${authCode.code}`;
 
     return {
       status: 302,
@@ -74,9 +75,7 @@ const deriveNameFromEmail = (email: string): string => {
   const parts = localPart.split(/[._-]+/);
 
   // Capitalize each part
-  const capitalized = parts.map((part) =>
-    part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
-  );
+  const capitalized = parts.map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
 
   return capitalized.join(" ");
 };

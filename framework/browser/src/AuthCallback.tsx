@@ -1,6 +1,6 @@
+import { type AuthExchangeResponse, authExchange } from "@broccoliapps/shared";
 import type { ComponentChildren } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import { type AuthExchangeResponse, authExchange } from "@broccoliapps/shared";
 import { setAuthTokens } from "./auth-cache";
 
 type AuthCallbackProps = {

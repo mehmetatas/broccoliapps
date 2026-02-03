@@ -1,6 +1,6 @@
 import { DropdownButton, useClickOutside } from "@broccoliapps/browser";
-import { useCallback, useRef, useState } from "preact/hooks";
 import type { UpdateFrequency } from "@broccoliapps/nwm-shared";
+import { useCallback, useRef, useState } from "preact/hooks";
 
 type FrequencyPickerProps = {
   value: UpdateFrequency;

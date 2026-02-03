@@ -6,9 +6,7 @@ const storage = createTokenStorage("com.broccoliapps.networthmonitor");
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   return (
-    <AuthProviderBase
-      apiBaseUrl={globalConfig.apps.networthmonitor.baseUrl}
-      storage={storage}>
+    <AuthProviderBase apiBaseUrl={globalConfig.apps.networthmonitor.baseUrl} storage={storage}>
       {children}
     </AuthProviderBase>
   );

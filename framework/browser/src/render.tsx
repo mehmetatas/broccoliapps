@@ -32,15 +32,9 @@ export function createRender(Html: ComponentType<RenderHtmlProps>): (element: VN
     const pageProps = element.props as Record<string, unknown>;
 
     const html = renderToString(
-      <Html
-        pageProps={pageProps}
-        title={options.title}
-        status={options.status}
-        staticPage={options.staticPage}
-        skipLayout={options.skipLayout}
-      >
+      <Html pageProps={pageProps} title={options.title} status={options.status} staticPage={options.staticPage} skipLayout={options.skipLayout}>
         {element}
-      </Html>
+      </Html>,
     );
 
     return {

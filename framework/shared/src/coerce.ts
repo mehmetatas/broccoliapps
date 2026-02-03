@@ -13,7 +13,7 @@ export const coerceNumber = () =>
       }
       return Number(val);
     }),
-    v.number()
+    v.number(),
   );
 
 /**
@@ -32,7 +32,7 @@ export const coerceBoolean = () =>
       }
       throw new Error(`Cannot convert "${val}" to boolean`);
     }),
-    v.boolean()
+    v.boolean(),
   );
 
 /**
@@ -48,7 +48,7 @@ export const coerceInteger = () =>
       }
       return Number(val);
     }),
-    v.integer()
+    v.integer(),
   );
 
 /**
@@ -59,7 +59,7 @@ export const coerceStringArray = () =>
   v.pipe(
     v.string(),
     v.transform((val: string) => val.split(",")),
-    v.array(v.string())
+    v.array(v.string()),
   );
 
 /**
@@ -75,7 +75,7 @@ export const coerceNumberArray = () =>
           throw new Error(`"${s}" is not a valid number`);
         }
         return Number(s);
-      })
+      }),
     ),
-    v.array(v.number())
+    v.array(v.number()),
   );

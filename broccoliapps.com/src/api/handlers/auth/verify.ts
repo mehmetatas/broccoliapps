@@ -1,6 +1,6 @@
 import { HttpError, log } from "@broccoliapps/backend";
-import { authCodes } from "../../../db/schemas";
 import { isExpired, centralVerifyAuth as verifyAuthToken } from "@broccoliapps/shared";
+import { authCodes } from "../../../db/schemas";
 import { api } from "../../lambda";
 
 api.register(verifyAuthToken, async (req, res) => {

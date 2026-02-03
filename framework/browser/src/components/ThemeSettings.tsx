@@ -1,4 +1,4 @@
-import { type Theme, setTheme as saveTheme } from "../theme";
+import { setTheme as saveTheme, type Theme } from "../theme";
 
 type ThemeSettingsProps = {
   value: Theme;
@@ -13,9 +13,7 @@ export const ThemeSettings = ({ value, onChange }: ThemeSettingsProps) => {
 
   return (
     <div>
-      <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-        Theme
-      </label>
+      <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Theme</label>
       <div class="flex gap-2">
         {(["system", "light", "dark"] as Theme[]).map((option) => (
           <button

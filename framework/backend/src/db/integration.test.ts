@@ -110,9 +110,7 @@ describe("DynamoDB Integration Tests", () => {
     });
 
     it("should not throw when deleting non-existent item", async () => {
-      await expect(
-        testTable.delete({ id: `${TEST_PREFIX}-nonexistent-delete` }, { status: "active" })
-      ).resolves.toBeUndefined();
+      await expect(testTable.delete({ id: `${TEST_PREFIX}-nonexistent-delete` }, { status: "active" })).resolves.toBeUndefined();
     });
   });
 
@@ -580,9 +578,7 @@ describe("Item utility functions", () => {
     });
 
     it("should build PK with multiple fields", () => {
-      expect(buildPK("order", ["userId", "orderId"], { userId: "u1", orderId: "o1" })).toBe(
-        "order#userId#u1#orderId#o1"
-      );
+      expect(buildPK("order", ["userId", "orderId"], { userId: "u1", orderId: "o1" })).toBe("order#userId#u1#orderId#o1");
     });
 
     it("should format numeric values in PK", () => {

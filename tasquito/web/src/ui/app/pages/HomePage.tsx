@@ -1,9 +1,9 @@
+import { FilterPills, IconButton, Spinner } from "@broccoliapps/browser";
+import type { ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
+import { useProjects } from "@broccoliapps/tasquito-shared/hooks";
 import { Archive, Check, Clock, Loader, RefreshCw, X } from "lucide-preact";
 import { useMemo, useState } from "preact/hooks";
-import type { ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
-import { FilterPills, IconButton, Spinner } from "@broccoliapps/browser";
 import { ProjectForm, ProjectList } from "../components";
-import { useProjects } from "../hooks";
 
 type ProjectFilter = "all" | "active" | "pending" | "done" | "archived";
 
@@ -54,12 +54,7 @@ export const HomePage = () => {
       {/* Header */}
       <div class="flex items-center gap-2">
         <h1 class="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Projects</h1>
-        <IconButton
-          icon={isLoading ? <Spinner size={18} /> : <RefreshCw size={18} />}
-          aria-label="Refresh projects"
-          onClick={refresh}
-          disabled={isLoading}
-        />
+        <IconButton icon={isLoading ? <Spinner size={18} /> : <RefreshCw size={18} />} aria-label="Refresh projects" onClick={refresh} disabled={isLoading} />
       </div>
 
       {/* Create Project Form */}

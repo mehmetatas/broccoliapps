@@ -80,16 +80,16 @@ async function updateMonthlyAverage(monthStr: string, currencies: string[]): Pro
   }
 
   // Create/update monthly average records
-  const monthlyAverages: ExchangeRate[] = Object.entries(ratesByCurrency).map(
-    ([currency, rates]) => ({
-      date: monthStr,
-      currency,
-      rate: rates.reduce((sum, r) => sum + r, 0) / rates.length,
-    })
-  );
+  const monthlyAverages: ExchangeRate[] = Object.entries(ratesByCurrency).map(([currency, rates]) => ({
+    date: monthStr,
+    currency,
+    rate: rates.reduce((sum, r) => sum + r, 0) / rates.length,
+  }));
 
   await exchangeRates.batchPut(monthlyAverages);
-  console.log(`Updated monthly average for ${monthStr} (${Object.keys(ratesByCurrency).length} currencies, based on ${allDailyRates.length / Object.keys(ratesByCurrency).length} days)`);
+  console.log(
+    `Updated monthly average for ${monthStr} (${Object.keys(ratesByCurrency).length} currencies, based on ${allDailyRates.length / Object.keys(ratesByCurrency).length} days)`,
+  );
 }
 
 async function deletePreviousMonthDailyRates(currentYear: number, currentMonth: number, currencies: string[]): Promise<void> {
@@ -115,8 +115,6 @@ async function deletePreviousMonthDailyRates(currentYear: number, currentMonth: 
   }
 
   // Delete using proper key structure
-  await exchangeRates.batchDelete(
-    allDailyRates.map((r) => ({ pk: { currency: r.currency }, sk: { date: r.date } }))
-  );
+  await exchangeRates.batchDelete(allDailyRates.map((r) => ({ pk: { currency: r.currency }, sk: { date: r.date } })));
   console.log(`Deleted ${allDailyRates.length} daily rates for previous month`);
 }

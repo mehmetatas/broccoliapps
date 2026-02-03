@@ -10,15 +10,7 @@ type CheckboxProps = {
   size?: "sm" | "md";
 };
 
-export const Checkbox = ({
-  checked,
-  onChange,
-  disabled = false,
-  loading = false,
-  label,
-  strikethrough = true,
-  size = "md",
-}: CheckboxProps) => {
+export const Checkbox = ({ checked, onChange, disabled = false, loading = false, label, strikethrough = true, size = "md" }: CheckboxProps) => {
   const iconSize = size === "sm" ? 16 : 20;
 
   return (
@@ -40,13 +32,13 @@ export const Checkbox = ({
           ${disabled || loading ? "cursor-not-allowed" : "cursor-pointer"}
         `.trim()}
       >
-        {loading ?
+        {loading ? (
           <Loader2 size={iconSize} class="text-neutral-400 dark:text-neutral-500 animate-spin" />
-          : checked ?
-            <CircleCheck size={iconSize} class="text-emerald-500" />
-            :
-            <Circle size={iconSize} class="text-neutral-300 dark:text-neutral-600 hover:text-neutral-400 dark:hover:text-neutral-500" />
-        }
+        ) : checked ? (
+          <CircleCheck size={iconSize} class="text-emerald-500" />
+        ) : (
+          <Circle size={iconSize} class="text-neutral-300 dark:text-neutral-600 hover:text-neutral-400 dark:hover:text-neutral-500" />
+        )}
       </button>
       {label && (
         <span

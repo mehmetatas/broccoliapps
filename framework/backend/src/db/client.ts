@@ -55,9 +55,7 @@ export const executeQuery = async <T>(params: QueryParams): Promise<QueryResult<
 
   // log.dbg("Executing query", { queryInput });
 
-  const response = await docClient.send(
-    new QueryCommand(queryInput)
-  );
+  const response = await docClient.send(new QueryCommand(queryInput));
 
   return {
     items: (response.Items ?? []) as DdbItem<T>[],
@@ -75,7 +73,7 @@ export const executeCountQuery = async (params: QueryParams): Promise<CountResul
     new QueryCommand({
       ...buildQueryInput(params),
       Select: "COUNT",
-    })
+    }),
   );
 
   return {
@@ -94,7 +92,7 @@ export const executePut = async <T>(params: PutParams<T>): Promise<void> => {
     new PutCommand({
       TableName: params.tableName,
       Item: params.item,
-    })
+    }),
   );
 };
 
@@ -105,7 +103,7 @@ export const executePutIfNotExists = async <T>(params: PutParams<T>): Promise<bo
         TableName: params.tableName,
         Item: params.item,
         ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)",
-      })
+      }),
     );
     return true;
   } catch (error: unknown) {
@@ -127,7 +125,7 @@ export const executeGet = async <T>(params: GetParams): Promise<DdbItem<T> | und
     new GetCommand({
       TableName: params.tableName,
       Key: { pk: params.pk, sk: params.sk },
-    })
+    }),
   );
   return response.Item as DdbItem<T> | undefined;
 };
@@ -143,7 +141,7 @@ export const executeDelete = async (params: DeleteParams): Promise<void> => {
     new DeleteCommand({
       TableName: params.tableName,
       Key: { pk: params.pk, sk: params.sk },
-    })
+    }),
   );
 };
 
@@ -166,7 +164,7 @@ export const executeBatchGet = async <T>(params: BatchGetParams): Promise<DdbIte
           Keys: keys.map((key) => ({ pk: key.pk, sk: key.sk })),
         },
       },
-    })
+    }),
   );
 
   return (response.Responses?.[params.tableName] ?? []) as DdbItem<T>[];
@@ -194,7 +192,7 @@ export const executeBatchPut = async <T>(params: BatchPutParams<T>): Promise<voi
             PutRequest: { Item: item },
           })),
         },
-      })
+      }),
     );
   }
 };
@@ -206,7 +204,7 @@ export interface BatchDeleteParams {
 
 export const executeBatchDelete = async (params: BatchDeleteParams): Promise<void> => {
   console.log("Deleting: " + params.keys.length);
-  console.log("Deleting: " + params.keys.slice(0, 10).map(c => JSON.stringify(c)));
+  console.log("Deleting: " + params.keys.slice(0, 10).map((c) => JSON.stringify(c)));
   const keys = uniqueByKey(params.keys);
   console.log("Deleting: " + keys.length);
 
@@ -225,7 +223,7 @@ export const executeBatchDelete = async (params: BatchDeleteParams): Promise<voi
             DeleteRequest: { Key: { pk: key.pk, sk: key.sk } },
           })),
         },
-      })
+      }),
     );
   }
 };

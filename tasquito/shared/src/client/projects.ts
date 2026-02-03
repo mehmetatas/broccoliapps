@@ -3,12 +3,12 @@ import {
   deleteProject as deleteProjectApi,
   getProject as getProjectApi,
   getProjects as getProjectsApi,
-  patchProject as patchProjectApi,
-  postProject as postProjectApi,
-  unarchiveProject as unarchiveProjectApi,
   type ProjectDto,
   type ProjectSummaryDto,
   type ProjectWithTasksDto,
+  patchProject as patchProjectApi,
+  postProject as postProjectApi,
+  unarchiveProject as unarchiveProjectApi,
 } from "../api-contracts";
 import { CACHE_KEYS, getCacheExpiry } from "./cache";
 import { getCache } from "./init";
@@ -46,11 +46,7 @@ const removeProjectFromCache = (id: string) => {
   getCache().remove(CACHE_KEYS.project(id));
 };
 
-export const setProjectCountsInCache = (
-  projectId: string,
-  openTaskCount: number,
-  totalTaskCount: number
-): void => {
+export const setProjectCountsInCache = (projectId: string, openTaskCount: number, totalTaskCount: number): void => {
   const existing = getCache().get<ProjectSummaryDto>(CACHE_KEYS.project(projectId));
   if (!existing) {
     return;

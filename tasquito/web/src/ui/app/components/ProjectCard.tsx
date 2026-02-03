@@ -1,5 +1,5 @@
-import { Archive } from "lucide-preact";
 import type { ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
+import { Archive } from "lucide-preact";
 import { AppLink } from "../SpaApp";
 import { ProjectStatusIndicator } from "./ProjectStatusIndicator";
 
@@ -26,19 +26,12 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
               <Archive size={14} />
             </div>
           ) : (
-            <ProjectStatusIndicator
-              openTaskCount={project.openTaskCount}
-              totalTaskCount={project.totalTaskCount}
-            />
+            <ProjectStatusIndicator openTaskCount={project.openTaskCount} totalTaskCount={project.totalTaskCount} />
           )}
         </div>
         <h3 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 line-clamp-1 pr-6">{project.name}</h3>
         <p class="text-sm text-neutral-400 dark:text-neutral-500">
-          {isArchived
-            ? "Archived"
-            : project.totalTaskCount === 0
-              ? "No tasks"
-              : `${project.openTaskCount} of ${project.totalTaskCount} open`}
+          {isArchived ? "Archived" : project.totalTaskCount === 0 ? "No tasks" : `${project.openTaskCount} of ${project.totalTaskCount} open`}
         </p>
       </div>
     </AppLink>

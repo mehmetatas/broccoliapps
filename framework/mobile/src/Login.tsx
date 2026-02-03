@@ -1,22 +1,7 @@
-import {
-  authExchange,
-  globalConfig,
-  sendMagicLink,
-  verifyApple,
-  type AuthExchangeResponse,
-} from "@broccoliapps/shared";
+import { type AuthExchangeResponse, authExchange, globalConfig, sendMagicLink, verifyApple } from "@broccoliapps/shared";
 import { appleAuth } from "@invertase/react-native-apple-authentication";
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  Linking,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Linking, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import InAppBrowser from "react-native-inappbrowser-reborn";
 import { useLoginTheme } from "./theme";
 import type { LoginProps } from "./types";
@@ -34,46 +19,31 @@ const parseCodeFromUrl = (url: string): string | null => {
   }
 };
 
-export function Login({
-  title,
-  slogan,
-  appId,
-  onLoginSuccess,
-  colors: colorOverrides,
-}: LoginProps) {
+export function Login({ title, slogan, appId, onLoginSuccess, colors: colorOverrides }: LoginProps) {
   const { colors } = useLoginTheme(colorOverrides);
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
-  const [loading, setLoading] = useState<"google" | "apple" | "email" | null>(
-    null,
-  );
+  const [loading, setLoading] = useState<"google" | "apple" | "email" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const appConfig = globalConfig.apps[appId];
   const baseUrl = appConfig.baseUrl;
   const broccoliappsBaseUrl = globalConfig.apps["broccoliapps-com"].baseUrl;
-  const mobileScheme =
-    "mobileScheme" in appConfig ? appConfig.mobileScheme : appId;
+  const mobileScheme = "mobileScheme" in appConfig ? appConfig.mobileScheme : appId;
 
-  const handleOAuthBrowser = async (
-    provider: "google" | "apple",
-  ): Promise<AuthExchangeResponse | null> => {
+  const handleOAuthBrowser = async (provider: "google" | "apple"): Promise<AuthExchangeResponse | null> => {
     const authUrl = `${broccoliappsBaseUrl}/auth?app=${appId}&provider=${provider}&platform=mobile`;
     const available = await InAppBrowser.isAvailable();
     if (!available) {
       return null;
     }
 
-    const result = await InAppBrowser.openAuth(
-      authUrl,
-      `${mobileScheme}://auth/callback`,
-      {
-        ephemeralWebSession: false,
-        showTitle: false,
-        enableUrlBarHiding: true,
-        enableDefaultShare: false,
-      },
-    );
+    const result = await InAppBrowser.openAuth(authUrl, `${mobileScheme}://auth/callback`, {
+      ephemeralWebSession: false,
+      showTitle: false,
+      enableUrlBarHiding: true,
+      enableDefaultShare: false,
+    });
 
     if (result.type === "success" && result.url) {
       const code = parseCodeFromUrl(result.url);
@@ -110,18 +80,13 @@ export function Login({
           requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
         });
 
-        const credentialState = await appleAuth.getCredentialStateForUser(
-          appleAuthResponse.user,
-        );
+        const credentialState = await appleAuth.getCredentialStateForUser(appleAuthResponse.user);
 
         if (credentialState !== appleAuth.State.AUTHORIZED) {
           return;
         }
 
-        if (
-          !appleAuthResponse.identityToken ||
-          !appleAuthResponse.authorizationCode
-        ) {
+        if (!appleAuthResponse.identityToken || !appleAuthResponse.authorizationCode) {
           return;
         }
 
@@ -132,9 +97,9 @@ export function Login({
             user: appleAuthResponse.user,
             fullName: appleAuthResponse.fullName
               ? {
-                givenName: appleAuthResponse.fullName.givenName,
-                familyName: appleAuthResponse.fullName.familyName,
-              }
+                  givenName: appleAuthResponse.fullName.givenName,
+                  familyName: appleAuthResponse.fullName.familyName,
+                }
               : undefined,
           },
           { baseUrl, skipAuth: true },
@@ -162,10 +127,7 @@ export function Login({
     setError(null);
     setLoading("email");
     try {
-      const result = await sendMagicLink.invoke(
-        { email: email.trim(), platform: "mobile" },
-        { baseUrl, skipAuth: true },
-      );
+      const result = await sendMagicLink.invoke({ email: email.trim(), platform: "mobile" }, { baseUrl, skipAuth: true });
       if (result.success) {
         setEmailSent(true);
       } else {
@@ -178,28 +140,42 @@ export function Login({
     }
   };
 
+  const openInAppBrowser = async (url: string) => {
+    const available = await InAppBrowser.isAvailable();
+    if (available) {
+      await InAppBrowser.open(url, {
+        dismissButtonStyle: "close",
+        preferredBarTintColor: colors.background,
+        preferredControlTintColor: colors.accent,
+        readerMode: false,
+        animated: true,
+        modalPresentationStyle: "fullScreen",
+        modalTransitionStyle: "coverVertical",
+        modalEnabled: true,
+        enableBarCollapsing: false,
+      });
+    } else {
+      await Linking.openURL(url);
+    }
+  };
+
   if (emailSent) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.content}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>
-            Check your email
-          </Text>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>Check your email</Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             We sent a sign-in link to{"\n"}
-            <Text style={[styles.emailHighlight, { color: colors.inputText }]}>
-              {email}
-            </Text>
+            <Text style={[styles.emailHighlight, { color: colors.inputText }]}>{email}</Text>
           </Text>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => {
               setEmailSent(false);
               setEmail("");
-            }}>
-            <Text style={[styles.backButtonText, { color: colors.accent }]}>
-              Back to sign in
-            </Text>
+            }}
+          >
+            <Text style={[styles.backButtonText, { color: colors.accent }]}>Back to sign in</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -210,12 +186,8 @@ export function Login({
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.content}>
         <View style={styles.logoArea}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>
-            {title}
-          </Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            {slogan}
-          </Text>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{slogan}</Text>
         </View>
 
         <View style={styles.authButtons}>
@@ -228,57 +200,27 @@ export function Login({
               },
             ]}
             onPress={onGooglePress}
-            disabled={loading !== null}>
-            {loading === "google" ?
+            disabled={loading !== null}
+          >
+            {loading === "google" ? (
               <ActivityIndicator color={colors.activityIndicator} />
-              : (
-                <Text
-                  style={[
-                    styles.googleButtonText,
-                    { color: colors.googleButtonText },
-                  ]}>
-                Continue with Google
-                </Text>
-              )}
+            ) : (
+              <Text style={[styles.googleButtonText, { color: colors.googleButtonText }]}>Continue with Google</Text>
+            )}
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.appleButton,
-              { backgroundColor: colors.appleButtonBg },
-            ]}
-            onPress={onApplePress}
-            disabled={loading !== null}>
-            {loading === "apple" ?
+          <TouchableOpacity style={[styles.appleButton, { backgroundColor: colors.appleButtonBg }]} onPress={onApplePress} disabled={loading !== null}>
+            {loading === "apple" ? (
               <ActivityIndicator color={colors.appleButtonText} />
-              : (
-                <Text
-                  style={[
-                    styles.appleButtonText,
-                    { color: colors.appleButtonText },
-                  ]}>
-                Continue with Apple
-                </Text>
-              )}
+            ) : (
+              <Text style={[styles.appleButtonText, { color: colors.appleButtonText }]}>Continue with Apple</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.divider}>
-            <View
-              style={[
-                styles.dividerLine,
-                { backgroundColor: colors.divider },
-              ]}
-            />
-            <Text
-              style={[styles.dividerText, { color: colors.textTertiary }]}>
-              or
-            </Text>
-            <View
-              style={[
-                styles.dividerLine,
-                { backgroundColor: colors.divider },
-              ]}
-            />
+            <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
+            <Text style={[styles.dividerText, { color: colors.textTertiary }]}>or</Text>
+            <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
           </View>
 
           <TextInput
@@ -301,38 +243,23 @@ export function Login({
           />
 
           <TouchableOpacity
-            style={[
-              styles.emailButton,
-              { backgroundColor: colors.accent },
-              !email.trim() && { backgroundColor: colors.accentDisabled },
-            ]}
+            style={[styles.emailButton, { backgroundColor: colors.accent }, !email.trim() && { backgroundColor: colors.accentDisabled }]}
             onPress={onEmailPress}
-            disabled={loading !== null || !email.trim()}>
-            {loading === "email" ?
-              <ActivityIndicator color="#fff" />
-              : (
-                <Text style={styles.emailButtonText}>
-                Continue with Email
-                </Text>
-              )}
+            disabled={loading !== null || !email.trim()}
+          >
+            {loading === "email" ? <ActivityIndicator color="#fff" /> : <Text style={styles.emailButtonText}>Continue with Email</Text>}
           </TouchableOpacity>
         </View>
 
-        {error &&
-          <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
-        }
+        {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
 
         <Text style={[styles.terms, { color: colors.textTertiary }]}>
           By continuing, you agree to our{" "}
-          <Text
-            style={styles.link}
-            onPress={() => Linking.openURL(`${baseUrl}/terms`)}>
+          <Text style={styles.link} onPress={() => openInAppBrowser(`${baseUrl}/terms`)}>
             Terms of Service
           </Text>{" "}
           and{" "}
-          <Text
-            style={styles.link}
-            onPress={() => Linking.openURL(`${baseUrl}/privacy`)}>
+          <Text style={styles.link} onPress={() => openInAppBrowser(`${baseUrl}/privacy`)}>
             Privacy Policy
           </Text>
         </Text>

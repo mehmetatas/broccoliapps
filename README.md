@@ -1,6 +1,5 @@
 # broccoliapps
 
-
 ```
 framework/
   backend/            # Code that only runs in lambda (ie authn/authz, logging, rate limiter, repo, http routing etc)

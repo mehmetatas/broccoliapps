@@ -1,5 +1,5 @@
-import { useEffect, useState } from "preact/hooks";
 import type { AccountDto, BucketDto } from "@broccoliapps/nwm-shared";
+import { useEffect, useState } from "preact/hooks";
 import { getDashboard } from "../api";
 
 type DashboardData = {

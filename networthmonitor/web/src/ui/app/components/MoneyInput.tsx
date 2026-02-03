@@ -13,18 +13,7 @@ type MoneyInputProps = {
   disabled?: boolean;
 };
 
-export const MoneyInput = ({
-  value,
-  onChange,
-  onBlur,
-  onKeyDown,
-  placeholder = "0",
-  label,
-  status,
-  currency,
-  prefix,
-  disabled,
-}: MoneyInputProps) => {
+export const MoneyInput = ({ value, onChange, onBlur, onKeyDown, placeholder = "0", label, status, currency, prefix, disabled }: MoneyInputProps) => {
   const handleChange = (e: Event) => {
     const input = e.target as HTMLInputElement;
     const rawValue = input.value.replace(/[^0-9.-]/g, "");
@@ -40,11 +29,7 @@ export const MoneyInput = ({
 
   return (
     <div class="flex flex-col gap-1.5">
-      {label && (
-        <label class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-          {label}
-        </label>
-      )}
+      {label && <label class="text-sm font-medium text-neutral-700 dark:text-neutral-300">{label}</label>}
       <div class="flex items-center gap-0">
         {prefix && (
           <span class="w-22 h-10 px-3 flex items-center bg-neutral-100 dark:bg-neutral-700 border border-r-0 border-neutral-200 dark:border-neutral-700 rounded-l-lg text-sm font-medium text-neutral-600 dark:text-neutral-400 whitespace-nowrap">
@@ -61,7 +46,8 @@ export const MoneyInput = ({
             onKeyDown={onKeyDown}
             placeholder={placeholder}
             disabled={disabled}
-            class={`w-full h-10 pl-3 ${value !== undefined && status ? "pr-16" : "pr-9"} border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-colors ${prefix && currency ? "" : prefix ? "rounded-r-lg" : currency ? "rounded-l-lg" : "rounded-lg"
+            class={`w-full h-10 pl-3 ${value !== undefined && status ? "pr-16" : "pr-9"} border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-colors ${
+              prefix && currency ? "" : prefix ? "rounded-r-lg" : currency ? "rounded-l-lg" : "rounded-lg"
             } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
           />
           {!status && value !== undefined && !disabled && (

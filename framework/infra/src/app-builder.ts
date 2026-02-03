@@ -24,10 +24,7 @@ import fs from "fs";
 
 export type Env = "prod" | string;
 
-export type LambdaConfig = Pick<
-  lambda.FunctionProps,
-  "memorySize" | "timeout" | "environment" | "reservedConcurrentExecutions"
->;
+export type LambdaConfig = Pick<lambda.FunctionProps, "memorySize" | "timeout" | "environment" | "reservedConcurrentExecutions">;
 
 export const defaultConfig = {
   lambda: {
@@ -75,8 +72,8 @@ export type SigninConfig = {
 };
 
 export type ScheduledJobConfig = {
-  schedule: string;  // EventBridge schedule expression: "rate(6 hours)" or "cron(0 3 ? * SUN *)"
-  payload: string;  // JSON stringified payload
+  schedule: string; // EventBridge schedule expression: "rate(6 hours)" or "cron(0 3 ? * SUN *)"
+  payload: string; // JSON stringified payload
 };
 
 class AppBuilder {
@@ -99,8 +96,8 @@ class AppBuilder {
     private readonly appName: string,
     private readonly account: string,
     private readonly region: string,
-    private readonly env: Env
-  ) { }
+    private readonly env: Env,
+  ) {}
 
   private isProd() {
     return this.env === "prod";
@@ -136,7 +133,7 @@ class AppBuilder {
       new GetParameterCommand({
         Name: paramPath,
         WithDecryption: true,
-      })
+      }),
     );
     if (!response.Parameter?.Value) {
       throw new Error(`SSM parameter not found: ${paramPath}`);
@@ -154,9 +151,9 @@ class AppBuilder {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
       pointInTimeRecoverySpecification: this.isProd()
         ? {
-          pointInTimeRecoveryEnabled: true,
-          recoveryPeriodInDays: 7,
-        }
+            pointInTimeRecoveryEnabled: true,
+            recoveryPeriodInDays: 7,
+          }
         : undefined,
     });
 
@@ -253,15 +250,12 @@ class AppBuilder {
   private configureLambda(
     name: string,
     { path, config }: LambdaDef,
-    {
-      table,
-      cognitoConfig,
-    }: { table?: dynamodb.Table; cognitoConfig?: { userPoolId: string; userPoolClientId: string } }
+    { table, cognitoConfig }: { table?: dynamodb.Table; cognitoConfig?: { userPoolId: string; userPoolClientId: string } },
   ): lambda.Function {
     // Merge Cognito env vars with user-provided config
     const environment: Record<string, string> = {
       BA_APP_ID: this.appName,
-      ...config?.environment ?? defaultConfig.lambda.environment,
+      ...(config?.environment ?? defaultConfig.lambda.environment),
     };
     if (cognitoConfig) {
       environment.COGNITO_USER_POOL_ID = cognitoConfig.userPoolId;
@@ -293,8 +287,7 @@ class AppBuilder {
       memorySize: config?.memorySize ?? defaultConfig.lambda.memorySize,
       timeout: config?.timeout ?? defaultConfig.lambda.timeout,
       environment,
-      reservedConcurrentExecutions:
-        config?.reservedConcurrentExecutions ?? defaultConfig.lambda.reservedConcurrentExecutions,
+      reservedConcurrentExecutions: config?.reservedConcurrentExecutions ?? defaultConfig.lambda.reservedConcurrentExecutions,
     });
 
     // All lambdas can read/write table (if table exists)
@@ -309,7 +302,7 @@ class AppBuilder {
         resources: [
           `arn:aws:ssm:${this.region}:${this.account}:parameter/${this.resourceName()}/*`, // /parameter/{appname}/* or /parameter/{appname}-{env}/*
         ],
-      })
+      }),
     );
 
     // Grant SES permissions if SES is configured
@@ -317,10 +310,8 @@ class AppBuilder {
       lambdaFn.addToRolePolicy(
         new iam.PolicyStatement({
           actions: ["ses:SendEmail", "ses:SendRawEmail"],
-          resources: [
-            `arn:aws:ses:${this.region}:${this.account}:identity/${this.sesDomain}`,
-          ],
-        })
+          resources: [`arn:aws:ses:${this.region}:${this.account}:identity/${this.sesDomain}`],
+        }),
       );
     }
 
@@ -434,14 +425,12 @@ class AppBuilder {
         origin: defaultBehavior.origin,
         ...defaultBehavior.options,
       },
-      additionalBehaviors: Object.fromEntries(
-        additionalBehaviors.map((b) => [b.path, { origin: b.origin, ...b.options }])
-      ),
+      additionalBehaviors: Object.fromEntries(additionalBehaviors.map((b) => [b.path, { origin: b.origin, ...b.options }])),
       comment: this.resourceName("distribution"),
       enabled: true,
       httpVersion: cloudfront.HttpVersion.HTTP2,
       certificate: this.getSslCert(),
-      domainNames: subdomains.map((sd) => sd === "" ? domain : `${sd}.${domain}`),
+      domainNames: subdomains.map((sd) => (sd === "" ? domain : `${sd}.${domain}`)),
       defaultRootObject: "",
       priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
     });
@@ -515,11 +504,7 @@ class AppBuilder {
     const { distPath, jobs } = this.scheduledJobs;
 
     // Create single Lambda for all jobs
-    const jobsLambda = this.configureLambda(
-      "jobs",
-      { path: distPath },
-      { table }
-    );
+    const jobsLambda = this.configureLambda("jobs", { path: distPath }, { table });
 
     // Create IAM role for Scheduler to invoke Lambda
     const schedulerRole = new iam.Role(this.stack, this.resourceName("scheduler-role"), {
@@ -532,9 +517,7 @@ class AppBuilder {
     for (const [jobName, config] of Object.entries(jobs)) {
       // Build event payload: { job: "name" } or { job: "name", payload: {...} }
       const parsedPayload = config.payload ? JSON.parse(config.payload) : null;
-      const eventPayload = parsedPayload && Object.keys(parsedPayload).length > 0
-        ? { job: jobName, payload: parsedPayload }
-        : { job: jobName };
+      const eventPayload = parsedPayload && Object.keys(parsedPayload).length > 0 ? { job: jobName, payload: parsedPayload } : { job: jobName };
 
       new scheduler.CfnSchedule(this.stack, this.resourceName(`job-${jobName}`), {
         name: this.resourceName(`job-${jobName}`),
@@ -724,9 +707,7 @@ class AppBuilder {
     }
 
     // Validate at least one origin with "/*" exists
-    const hasDefaultOrigin =
-      this.lambdaOrigins.some((o) => o.pathPattern === "/*") ||
-      this.s3Origins.some((o) => o.pathPattern === "/*");
+    const hasDefaultOrigin = this.lambdaOrigins.some((o) => o.pathPattern === "/*") || this.s3Origins.some((o) => o.pathPattern === "/*");
     if (!hasDefaultOrigin) {
       throw new Error("At least one origin must have path '/*' (default behavior)");
     }

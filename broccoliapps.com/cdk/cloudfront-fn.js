@@ -1,3 +1,4 @@
+// biome-ignore lint/correctness/noUnusedVariables: CloudFront Function
 function handler(event) {
   var request = event.request;
   var host = request.headers.host.value;

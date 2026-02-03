@@ -1,13 +1,24 @@
-import { globalConfig, authExchange, refreshToken, sendMagicLink, verifyApple, centralSendEmail, centralVerifyNative, type AuthUserDto, epoch, setS2SProvider } from "@broccoliapps/shared";
+import {
+  type AuthUserDto,
+  authExchange,
+  centralSendEmail,
+  centralVerifyNative,
+  epoch,
+  globalConfig,
+  refreshToken,
+  sendMagicLink,
+  setS2SProvider,
+  verifyApple,
+} from "@broccoliapps/shared";
 import { crypto } from "../crypto";
 import { users } from "../db/schemas/shared";
 import { HttpError } from "../http";
 
 import type { ApiRouter } from "../http/api-router";
-import { auth } from "./index";
-import { getAuthConfig } from "./config";
-import { JwtData } from "./jwt";
 import { verifyAppleIdentityToken } from "./apple";
+import { getAuthConfig } from "./config";
+import { auth } from "./index";
+import { JwtData } from "./jwt";
 
 export type UseAuthOptions = {
   onNewUser?: (user: JwtData) => Promise<void>;
@@ -84,8 +95,8 @@ export const registerAuthHandlers = (api: ApiRouter, options?: UseAuthOptions) =
     const { appId } = getAuthConfig();
 
     await centralSendEmail.invoke(
-      { app: appId, email: req.email, ...req.platform && { platform: req.platform } },
-      { baseUrl: globalConfig.apps["broccoliapps-com"].baseUrl }
+      { app: appId, email: req.email, ...(req.platform && { platform: req.platform }) },
+      { baseUrl: globalConfig.apps["broccoliapps-com"].baseUrl },
     );
 
     return res.ok({ success: true });
@@ -100,14 +111,12 @@ export const registerAuthHandlers = (api: ApiRouter, options?: UseAuthOptions) =
     // 2. Derive name from fullName param (Apple only sends on first sign-in) or email
     const givenName = req.fullName?.givenName;
     const familyName = req.fullName?.familyName;
-    const name = givenName || familyName
-      ? [givenName, familyName].filter(Boolean).join(" ")
-      : applePayload.email.split("@")[0] ?? "User";
+    const name = givenName || familyName ? [givenName, familyName].filter(Boolean).join(" ") : (applePayload.email.split("@")[0] ?? "User");
 
     // 3. Call broccoliapps verify-native to get/create central user
     const { user: centralUser } = await centralVerifyNative.invoke(
       { app: appId, email: applePayload.email, name, provider: "apple" as const },
-      { baseUrl: globalConfig.apps["broccoliapps-com"].baseUrl }
+      { baseUrl: globalConfig.apps["broccoliapps-com"].baseUrl },
     );
 
     // 4. Generate tokens

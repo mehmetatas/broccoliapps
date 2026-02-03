@@ -38,21 +38,7 @@ const allFieldsDefined = (fields: string[], record: Record<string, unknown>): bo
 };
 
 // DDB internal fields to strip from results
-const DDB_FIELDS = [
-  "pk",
-  "sk",
-  "gsi1_pk",
-  "gsi1_sk",
-  "gsi2_pk",
-  "gsi2_sk",
-  "gsi3_pk",
-  "gsi3_sk",
-  "gsi4_pk",
-  "gsi4_sk",
-  "gsi5_pk",
-  "gsi5_sk",
-  "_type",
-];
+const DDB_FIELDS = ["pk", "sk", "gsi1_pk", "gsi1_sk", "gsi2_pk", "gsi2_sk", "gsi3_pk", "gsi3_sk", "gsi4_pk", "gsi4_sk", "gsi5_pk", "gsi5_sk", "_type"];
 
 export interface ItemConfig {
   typeName: string;

@@ -1,33 +1,8 @@
-import {
-  Car,
-  CreditCard,
-  Gift,
-  Heart,
-  Home,
-  LucideIcon,
-  PiggyBank,
-  Plane,
-  ShoppingCart,
-  Sparkles,
-  Trash2,
-  Tv,
-  Utensils,
-  Zap,
-} from "lucide-react-native";
+import { Car, CreditCard, Gift, Heart, Home, LucideIcon, PiggyBank, Plane, ShoppingCart, Sparkles, Trash2, Tv, Utensils, Zap } from "lucide-react-native";
 import React, { useCallback } from "react";
-import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
-import Animated, {
-  FadeIn,
-  FadeOut,
-  LinearTransition,
-} from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
 import { getCategories } from "../storage/categories";
 import { useTheme } from "../theme/ThemeContext";
 import { SpendRecord } from "../types/spendRecord";
@@ -63,24 +38,17 @@ interface SpendRecordItemProps {
   onDelete: (record: SpendRecord) => void;
 }
 
-export function SpendRecordItem({
-  record,
-  onDelete,
-}: SpendRecordItemProps): React.JSX.Element {
+export function SpendRecordItem({ record, onDelete }: SpendRecordItemProps): React.JSX.Element {
   const { theme } = useTheme();
   const categories = getCategories();
-  const categoriesById = Object.fromEntries(categories.map(c => [c.id, c]));
+  const categoriesById = Object.fromEntries(categories.map((c) => [c.id, c]));
   const category = categoriesById[record.category];
   const Icon = category ? ICON_MAP[category.icon] : null;
 
   const renderRightActions = useCallback(
     () => (
       <View style={styles.deleteActionContainer}>
-        <TouchableOpacity
-          style={styles.deleteAction}
-          onPress={() => onDelete(record)}
-          activeOpacity={0.7}
-        >
+        <TouchableOpacity style={styles.deleteAction} onPress={() => onDelete(record)} activeOpacity={0.7}>
           <Trash2 size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
@@ -89,11 +57,7 @@ export function SpendRecordItem({
   );
 
   return (
-    <Animated.View
-      entering={FadeIn.duration(200)}
-      exiting={FadeOut.duration(200)}
-      layout={LinearTransition.springify()}
-    >
+    <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(200)} layout={LinearTransition.springify()}>
       <ReanimatedSwipeable
         renderRightActions={renderRightActions}
         onSwipeableOpen={() => onDelete(record)}
@@ -101,25 +65,12 @@ export function SpendRecordItem({
         rightThreshold={SWIPE_DELETE_THRESHOLD}
       >
         <View style={[styles.spendItem, { backgroundColor: theme.surface }]}>
-          <View
-            style={[
-              styles.spendIconContainer,
-              { backgroundColor: theme.background },
-            ]}
-          >
-            {Icon && <Icon size={20} color={theme.text} />}
-          </View>
+          <View style={[styles.spendIconContainer, { backgroundColor: theme.background }]}>{Icon && <Icon size={20} color={theme.text} />}</View>
           <View style={styles.spendInfo}>
-            <Text style={[styles.spendCategory, { color: theme.text }]}>
-              {category?.label ?? "Unknown"}
-            </Text>
-            <Text style={[styles.spendDate, { color: theme.textSecondary }]}>
-              {formatDate(record.date)}
-            </Text>
+            <Text style={[styles.spendCategory, { color: theme.text }]}>{category?.label ?? "Unknown"}</Text>
+            <Text style={[styles.spendDate, { color: theme.textSecondary }]}>{formatDate(record.date)}</Text>
           </View>
-          <Text style={[styles.spendAmount, { color: theme.text }]}>
-            ${record.amount}
-          </Text>
+          <Text style={[styles.spendAmount, { color: theme.text }]}>${record.amount}</Text>
         </View>
       </ReanimatedSwipeable>
     </Animated.View>

@@ -1,7 +1,7 @@
-import type { ProjectWithTasksDto, TaskDto, TaskStatus } from "@broccoliapps/tasquito-shared";
 import { generateKeyBetween } from "fractional-indexing";
-import { useEffect, useRef, useState } from "preact/hooks";
-import { archiveProject, deleteProject, deleteTask, getProject, patchProject, patchTask, postSubtask, postTask, unarchiveProject } from "../api";
+import { useEffect, useRef, useState } from "react";
+import type { ProjectWithTasksDto, TaskDto, TaskStatus } from "../api-contracts";
+import { archiveProject, deleteProject, deleteTask, getProject, patchProject, patchTask, postSubtask, postTask, unarchiveProject } from "../client";
 
 type TaskWithSubtasks = TaskDto & { subtasks: TaskDto[] };
 
@@ -97,7 +97,7 @@ export const useProject = (id: string) => {
       return;
     }
     await patchProject({ id: project.id, name });
-    setProject((prev) => prev ? { ...prev, name } : null);
+    setProject((prev) => (prev ? { ...prev, name } : null));
   };
 
   const remove = async () => {
@@ -122,7 +122,6 @@ export const useProject = (id: string) => {
       await unarchiveProject(project.id);
       await load();
     } catch (err: unknown) {
-      // Check for limit error (403)
       const error = err as { status?: number; message?: string };
       if (error?.status === 403 && error?.message) {
         setLimitError(error.message);
@@ -180,7 +179,7 @@ export const useProject = (id: string) => {
             }
             return {
               ...prev,
-              tasks: prev.tasks.map((t) => t.id === item.taskId ? { ...t, status: item.originalStatus } : t),
+              tasks: prev.tasks.map((t) => (t.id === item.taskId ? { ...t, status: item.originalStatus } : t)),
             };
           });
         })
@@ -215,10 +214,8 @@ export const useProject = (id: string) => {
       return;
     }
 
-    // Show skeleton immediately
     setPendingTaskCount((c) => c + 1);
 
-    // Add to queue
     taskQueueRef.current.push({
       type: "create",
       projectId: project.id,
@@ -228,7 +225,6 @@ export const useProject = (id: string) => {
       subtasks: data.subtasks,
     });
 
-    // Start processing if not already
     processTaskQueue();
   };
 
@@ -237,25 +233,23 @@ export const useProject = (id: string) => {
       return;
     }
 
-    // Save original status for potential rollback
     const originalTask = project.tasks.find((t) => t.id === taskId);
     if (!originalTask) {
       return;
     }
     const originalStatus = originalTask.status;
 
-    // Optimistic update - move immediately
+    // Optimistic update
     setProject((prev) => {
       if (!prev) {
         return null;
       }
       return {
         ...prev,
-        tasks: prev.tasks.map((t) => t.id === taskId ? { ...t, status } : t),
+        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, status } : t)),
       };
     });
 
-    // Add to queue
     taskQueueRef.current.push({
       type: "status",
       projectId: project.id,
@@ -264,7 +258,6 @@ export const useProject = (id: string) => {
       originalStatus,
     });
 
-    // Start processing if not already
     processTaskQueue();
   };
 
@@ -279,7 +272,7 @@ export const useProject = (id: string) => {
       }
       return {
         ...prev,
-        tasks: prev.tasks.map((t) => t.id === taskId ? { ...t, title } : t),
+        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, title } : t)),
       };
     });
   };
@@ -295,7 +288,7 @@ export const useProject = (id: string) => {
       }
       return {
         ...prev,
-        tasks: prev.tasks.map((t) => t.id === taskId ? { ...t, description } : t),
+        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, description } : t)),
       };
     });
   };
@@ -311,7 +304,7 @@ export const useProject = (id: string) => {
       }
       return {
         ...prev,
-        tasks: prev.tasks.map((t) => t.id === taskId ? { ...t, dueDate } : t),
+        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, dueDate } : t)),
       };
     });
   };
@@ -321,13 +314,12 @@ export const useProject = (id: string) => {
       return;
     }
 
-    // Find the task to save for potential restoration
     const taskToDelete = project.tasks.find((t) => t.id === taskId);
     if (!taskToDelete) {
       return;
     }
 
-    // Optimistic update - remove immediately
+    // Optimistic update
     setProject((prev) => {
       if (!prev) {
         return null;
@@ -338,7 +330,6 @@ export const useProject = (id: string) => {
       };
     });
 
-    // Add to queue
     taskQueueRef.current.push({
       type: "delete",
       projectId: project.id,
@@ -346,7 +337,6 @@ export const useProject = (id: string) => {
       taskToRestore: taskToDelete,
     });
 
-    // Start processing if not already
     processTaskQueue();
   };
 
@@ -356,7 +346,6 @@ export const useProject = (id: string) => {
       return;
     }
 
-    // Save original status for potential rollback
     const parentTask = project.tasks.find((t) => t.id === taskId);
     const originalSubtask = parentTask?.subtasks.find((st) => st.id === subtaskId);
     if (!originalSubtask) {
@@ -364,22 +353,17 @@ export const useProject = (id: string) => {
     }
     const originalStatus = originalSubtask.status;
 
-    // Optimistic update - move immediately
+    // Optimistic update
     setProject((prev) => {
       if (!prev) {
         return null;
       }
       return {
         ...prev,
-        tasks: prev.tasks.map((t) =>
-          t.id === taskId
-            ? { ...t, subtasks: t.subtasks.map((st) => st.id === subtaskId ? { ...st, status } : st) }
-            : t
-        ),
+        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: t.subtasks.map((st) => (st.id === subtaskId ? { ...st, status } : st)) } : t)),
       };
     });
 
-    // Add to queue for this task
     if (!subtaskQueuesRef.current.has(taskId)) {
       subtaskQueuesRef.current.set(taskId, []);
     }
@@ -392,7 +376,6 @@ export const useProject = (id: string) => {
       originalStatus,
     });
 
-    // Start processing if not already
     processSubtaskQueue(taskId);
   };
 
@@ -407,11 +390,7 @@ export const useProject = (id: string) => {
       }
       return {
         ...prev,
-        tasks: prev.tasks.map((t) =>
-          t.id === taskId
-            ? { ...t, subtasks: t.subtasks.map((st) => st.id === subtaskId ? { ...st, title } : st) }
-            : t
-        ),
+        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: t.subtasks.map((st) => (st.id === subtaskId ? { ...st, title } : st)) } : t)),
       };
     });
   };
@@ -421,27 +400,23 @@ export const useProject = (id: string) => {
       return;
     }
 
-    // Find the subtask to save for potential restoration
     const parentTask = project.tasks.find((t) => t.id === taskId);
     const subtaskToDelete = parentTask?.subtasks.find((st) => st.id === subtaskId);
     if (!subtaskToDelete) {
       return;
     }
 
-    // Optimistic update - remove immediately
+    // Optimistic update
     setProject((prev) => {
       if (!prev) {
         return null;
       }
       return {
         ...prev,
-        tasks: prev.tasks.map((t) =>
-          t.id === taskId ? { ...t, subtasks: t.subtasks.filter((st) => st.id !== subtaskId) } : t
-        ),
+        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: t.subtasks.filter((st) => st.id !== subtaskId) } : t)),
       };
     });
 
-    // Add to queue for this task
     if (!subtaskQueuesRef.current.has(taskId)) {
       subtaskQueuesRef.current.set(taskId, []);
     }
@@ -453,7 +428,6 @@ export const useProject = (id: string) => {
       subtaskToRestore: subtaskToDelete,
     });
 
-    // Start processing if not already
     processSubtaskQueue(taskId);
   };
 
@@ -480,9 +454,7 @@ export const useProject = (id: string) => {
             }
             return {
               ...prev,
-              tasks: prev.tasks.map((t) =>
-                t.id === taskId ? { ...t, subtasks: [...t.subtasks, result.task] } : t
-              ),
+              tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: [...t.subtasks, result.task] } : t)),
             };
           });
         })
@@ -518,8 +490,11 @@ export const useProject = (id: string) => {
               ...prev,
               tasks: prev.tasks.map((t) =>
                 t.id === taskId
-                  ? { ...t, subtasks: t.subtasks.map((st) => st.id === item.subtaskId ? { ...st, status: item.originalStatus } : st) }
-                  : t
+                  ? {
+                      ...t,
+                      subtasks: t.subtasks.map((st) => (st.id === item.subtaskId ? { ...st, status: item.originalStatus } : st)),
+                    }
+                  : t,
               ),
             };
           });
@@ -538,9 +513,7 @@ export const useProject = (id: string) => {
             }
             return {
               ...prev,
-              tasks: prev.tasks.map((t) =>
-                t.id === taskId ? { ...t, subtasks: [...t.subtasks, item.subtaskToRestore] } : t
-              ),
+              tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: [...t.subtasks, item.subtaskToRestore] } : t)),
             };
           });
         })
@@ -556,14 +529,12 @@ export const useProject = (id: string) => {
       return;
     }
 
-    // Show skeleton immediately
     setPendingSubtaskCounts((prev) => {
       const next = new Map(prev);
       next.set(taskId, (next.get(taskId) ?? 0) + 1);
       return next;
     });
 
-    // Add to queue for this task
     if (!subtaskQueuesRef.current.has(taskId)) {
       subtaskQueuesRef.current.set(taskId, []);
     }
@@ -574,7 +545,6 @@ export const useProject = (id: string) => {
       title,
     });
 
-    // Start processing if not already
     processSubtaskQueue(taskId);
   };
 
@@ -589,7 +559,6 @@ export const useProject = (id: string) => {
       return;
     }
 
-    // Get the sortOrders of the adjacent tasks
     const afterTask = afterId ? project.tasks.find((t) => t.id === afterId) : null;
     const beforeTask = beforeId ? project.tasks.find((t) => t.id === beforeId) : null;
 
@@ -603,31 +572,22 @@ export const useProject = (id: string) => {
       if (!prev) {
         return null;
       }
-      const updatedTasks = prev.tasks.map((t) => t.id === taskId ? { ...t, sortOrder: newSortOrder } : t);
-
       return {
         ...prev,
-        tasks: updatedTasks,
+        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, sortOrder: newSortOrder } : t)),
       };
     });
 
-    // Persist to server
     try {
       await patchTask({ projectId: project.id, id: taskId, sortOrder: newSortOrder });
     } catch (err) {
       console.error(err);
-      // Revert on error
       load();
     }
   };
 
   // Reorder subtask within its parent
-  const reorderSubtask = async (
-    parentId: string,
-    subtaskId: string,
-    afterId: string | null,
-    beforeId: string | null
-  ) => {
+  const reorderSubtask = async (parentId: string, subtaskId: string, afterId: string | null, beforeId: string | null) => {
     if (!project) {
       return;
     }
@@ -642,7 +602,6 @@ export const useProject = (id: string) => {
       return;
     }
 
-    // Get the sortOrders of the adjacent subtasks
     const afterSubtask = afterId ? parentTask.subtasks.find((st) => st.id === afterId) : null;
     const beforeSubtask = beforeId ? parentTask.subtasks.find((st) => st.id === beforeId) : null;
 
@@ -661,37 +620,31 @@ export const useProject = (id: string) => {
         tasks: prev.tasks.map((t) =>
           t.id === parentId
             ? {
-              ...t,
-              subtasks: t.subtasks.map((st) =>
-                st.id === subtaskId ? { ...st, sortOrder: newSortOrder } : st
-              ),
-            }
-            : t
+                ...t,
+                subtasks: t.subtasks.map((st) => (st.id === subtaskId ? { ...st, sortOrder: newSortOrder } : st)),
+              }
+            : t,
         ),
       };
     });
 
-    // Persist to server
     try {
       await patchTask({ projectId: project.id, id: subtaskId, sortOrder: newSortOrder });
     } catch {
-      // Revert on error
       load();
     }
   };
 
-  // Sorted tasks (todo first, then done, then by sortOrder)
-  // Note: Use standard string comparison (<, >) for sortOrder, not localeCompare,
-  // because fractional-indexing generates keys designed for ASCII comparison
+  // Sorted tasks: todo first, then done, each sorted by sortOrder (ASCII comparison)
   const sortedTasks: TaskWithSubtasks[] = project
     ? [...project.tasks].sort((a, b) => {
-      if (a.status !== b.status) {
-        return a.status === "todo" ? -1 : 1;
-      }
-      const aOrder = a.sortOrder ?? "";
-      const bOrder = b.sortOrder ?? "";
-      return aOrder < bOrder ? -1 : aOrder > bOrder ? 1 : 0;
-    })
+        if (a.status !== b.status) {
+          return a.status === "todo" ? -1 : 1;
+        }
+        const aOrder = a.sortOrder ?? "";
+        const bOrder = b.sortOrder ?? "";
+        return aOrder < bOrder ? -1 : aOrder > bOrder ? 1 : 0;
+      })
     : [];
 
   return {
@@ -722,5 +675,7 @@ export const useProject = (id: string) => {
     removeSubtask,
     createSubtask,
     reorderSubtask,
+    // Refresh
+    refresh: load,
   };
 };

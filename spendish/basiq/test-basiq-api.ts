@@ -13,7 +13,6 @@ const main = async () => {
     await api.getToken("SERVER_ACCESS");
     const authLink = await api.createAuthLink(USER_ID);
     console.log(authLink.links.public);
-
   } catch (error) {
     console.error(error);
     process.exit(1);
@@ -21,4 +20,3 @@ const main = async () => {
 };
 
 main();
-

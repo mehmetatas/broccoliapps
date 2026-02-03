@@ -1,6 +1,6 @@
+import { buildApp } from "@broccoliapps/dev-tools";
 import * as path from "path";
 import { fileURLToPath } from "url";
-import { buildApp } from "@broccoliapps/dev-tools";
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
 

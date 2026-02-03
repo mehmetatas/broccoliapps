@@ -63,7 +63,7 @@ const signInWith = async (provider: CognitoIdentityProvider, app: string, platfo
       path: "/",
       sameSite: "lax",
       secure: true,
-    })
+    }),
   );
 
   cookies.set(
@@ -72,7 +72,7 @@ const signInWith = async (provider: CognitoIdentityProvider, app: string, platfo
       path: "/",
       sameSite: "lax",
       secure: true,
-    })
+    }),
   );
 
   if (platform === "mobile") {
@@ -82,7 +82,7 @@ const signInWith = async (provider: CognitoIdentityProvider, app: string, platfo
         path: "/",
         sameSite: "lax",
         secure: true,
-      })
+      }),
     );
   }
 

@@ -47,12 +47,12 @@ export function createWwwApp(config: WwwAppConfig): ComponentType<AppProps> {
 
     return (
       <Router>
-        {Object.entries(routesWithLayout).map(([path, component]) =>
+        {Object.entries(routesWithLayout).map(([path, component]) => (
           <Route key={path} path={path} component={component} pageProps={pageProps} withLayout={true} />
-        )}
-        {Object.entries(routesWithoutLayout).map(([path, component]) =>
+        ))}
+        {Object.entries(routesWithoutLayout).map(([path, component]) => (
           <Route key={path} path={path} component={component} pageProps={pageProps} withLayout={false} />
-        )}
+        ))}
         <Route default component={ClientNotFound} pageProps={pageProps} withLayout={false} />
       </Router>
     );

@@ -18,8 +18,8 @@
     "kill-port": "f(){ pid=$(lsof -ti:$1); [ -n \"$pid\" ] && kill -9 $pid && echo 'Killed process on port '$1 || echo 'No process on port '$1; }; f",
     "build:framework": "npm run build -w @broccoliapps/shared && npm run build -w @broccoliapps/backend -w @broccoliapps/frontend -w @broccoliapps/infra -w @broccoliapps/dev-tools -w @broccoliapps/browser -w @broccoliapps/mobile",
     "test": "npm run test --workspaces --if-present",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "clean": "npm run clean --workspaces --if-present",
     "dotcom": "npm run build:framework && npm run dev -w @broccoliapps/dotcom",
     "deploy:dotcom": "npm run build:framework && npm run deploy -w @broccoliapps/dotcom",
@@ -29,10 +29,6 @@
     "deploy:tasquito": "npm run build:framework && npm run deploy -w @broccoliapps/tasquito-web"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
-    "@stylistic/eslint-plugin": "^2.13.0",
-    "eslint": "^8.57.1",
-    "eslint-plugin-unused-imports": "^4.1.4",
-    "typescript-eslint": "^8.52.0"
+    "@biomejs/biome": "^2.3.13"
   }
 }

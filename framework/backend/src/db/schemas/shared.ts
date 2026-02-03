@@ -28,6 +28,4 @@ export type UserPreference = {
   value: string | number | boolean;
 };
 
-export const userPreferences = table<UserPreference>("userPreference")
-  .key(["userId"], ["key"])
-  .build();
+export const userPreferences = table<UserPreference>("userPreference").key(["userId"], ["key"]).build();

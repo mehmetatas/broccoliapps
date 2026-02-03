@@ -8,12 +8,7 @@ type AddBucketFormProps = {
   isLoading?: boolean;
 };
 
-export const AddBucketForm = ({
-  value,
-  onChange,
-  onSubmit,
-  isLoading = false,
-}: AddBucketFormProps) => {
+export const AddBucketForm = ({ value, onChange, onSubmit, isLoading = false }: AddBucketFormProps) => {
   return (
     <div class="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
       <div class="flex items-center gap-3">
@@ -30,11 +25,7 @@ export const AddBucketForm = ({
           }}
         />
         <Button onClick={onSubmit} disabled={!value.trim() || isLoading}>
-          {isLoading ?
-            <Loader2 size={18} class="animate-spin" />
-            :
-            <Plus size={18} />
-          }
+          {isLoading ? <Loader2 size={18} class="animate-spin" /> : <Plus size={18} />}
         </Button>
       </div>
     </div>

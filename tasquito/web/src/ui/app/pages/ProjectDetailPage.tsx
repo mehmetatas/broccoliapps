@@ -1,10 +1,10 @@
 import { ArchiveConfirmModal, DeleteConfirmModal, EditableText, EmptyState, IconButton, useDragAndDrop, useModal } from "@broccoliapps/browser";
 import { LIMITS, type TaskDto } from "@broccoliapps/tasquito-shared";
+import { useProject } from "@broccoliapps/tasquito-shared/hooks";
 import autoAnimate, { type AnimationController } from "@formkit/auto-animate";
 import { Archive, ArchiveRestore, ArrowLeft, CheckSquare, ChevronDown, ChevronRight, Trash2, X } from "lucide-preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { ProjectDetailSkeleton, TaskCard, TaskCardSkeleton, TaskForm } from "../components";
-import { useProject } from "../hooks";
 import { AppLink } from "../SpaApp";
 
 type ProjectDetailPageProps = {
@@ -77,7 +77,11 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
     if (el) {
       if (!todoAnimateRef.current || todoAnimateRef.current.parent !== el) {
         todoAnimateRef.current?.destroy?.();
-        todoAnimateRef.current = autoAnimate(el, { duration: 200, easing: "ease-out", disrespectUserMotionPreference: true });
+        todoAnimateRef.current = autoAnimate(el, {
+          duration: 200,
+          easing: "ease-out",
+          disrespectUserMotionPreference: true,
+        });
       }
     } else if (todoAnimateRef.current) {
       todoAnimateRef.current.destroy?.();
@@ -94,7 +98,11 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
     if (el) {
       if (!doneAnimateRef.current || doneAnimateRef.current.parent !== el) {
         doneAnimateRef.current?.destroy?.();
-        doneAnimateRef.current = autoAnimate(el, { duration: 200, easing: "ease-out", disrespectUserMotionPreference: true });
+        doneAnimateRef.current = autoAnimate(el, {
+          duration: 200,
+          easing: "ease-out",
+          disrespectUserMotionPreference: true,
+        });
       }
     } else if (doneAnimateRef.current) {
       doneAnimateRef.current.destroy?.();
@@ -154,8 +162,8 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
     if (!project?.archivedAt) {
       return null;
     }
-    const twoWeeksMs = 14 * 24 * 60 * 60 * 1000;
-    const deletionTime = project.archivedAt + twoWeeksMs;
+    const ttlMs = LIMITS.ARCHIVE_TTL_DAYS * 24 * 60 * 60 * 1000;
+    const deletionTime = project.archivedAt + ttlMs;
     const now = Date.now();
     const daysRemaining = Math.ceil((deletionTime - now) / (24 * 60 * 60 * 1000));
 
@@ -240,13 +248,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
             textClassName="text-2xl font-bold text-neutral-900 dark:text-neutral-100"
           />
         </div>
-        {!isArchived && (
-          <IconButton
-            icon={<Archive size={20} />}
-            aria-label="Archive project"
-            onClick={() => archiveModal.open()}
-          />
-        )}
+        {!isArchived && <IconButton icon={<Archive size={20} />} aria-label="Archive project" onClick={() => archiveModal.open()} />}
       </div>
 
       {/* Archived Banner */}
@@ -254,7 +256,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
         <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4">
           <p class="text-amber-800 dark:text-amber-200 mb-3">
             This project is archived and will be deleted in{" "}
-            <span class="font-semibold">{getDaysUntilDeletion()} days</span>.
+            <span class="font-semibold">{(getDaysUntilDeletion() ?? 0) < 1 ? "soon" : `${getDaysUntilDeletion()} days`}</span>.
           </p>
           <div class="flex gap-2">
             <button
@@ -297,11 +299,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
 
       {/* Tasks */}
       {tasks.length === 0 && pendingTaskCount === 0 ? (
-        <EmptyState
-          icon={<CheckSquare size={64} strokeWidth={1} />}
-          title="No tasks yet"
-          description="Create your first task to get started."
-        />
+        <EmptyState icon={<CheckSquare size={64} strokeWidth={1} />} title="No tasks yet" description="Create your first task to get started." />
       ) : (
         <div class="space-y-4">
           {/* Todo Tasks */}
@@ -309,9 +307,9 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
             <div ref={todoContainerRef} class="space-y-4">
               {todoTasks.map(renderTaskCard)}
               {/* Pending Task Skeletons at bottom */}
-              {Array.from({ length: pendingTaskCount }).map((_, i) =>
+              {Array.from({ length: pendingTaskCount }).map((_, i) => (
                 <TaskCardSkeleton key={`pending-${i}`} />
-              )}
+              ))}
             </div>
           )}
 

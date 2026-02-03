@@ -8,12 +8,7 @@ type DatePickerProps = {
   disabled?: boolean;
 };
 
-export const DatePicker = ({
-  value,
-  onChange,
-  placeholder = "YYYY-MM-DD",
-  disabled = false,
-}: DatePickerProps) => {
+export const DatePicker = ({ value, onChange, placeholder = "YYYY-MM-DD", disabled = false }: DatePickerProps) => {
   const hiddenInputRef = useRef<HTMLInputElement>(null);
 
   const handleTextChange = (e: Event) => {
@@ -66,14 +61,7 @@ export const DatePicker = ({
       </div>
 
       {/* Hidden native date picker */}
-      <input
-        ref={hiddenInputRef}
-        type="date"
-        value={value ?? ""}
-        onChange={handleDateInputChange}
-        class="sr-only"
-        tabIndex={-1}
-      />
+      <input ref={hiddenInputRef} type="date" value={value ?? ""} onChange={handleDateInputChange} class="sr-only" tabIndex={-1} />
 
       {/* Clear button */}
       {value && !disabled && (

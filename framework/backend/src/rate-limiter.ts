@@ -61,7 +61,7 @@ const incrementAndGetCounter = async (key: string, ttl: number, increment = 1): 
         ":ttl": ttl,
       },
       ReturnValues: "ALL_NEW",
-    })
+    }),
   );
 
   return result.Attributes!.counter as number;

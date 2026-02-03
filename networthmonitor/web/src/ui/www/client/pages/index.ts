@@ -1,2 +1,2 @@
-export { HomePage } from "./HomePage";
 export { ErrorPage } from "./ErrorPage";
+export { HomePage } from "./HomePage";

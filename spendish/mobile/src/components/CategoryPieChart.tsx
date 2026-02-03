@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { Dimensions, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { PieChart } from "react-native-chart-kit";
 import { getCategories } from "../storage/categories";
 import { useTheme } from "../theme/ThemeContext";
@@ -37,25 +32,21 @@ const CATEGORY_COLORS = [
   "#58D68D", // Emerald
 ];
 
-export function CategoryPieChart({
-  data,
-}: CategoryPieChartProps): React.JSX.Element {
+export function CategoryPieChart({ data }: CategoryPieChartProps): React.JSX.Element {
   const { theme } = useTheme();
   const [showPercentage, setShowPercentage] = useState(false);
 
   const categories = getCategories();
-  const categoriesById = Object.fromEntries(categories.map(c => [c.id, c]));
+  const categoriesById = Object.fromEntries(categories.map((c) => [c.id, c]));
 
   const total = data.reduce((sum, d) => sum + d.amount, 0);
 
   // Transform data for pie chart - include value in the name for display
   const pieData = data.map((d, index) => {
     const category = categoriesById[d.category];
-    const percentage = total > 0 ? d.amount / total * 100 : 0;
+    const percentage = total > 0 ? (d.amount / total) * 100 : 0;
     const label = category?.label ?? d.category;
-    const valueLabel = showPercentage
-      ? `${percentage.toFixed(0)}%`
-      : `$${d.amount}`;
+    const valueLabel = showPercentage ? `${percentage.toFixed(0)}%` : `$${d.amount}`;
 
     return {
       name: `${label} ${valueLabel}`,
@@ -71,15 +62,9 @@ export function CategoryPieChart({
   };
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={() => setShowPercentage(!showPercentage)}
-      activeOpacity={0.8}
-    >
+    <TouchableOpacity style={styles.container} onPress={() => setShowPercentage(!showPercentage)} activeOpacity={0.8}>
       {/* Hint text */}
-      <Text style={[styles.hint, { color: theme.textSecondary }]}>
-        Tap to show {showPercentage ? "$" : "%"}
-      </Text>
+      <Text style={[styles.hint, { color: theme.textSecondary }]}>Tap to show {showPercentage ? "$" : "%"}</Text>
 
       {/* Pie Chart with built-in legend */}
       <PieChart

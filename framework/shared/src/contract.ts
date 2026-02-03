@@ -7,7 +7,7 @@ export class ApiError extends Error {
   constructor(
     public readonly status: number,
     message: string,
-    public readonly details?: string[]
+    public readonly details?: string[],
   ) {
     super(message);
     this.name = "ApiError";
@@ -32,7 +32,7 @@ export const setBaseUrl = (url: string): void => {
 
 // Global access token getter for authenticated requests
 type TokenProvider = {
-  get: () => Promise<string | undefined>
+  get: () => Promise<string | undefined>;
 };
 let tokenProvider: TokenProvider = { get: () => Promise.resolve(undefined) };
 export const setTokenProvider = (provider: TokenProvider): void => {
@@ -77,8 +77,8 @@ export class ApiContract<TReq extends Record<string, unknown>, TRes> {
     public readonly path: string,
     public readonly schema: Schema<TReq>,
     public readonly responseSchema?: ResponseSchema<TRes>,
-    public readonly isS2S: boolean = false
-  ) { }
+    public readonly isS2S: boolean = false,
+  ) {}
 
   /**
    * Invoke this API contract
@@ -170,9 +170,7 @@ export class ApiContract<TReq extends Record<string, unknown>, TRes> {
 
 // Builder: after .withRequest() - IS a contract (defaults to void), can add .withResponse()
 export class ContractWithRequest<TReq extends Record<string, unknown>> extends ApiContract<TReq, void> {
-  withResponse<TEntries extends v.ObjectEntries>(
-    entries: TEntries
-  ): ApiContract<TReq, v.InferOutput<v.ObjectSchema<TEntries, undefined>>> {
+  withResponse<TEntries extends v.ObjectEntries>(entries: TEntries): ApiContract<TReq, v.InferOutput<v.ObjectSchema<TEntries, undefined>>> {
     const responseSchema = v.object(entries);
     type TRes = v.InferOutput<typeof responseSchema>;
     return new ApiContract<TReq, TRes>(this.method, this.path, this.schema, responseSchema, this.isS2S);
@@ -189,16 +187,12 @@ export class ContractBuilder extends ApiContract<EmptyRequest, void> {
     return new ContractBuilder(this.method, this.path, true);
   }
 
-  withRequest<TReq extends v.ObjectEntries>(
-    entries: TReq
-  ): ContractWithRequest<v.InferOutput<v.ObjectSchema<TReq, undefined>>> {
+  withRequest<TReq extends v.ObjectEntries>(entries: TReq): ContractWithRequest<v.InferOutput<v.ObjectSchema<TReq, undefined>>> {
     const schema = v.object(entries);
     return new ContractWithRequest<v.InferOutput<v.ObjectSchema<TReq, undefined>>>(this.method, this.path, schema, undefined, this.isS2S);
   }
 
-  withResponse<TRes extends v.ObjectEntries>(
-    entries: TRes
-  ): ApiContract<EmptyRequest, v.InferOutput<v.ObjectSchema<TRes, undefined>>> {
+  withResponse<TRes extends v.ObjectEntries>(entries: TRes): ApiContract<EmptyRequest, v.InferOutput<v.ObjectSchema<TRes, undefined>>> {
     const responseSchema = v.object(entries);
     type TResponse = v.InferOutput<typeof responseSchema>;
     return new ApiContract<EmptyRequest, TResponse>(this.method, this.path, emptySchema, responseSchema, this.isS2S);

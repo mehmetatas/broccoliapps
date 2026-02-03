@@ -3,17 +3,14 @@ import { crypto } from "../crypto";
 import { tokens, users } from "../db/schemas/shared";
 import { log } from "../log";
 import { getAuthConfig } from "./config";
-import { jwt, JwtData } from "./jwt";
+import { JwtData, jwt } from "./jwt";
 
 export type AuthTokens = { accessToken: string; refreshToken: string; user: JwtData };
 
 const exchange = async (authCode: string): Promise<AuthTokens> => {
   const { appId } = getAuthConfig();
 
-  const { user } = await centralVerifyAuth.invoke(
-    { app: appId, code: authCode },
-    { baseUrl: globalConfig.apps["broccoliapps-com"].baseUrl }
-  );
+  const { user } = await centralVerifyAuth.invoke({ app: appId, code: authCode }, { baseUrl: globalConfig.apps["broccoliapps-com"].baseUrl });
 
   const accessToken = await createAccessToken(user);
   const refreshToken = await createRefreshToken(user.userId);

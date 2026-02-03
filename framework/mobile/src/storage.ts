@@ -20,13 +20,13 @@ export const createTokenStorage = (service: string): TokenStorage => ({
     });
   },
   get: async () => {
-    const result = await Keychain.getGenericPassword({service});
+    const result = await Keychain.getGenericPassword({ service });
     if (!result) {
       return null;
     }
     return JSON.parse(result.password) as StoredTokens;
   },
   clear: async () => {
-    await Keychain.resetGenericPassword({service});
+    await Keychain.resetGenericPassword({ service });
   },
 });

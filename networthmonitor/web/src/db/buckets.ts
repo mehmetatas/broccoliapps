@@ -8,6 +8,4 @@ export type Bucket = {
   accountIds?: string[];
 };
 
-export const buckets = table<Bucket>("bucket")
-  .key(["userId"], ["id"])
-  .build();
+export const buckets = table<Bucket>("bucket").key(["userId"], ["id"]).build();

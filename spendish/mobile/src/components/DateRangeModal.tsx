@@ -1,13 +1,6 @@
-import React, { useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-} from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import React, { useState } from "react";
+import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 
 interface DateRangeModalProps {
@@ -18,13 +11,7 @@ interface DateRangeModalProps {
   initialEndDate?: Date;
 }
 
-export function DateRangeModal({
-  visible,
-  onClose,
-  onConfirm,
-  initialStartDate,
-  initialEndDate,
-}: DateRangeModalProps): React.JSX.Element {
+export function DateRangeModal({ visible, onClose, onConfirm, initialStartDate, initialEndDate }: DateRangeModalProps): React.JSX.Element {
   const { theme, isDark } = useTheme();
   const [startDate, setStartDate] = useState(initialStartDate || new Date());
   const [endDate, setEndDate] = useState(initialEndDate || new Date());
@@ -64,31 +51,17 @@ export function DateRangeModal({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={[styles.content, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.title, { color: theme.text }]}>
-            Custom Date Range
-          </Text>
+          <Text style={[styles.title, { color: theme.text }]}>Custom Date Range</Text>
 
           {/* Start Date */}
           <View style={styles.dateSection}>
-            <Text style={[styles.dateLabel, { color: theme.textSecondary }]}>
-              Start Date
-            </Text>
+            <Text style={[styles.dateLabel, { color: theme.textSecondary }]}>Start Date</Text>
             {Platform.OS === "android" && !showStartPicker && (
-              <TouchableOpacity
-                style={[styles.dateButton, { backgroundColor: theme.background }]}
-                onPress={() => setShowStartPicker(true)}
-              >
-                <Text style={[styles.dateText, { color: theme.text }]}>
-                  {formatDisplayDate(startDate)}
-                </Text>
+              <TouchableOpacity style={[styles.dateButton, { backgroundColor: theme.background }]} onPress={() => setShowStartPicker(true)}>
+                <Text style={[styles.dateText, { color: theme.text }]}>{formatDisplayDate(startDate)}</Text>
               </TouchableOpacity>
             )}
             {showStartPicker && (
@@ -104,17 +77,10 @@ export function DateRangeModal({
 
           {/* End Date */}
           <View style={styles.dateSection}>
-            <Text style={[styles.dateLabel, { color: theme.textSecondary }]}>
-              End Date
-            </Text>
+            <Text style={[styles.dateLabel, { color: theme.textSecondary }]}>End Date</Text>
             {Platform.OS === "android" && !showEndPicker && (
-              <TouchableOpacity
-                style={[styles.dateButton, { backgroundColor: theme.background }]}
-                onPress={() => setShowEndPicker(true)}
-              >
-                <Text style={[styles.dateText, { color: theme.text }]}>
-                  {formatDisplayDate(endDate)}
-                </Text>
+              <TouchableOpacity style={[styles.dateButton, { backgroundColor: theme.background }]} onPress={() => setShowEndPicker(true)}>
+                <Text style={[styles.dateText, { color: theme.text }]}>{formatDisplayDate(endDate)}</Text>
               </TouchableOpacity>
             )}
             {showEndPicker && (
@@ -131,23 +97,11 @@ export function DateRangeModal({
 
           {/* Buttons */}
           <View style={styles.buttonRow}>
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: theme.background }]}
-              onPress={onClose}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.buttonText, { color: theme.textSecondary }]}>
-                Cancel
-              </Text>
+            <TouchableOpacity style={[styles.button, { backgroundColor: theme.background }]} onPress={onClose} activeOpacity={0.7}>
+              <Text style={[styles.buttonText, { color: theme.textSecondary }]}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: theme.accent }]}
-              onPress={handleConfirm}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.buttonText, { color: theme.accentText }]}>
-                Confirm
-              </Text>
+            <TouchableOpacity style={[styles.button, { backgroundColor: theme.accent }]} onPress={handleConfirm} activeOpacity={0.7}>
+              <Text style={[styles.buttonText, { color: theme.accentText }]}>Confirm</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -2,10 +2,10 @@ declare const __DEV__: boolean | undefined;
 
 const isDev =
   typeof window === "undefined"
-    ? !process.env.LAMBDA_TASK_ROOT                       // Node.js / Lambda
+    ? !process.env.LAMBDA_TASK_ROOT // Node.js / Lambda
     : typeof window.location !== "undefined"
-      ? window.location.hostname === "localhost"           // Browser
-      : false;                                              // React Native — always use prod URLs
+      ? window.location.hostname === "localhost" // Browser
+      : false; // React Native — always use prod URLs
 
 export const globalConfig = {
   isDev,

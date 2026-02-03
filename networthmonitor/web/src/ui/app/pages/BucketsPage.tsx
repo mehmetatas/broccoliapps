@@ -28,12 +28,7 @@ export const BucketsPage = () => {
       <PageHeader title="Buckets" backHref="/" />
 
       <div class="space-y-4">
-        {b.buckets.length === 0 && (
-          <EmptyState
-            title="No buckets yet."
-            description="Create one below to group your assets and debts."
-          />
-        )}
+        {b.buckets.length === 0 && <EmptyState title="No buckets yet." description="Create one below to group your assets and debts." />}
 
         {b.buckets.map((bucket) => (
           <BucketListItem
@@ -56,12 +51,7 @@ export const BucketsPage = () => {
           />
         ))}
 
-        <AddBucketForm
-          value={b.newBucketName}
-          onChange={b.setNewBucketName}
-          onSubmit={b.create}
-          isLoading={b.creatingBucket}
-        />
+        <AddBucketForm value={b.newBucketName} onChange={b.setNewBucketName} onSubmit={b.create} isLoading={b.creatingBucket} />
       </div>
 
       <Modal
@@ -73,9 +63,7 @@ export const BucketsPage = () => {
         confirmVariant="danger"
         isLoading={b.deleting}
       >
-        <p>
-          Are you sure you want to delete "{b.deleteModal.data?.name}"? Accounts will be unlinked but not deleted.
-        </p>
+        <p>Are you sure you want to delete "{b.deleteModal.data?.name}"? Accounts will be unlinked but not deleted.</p>
       </Modal>
     </div>
   );

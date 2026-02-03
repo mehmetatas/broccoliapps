@@ -1,11 +1,5 @@
-import React, { useRef, useEffect, useCallback } from "react";
-import {
-  FlatList,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  View,
-} from "react-native";
+import React, { useCallback, useEffect, useRef } from "react";
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 
 export type PillPickerProps = {
@@ -15,12 +9,7 @@ export type PillPickerProps = {
   small?: boolean;
 };
 
-export function PillPicker({
-  items,
-  selectedId,
-  onSelect,
-  small = false,
-}: PillPickerProps): React.JSX.Element {
+export function PillPicker({ items, selectedId, onSelect, small = false }: PillPickerProps): React.JSX.Element {
   const { theme } = useTheme();
   const flatListRef = useRef<FlatList>(null);
   const entries = Object.entries(items);
@@ -81,7 +70,7 @@ export function PillPicker({
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
-      onScrollToIndexFailed={info => {
+      onScrollToIndexFailed={(info) => {
         // Fallback: scroll to approximate position after a short delay
         setTimeout(() => {
           flatListRef.current?.scrollToIndex({

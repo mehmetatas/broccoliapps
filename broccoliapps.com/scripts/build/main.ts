@@ -1,6 +1,6 @@
+import { buildApp } from "@broccoliapps/dev-tools";
 import * as path from "path";
 import { fileURLToPath } from "url";
-import { buildApp } from "@broccoliapps/dev-tools";
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -12,9 +12,7 @@ buildApp({
     { entry: "src/events", outdir: "dist/events", forbiddenDeps: ["preact", "preact-render-to-string", "hono"] },
     { entry: "src/jobs", outdir: "dist/jobs", forbiddenDeps: ["preact", "preact-render-to-string", "hono"] },
   ],
-  clients: [
-    { name: "app", entry: "src/ui/client/index.tsx", cssEntry: "src/ui/client/app.css" },
-  ],
+  clients: [{ name: "app", entry: "src/ui/client/index.tsx", cssEntry: "src/ui/client/app.css" }],
 }).catch((err) => {
   console.error(err);
   process.exit(1);

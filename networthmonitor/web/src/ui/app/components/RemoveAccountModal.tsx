@@ -10,14 +10,7 @@ type RemoveAccountModalProps = {
   isLoading: boolean;
 };
 
-export const RemoveAccountModal = ({
-  open,
-  onClose,
-  onArchive,
-  onDelete,
-  accountType,
-  isLoading,
-}: RemoveAccountModalProps) => {
+export const RemoveAccountModal = ({ open, onClose, onArchive, onDelete, accountType, isLoading }: RemoveAccountModalProps) => {
   const [action, setAction] = useState<"archive" | "delete">("archive");
 
   const typeLabel = accountType === "asset" ? "asset" : "debt";
@@ -42,14 +35,7 @@ export const RemoveAccountModal = ({
     >
       <div class="space-y-4">
         <label class="flex items-start gap-3 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors">
-          <input
-            type="radio"
-            name="remove-action"
-            value="archive"
-            checked={action === "archive"}
-            onChange={() => setAction("archive")}
-            class="mt-1"
-          />
+          <input type="radio" name="remove-action" value="archive" checked={action === "archive"} onChange={() => setAction("archive")} class="mt-1" />
           <div>
             <p class="font-medium text-neutral-900 dark:text-neutral-100">
               Archive <span class="text-neutral-500 dark:text-neutral-400 font-normal">(Recommended)</span>
@@ -61,14 +47,7 @@ export const RemoveAccountModal = ({
         </label>
 
         <label class="flex items-start gap-3 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors">
-          <input
-            type="radio"
-            name="remove-action"
-            value="delete"
-            checked={action === "delete"}
-            onChange={() => setAction("delete")}
-            class="mt-1"
-          />
+          <input type="radio" name="remove-action" value="delete" checked={action === "delete"} onChange={() => setAction("delete")} class="mt-1" />
           <div>
             <p class="font-medium text-neutral-900 dark:text-neutral-100">Permanent Delete</p>
             <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-1">

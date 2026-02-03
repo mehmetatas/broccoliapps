@@ -39,16 +39,10 @@ export const ArchivedAccountsPage = () => {
         <div class="space-y-8">
           {archivedAssets.length > 0 && (
             <section>
-              <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
-                Archived Assets
-              </h2>
+              <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">Archived Assets</h2>
               <div class="space-y-3">
                 {archivedAssets.map((asset) => (
-                  <ArchivedAccountCard
-                    key={asset.id}
-                    account={asset}
-                    maxValue={maxValues[asset.id] ?? 0}
-                  />
+                  <ArchivedAccountCard key={asset.id} account={asset} maxValue={maxValues[asset.id] ?? 0} />
                 ))}
               </div>
             </section>
@@ -56,16 +50,10 @@ export const ArchivedAccountsPage = () => {
 
           {archivedDebts.length > 0 && (
             <section>
-              <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
-                Archived Debts
-              </h2>
+              <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">Archived Debts</h2>
               <div class="space-y-3">
                 {archivedDebts.map((debt) => (
-                  <ArchivedAccountCard
-                    key={debt.id}
-                    account={debt}
-                    maxValue={maxValues[debt.id] ?? 0}
-                  />
+                  <ArchivedAccountCard key={debt.id} account={debt} maxValue={maxValues[debt.id] ?? 0} />
                 ))}
               </div>
             </section>

@@ -12,23 +12,12 @@ export type HtmlProps = {
   children: ComponentChildren;
 };
 
-export const Html = ({
-  title = "Broccoli Apps",
-  pageProps,
-  staticPage = false,
-  skipLayout = false,
-  status = 200,
-  children,
-}: HtmlProps) => {
+export const Html = ({ title = "Broccoli Apps", pageProps, staticPage = false, skipLayout = false, status = 200, children }: HtmlProps) => {
   const buildId = typeof __BUILD_ID__ !== "undefined" ? __BUILD_ID__ : "";
-  const isDevMode = process.env.NODE_ENV === "development" || !buildId && typeof window === "undefined";
+  const isDevMode = process.env.NODE_ENV === "development" || (!buildId && typeof window === "undefined");
 
   const cssFile = buildId ? `/static/app.${buildId}.css` : "/static/app.css";
-  const jsFile = isDevMode
-    ? "http://localhost:5080/src/ui/client/index.tsx"
-    : buildId
-      ? `/static/app.${buildId}.js`
-      : "/static/app.js";
+  const jsFile = isDevMode ? "http://localhost:5080/src/ui/client/index.tsx" : buildId ? `/static/app.${buildId}.js` : "/static/app.js";
 
   return (
     <html lang="en">
@@ -40,10 +29,7 @@ export const Html = ({
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <link rel="icon" href="/static/logo-64.png" />
 
         <link rel="stylesheet" href={isDevMode ? "http://localhost:5080/src/ui/client/app.css" : cssFile} />

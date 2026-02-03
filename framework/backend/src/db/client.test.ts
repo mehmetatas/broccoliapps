@@ -34,8 +34,8 @@ describe("client error handling", () => {
     await expect(
       executePutIfNotExists({
         tableName: "test-table",
-        item: { pk: "test", sk: "test", _type: "test" }
-      })
+        item: { pk: "test", sk: "test", _type: "test" },
+      }),
     ).rejects.toThrow("Some other DynamoDB error");
   });
 

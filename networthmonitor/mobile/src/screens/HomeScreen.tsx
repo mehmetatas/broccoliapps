@@ -1,23 +1,18 @@
-import {useTheme} from "@broccoliapps/mobile";
-import type {NativeStackScreenProps} from "@react-navigation/native-stack";
-import React from "react";
-import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import type {RootStackParamList} from "../navigation/types";
+import { useTheme } from "@broccoliapps/mobile";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import type { RootStackParamList } from "../navigation/types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
-export function HomeScreen({navigation}: Props) {
-  const {colors} = useTheme();
+export function HomeScreen({ navigation }: Props) {
+  const { colors } = useTheme();
 
   return (
-    <View style={[styles.container, {backgroundColor: colors.background}]}>
-      <Text style={[styles.title, {color: colors.textPrimary}]}>Net Worth Monitor</Text>
-      <Text style={[styles.subtitle, {color: colors.textSecondary}]}>
-        Track your wealth, effortlessly
-      </Text>
-      <TouchableOpacity
-        style={[styles.button, {backgroundColor: colors.accent}]}
-        onPress={() => navigation.navigate("Details")}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.title, { color: colors.textPrimary }]}>Net Worth Monitor</Text>
+      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Track your wealth, effortlessly</Text>
+      <TouchableOpacity style={[styles.button, { backgroundColor: colors.accent }]} onPress={() => navigation.navigate("Details")}>
         <Text style={styles.buttonText}>Go to Details</Text>
       </TouchableOpacity>
     </View>

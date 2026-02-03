@@ -1,6 +1,6 @@
 import { HttpError } from "@broccoliapps/backend";
-import { exchangeRates } from "../../db/currencyRates";
 import { getExchangeRates } from "@broccoliapps/nwm-shared";
+import { exchangeRates } from "../../db/currencyRates";
 import { api } from "../lambda";
 
 // GET /exchange-rates/:fromCurrency/:toCurrency - get historical exchange rates
@@ -26,7 +26,7 @@ api.register(getExchangeRates, async (req, res) => {
 
   let year = startYearNum;
   let month = startMonthNum;
-  while (year < endYearNum || year === endYearNum && month <= endMonthNum) {
+  while (year < endYearNum || (year === endYearNum && month <= endMonthNum)) {
     months.push(`${year}-${String(month).padStart(2, "0")}`);
     month++;
     if (month > 12) {
@@ -40,9 +40,7 @@ api.register(getExchangeRates, async (req, res) => {
     fromCurrency === "USD"
       ? Promise.resolve([])
       : exchangeRates.query({ currency: fromCurrency }, { between: [{ date: after }, { date: currentMonth }] }).all(),
-    toCurrency === "USD"
-      ? Promise.resolve([])
-      : exchangeRates.query({ currency: toCurrency }, { between: [{ date: after }, { date: currentMonth }] }).all(),
+    toCurrency === "USD" ? Promise.resolve([]) : exchangeRates.query({ currency: toCurrency }, { between: [{ date: after }, { date: currentMonth }] }).all(),
   ]);
 
   // Build rate maps (only monthly rates - filter out daily format yyyy-mm-dd)
@@ -75,8 +73,8 @@ api.register(getExchangeRates, async (req, res) => {
   const rates: Record<string, number> = {};
 
   for (const m of months) {
-    const fromRate = fromCurrency === "USD" ? 1 : fromRateMap.get(m) ?? oldestFromRate;
-    const toRate = toCurrency === "USD" ? 1 : toRateMap.get(m) ?? oldestToRate;
+    const fromRate = fromCurrency === "USD" ? 1 : (fromRateMap.get(m) ?? oldestFromRate);
+    const toRate = toCurrency === "USD" ? 1 : (toRateMap.get(m) ?? oldestToRate);
 
     if (fromRate !== undefined && toRate !== undefined && fromRate !== 0) {
       // Cross-rate: toRate / fromRate

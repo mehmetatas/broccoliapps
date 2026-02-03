@@ -57,11 +57,7 @@ const shortenPath = (p: string): string => {
  * Analyze a bundle's metafile for forbidden dependencies.
  * Returns an array of found forbidden deps with their import chains.
  */
-export const findForbiddenDeps = (
-  metafile: esbuild.Metafile,
-  forbiddenDeps: string[],
-  entryFile: string
-): ForbiddenDepResult[] => {
+export const findForbiddenDeps = (metafile: esbuild.Metafile, forbiddenDeps: string[], entryFile: string): ForbiddenDepResult[] => {
   const results: ForbiddenDepResult[] = [];
   const seenDeps = new Set<string>();
 

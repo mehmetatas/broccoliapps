@@ -1,15 +1,8 @@
 import { HttpError } from "@broccoliapps/backend";
+import { deleteBucket, getBucketAccounts, getBuckets, patchBucket, postBucket, putBucketAccounts } from "@broccoliapps/nwm-shared";
 import { random } from "@broccoliapps/shared";
 import { accounts } from "../../db/accounts";
 import { buckets } from "../../db/buckets";
-import {
-  deleteBucket,
-  getBucketAccounts,
-  getBuckets,
-  patchBucket,
-  postBucket,
-  putBucketAccounts,
-} from "@broccoliapps/nwm-shared";
 import { api } from "../lambda";
 
 // GET /buckets/:id/accounts - get accounts in a bucket (register most specific routes first)
@@ -59,9 +52,7 @@ api.register(putBucketAccounts, async (req, res, ctx) => {
   // Batch fetch and update all affected accounts
   const allAffectedAccountIds = [...addedAccountIds, ...removedAccountIds];
   if (allAffectedAccountIds.length > 0) {
-    const affectedAccounts = await accounts.batchGet(
-      allAffectedAccountIds.map((id) => ({ pk: { userId }, sk: { id } }))
-    );
+    const affectedAccounts = await accounts.batchGet(allAffectedAccountIds.map((id) => ({ pk: { userId }, sk: { id } })));
 
     const updatedAccounts = affectedAccounts.map((account) => {
       const bucketIds = account.bucketIds ?? [];
@@ -134,9 +125,7 @@ api.register(deleteBucket, async (req, res, ctx) => {
   // Remove this bucket ID from all associated accounts' bucketIds
   const accountIds = bucket.accountIds ?? [];
   if (accountIds.length > 0) {
-    const associatedAccounts = await accounts.batchGet(
-      accountIds.map((id) => ({ pk: { userId }, sk: { id } }))
-    );
+    const associatedAccounts = await accounts.batchGet(accountIds.map((id) => ({ pk: { userId }, sk: { id } })));
 
     const updatedAccounts = associatedAccounts.map((account) => ({
       ...account,

@@ -1,34 +1,15 @@
-import type { ChartArea, ScriptableContext, TooltipModel } from "chart.js";
-import {
-  CategoryScale,
-  Chart as ChartJS,
-  Filler,
-  Legend,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-} from "chart.js";
-import { useRef } from "preact/hooks";
-import { render } from "preact";
-import { Line } from "react-chartjs-2";
+import { EmptyState } from "@broccoliapps/browser";
 import { getCurrencySymbol } from "@broccoliapps/nwm-shared";
+import type { ChartArea, ScriptableContext, TooltipModel } from "chart.js";
+import { CategoryScale, Chart as ChartJS, Filler, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js";
+import { render } from "preact";
+import { useRef } from "preact/hooks";
+import { Line } from "react-chartjs-2";
 import { formatMonthLabel } from "../utils/dateUtils";
 import { fillToCurrentMonth } from "../utils/historyUtils";
-import { EmptyState } from "@broccoliapps/browser";
 import { MoneyDisplay } from "./MoneyDisplay";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 type ValueChartProps = {
   data: Record<string, number | undefined>;
@@ -51,12 +32,7 @@ const formatCompactNumber = (value: number, currencySymbol: string): string => {
   return sign + currencySymbol + absValue;
 };
 
-const createGradient = (
-  ctx: CanvasRenderingContext2D,
-  chartArea: ChartArea,
-  isDark: boolean,
-  isNegative: boolean
-) => {
+const createGradient = (ctx: CanvasRenderingContext2D, chartArea: ChartArea, isDark: boolean, isNegative: boolean) => {
   const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
   if (isNegative) {
     // Red gradient for negative values
@@ -119,7 +95,7 @@ export const ValueChart = ({ data, variant = "default", currency = "USD" }: Valu
         <div class="text-xs text-neutral-500 dark:text-neutral-400 mb-1">{label}</div>
         <MoneyDisplay amount={value} currency={currency} size="sm" />
       </div>,
-      tooltipEl
+      tooltipEl,
     );
 
     // Position tooltip
@@ -155,9 +131,7 @@ export const ValueChart = ({ data, variant = "default", currency = "USD" }: Valu
   }
 
   // Detect dark mode
-  const isDark =
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   const isNegative = variant === "negative";
   const lineColor = isNegative ? "#ef4444" : "#3b82f6";
@@ -223,11 +197,7 @@ export const ValueChart = ({ data, variant = "default", currency = "USD" }: Valu
   return (
     <div class="relative h-64 p-2 bg-white dark:bg-black rounded-lg">
       <Line data={chartData} options={options} />
-      <div
-        ref={tooltipRef}
-        class="fixed pointer-events-none z-50 transition-opacity duration-150"
-        style={{ opacity: 0 }}
-      />
+      <div ref={tooltipRef} class="fixed pointer-events-none z-50 transition-opacity duration-150" style={{ opacity: 0 }} />
     </div>
   );
 };

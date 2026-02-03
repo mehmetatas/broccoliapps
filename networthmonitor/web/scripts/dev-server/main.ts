@@ -1,6 +1,6 @@
 import { serve } from "@broccoliapps/dev-tools";
-import { Hono } from "hono";
 import { serveStatic } from "@hono/node-server/serve-static";
+import { Hono } from "hono";
 import { api } from "../../src/api/lambda";
 import { www } from "../../src/ui/www/server/lambda";
 

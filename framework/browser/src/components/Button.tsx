@@ -24,14 +24,7 @@ const sizeClasses: Record<ButtonSize, string> = {
   lg: "px-6 py-3 text-base",
 };
 
-export const Button = ({
-  variant = "primary",
-  size = "md",
-  class: className,
-  disabled,
-  children,
-  ...props
-}: ButtonProps) => {
+export const Button = ({ variant = "primary", size = "md", class: className, disabled, children, ...props }: ButtonProps) => {
   return (
     <button
       {...props}

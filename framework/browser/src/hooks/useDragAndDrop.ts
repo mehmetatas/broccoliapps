@@ -12,11 +12,7 @@ type UseDragAndDropOptions<T extends DragItem> = {
   onDragStateChange?: (isDragging: boolean) => void;
 };
 
-export const useDragAndDrop = <T extends DragItem>({
-  onReorder,
-  disabled = false,
-  onDragStateChange,
-}: UseDragAndDropOptions<T>) => {
+export const useDragAndDrop = <T extends DragItem>({ onReorder, disabled = false, onDragStateChange }: UseDragAndDropOptions<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sortableRef = useRef<Sortable | null>(null);
   const onDragStateChangeRef = useRef(onDragStateChange);
@@ -68,12 +64,8 @@ export const useDragAndDrop = <T extends DragItem>({
 
         // After SortableJS moves the element, the DOM is in the new order
         // Query only direct children to avoid including nested elements (like subtasks)
-        const elements = Array.from(container.children).filter((el) =>
-          el.hasAttribute("data-drag-id")
-        );
-        const draggedIndex = elements.findIndex(
-          (el) => el.getAttribute("data-drag-id") === draggedId
-        );
+        const elements = Array.from(container.children).filter((el) => el.hasAttribute("data-drag-id"));
+        const draggedIndex = elements.findIndex((el) => el.getAttribute("data-drag-id") === draggedId);
 
         if (draggedIndex === -1) {
           return;

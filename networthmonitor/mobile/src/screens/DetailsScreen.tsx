@@ -1,6 +1,5 @@
 import { useAuth, useTheme } from "@broccoliapps/mobile";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import type { RootStackParamList } from "../navigation/types";
 
@@ -13,17 +12,11 @@ export function DetailsScreen({ navigation }: Props) {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.title, { color: colors.textPrimary }]}>Details</Text>
-      <Text style={[styles.body, { color: colors.textSecondary }]}>
-        Navigation is working correctly.
-      </Text>
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: colors.buttonSecondaryBg }]}
-        onPress={() => navigation.goBack()}>
+      <Text style={[styles.body, { color: colors.textSecondary }]}>Navigation is working correctly.</Text>
+      <TouchableOpacity style={[styles.button, { backgroundColor: colors.buttonSecondaryBg }]} onPress={() => navigation.goBack()}>
         <Text style={styles.buttonText}>Go Back</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.signOutButton, { backgroundColor: colors.danger }]}
-        onPress={() => logout()}>
+      <TouchableOpacity style={[styles.signOutButton, { backgroundColor: colors.danger }]} onPress={() => logout()}>
         <Text style={styles.buttonText}>Sign Out</Text>
       </TouchableOpacity>
     </View>

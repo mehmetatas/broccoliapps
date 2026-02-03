@@ -12,15 +12,12 @@ export const ErrorPage = ({ status, message, details }: ErrorPageProps) => {
         <p class="text-xl text-neutral-600 mb-6">{message}</p>
         {details && details.length > 0 && (
           <ul class="text-sm text-neutral-500 mb-6">
-            {details.map((detail, i) =>
+            {details.map((detail, i) => (
               <li key={i}>{detail}</li>
-            )}
+            ))}
           </ul>
         )}
-        <a
-          href="/"
-          class="inline-block px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition"
-        >
+        <a href="/" class="inline-block px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition">
           Go Home
         </a>
       </div>

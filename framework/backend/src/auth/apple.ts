@@ -1,5 +1,5 @@
-import * as jose from "jose";
 import { globalConfig } from "@broccoliapps/shared";
+import * as jose from "jose";
 import { getAuthConfig } from "./config";
 
 const APPLE_ISSUER = "https://appleid.apple.com";

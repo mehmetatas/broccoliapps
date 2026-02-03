@@ -11,7 +11,7 @@ import { HttpError } from "./page-router";
 export class RequestContext {
   private user: JwtData | undefined;
 
-  constructor(private ctx: Context) { }
+  constructor(private ctx: Context) {}
 
   /**
    * Get a request header value

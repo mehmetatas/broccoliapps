@@ -1,9 +1,9 @@
+import { Card, Checkbox, EditableText, Skeleton } from "@broccoliapps/browser";
 import { LIMITS, type TaskDto, type TaskStatus } from "@broccoliapps/tasquito-shared";
+import autoAnimate, { type AnimationController } from "@formkit/auto-animate";
 import { Calendar, ChevronDown, ChevronRight, Pencil, Trash2, X } from "lucide-preact";
 import { useEffect, useRef, useState } from "preact/hooks";
-import autoAnimate, { type AnimationController } from "@formkit/auto-animate";
 import Sortable from "sortablejs";
-import { Card, Checkbox, EditableText, Skeleton } from "@broccoliapps/browser";
 
 type TaskWithSubtasks = TaskDto & {
   subtasks: TaskDto[];
@@ -111,9 +111,7 @@ export const TaskCard = ({
         // After SortableJS moves the element, the DOM is in the new order
         // Query the DOM directly to find neighbors
         const elements = Array.from(container.querySelectorAll("[data-drag-id]"));
-        const draggedIndex = elements.findIndex(
-          (el) => el.getAttribute("data-drag-id") === draggedId
-        );
+        const draggedIndex = elements.findIndex((el) => el.getAttribute("data-drag-id") === draggedId);
 
         if (draggedIndex === -1) {
           return;
@@ -143,7 +141,11 @@ export const TaskCard = ({
     if (el) {
       if (!subtaskAnimateRef.current || subtaskAnimateRef.current.parent !== el) {
         subtaskAnimateRef.current?.destroy?.();
-        subtaskAnimateRef.current = autoAnimate(el, { duration: 150, easing: "ease-out", disrespectUserMotionPreference: true });
+        subtaskAnimateRef.current = autoAnimate(el, {
+          duration: 150,
+          easing: "ease-out",
+          disrespectUserMotionPreference: true,
+        });
       }
     } else if (subtaskAnimateRef.current) {
       subtaskAnimateRef.current.destroy?.();
@@ -160,7 +162,11 @@ export const TaskCard = ({
     if (el) {
       if (!doneSubtaskAnimateRef.current || doneSubtaskAnimateRef.current.parent !== el) {
         doneSubtaskAnimateRef.current?.destroy?.();
-        doneSubtaskAnimateRef.current = autoAnimate(el, { duration: 150, easing: "ease-out", disrespectUserMotionPreference: true });
+        doneSubtaskAnimateRef.current = autoAnimate(el, {
+          duration: 150,
+          easing: "ease-out",
+          disrespectUserMotionPreference: true,
+        });
       }
     } else if (doneSubtaskAnimateRef.current) {
       doneSubtaskAnimateRef.current.destroy?.();
@@ -220,13 +226,7 @@ export const TaskCard = ({
     >
       {/* Header: Checkbox + Title + Date + Edit + Delete */}
       <div class="flex items-center gap-2">
-        <Checkbox
-          checked={isDone}
-          onChange={handleToggleStatus}
-          disabled={disabled}
-          loading={isTogglingTask}
-          strikethrough={false}
-        />
+        <Checkbox checked={isDone} onChange={handleToggleStatus} disabled={disabled} loading={isTogglingTask} strikethrough={false} />
         <div class="flex-1 min-w-0 flex items-center gap-2">
           <EditableText
             value={task.title}
@@ -235,9 +235,11 @@ export const TaskCard = ({
             maxLength={LIMITS.MAX_TASK_TITLE_LENGTH}
             textClassName={`text-lg font-medium ${isDone ? "line-through text-neutral-400 dark:text-neutral-500" : "text-neutral-900 dark:text-neutral-100"}`}
           />
-          {(task.subtasks.length > 0 || pendingSubtaskCount > 0) &&
-            <span class="text-xs text-neutral-400 dark:text-neutral-500">({doneSubtasks.length}/{task.subtasks.length + pendingSubtaskCount})</span>
-          }
+          {(task.subtasks.length > 0 || pendingSubtaskCount > 0) && (
+            <span class="text-xs text-neutral-400 dark:text-neutral-500">
+              ({doneSubtasks.length}/{task.subtasks.length + pendingSubtaskCount})
+            </span>
+          )}
         </div>
         {/* Date badge - only show if has date or in edit mode */}
         {(task.dueDate || isEditMode) && (
@@ -247,10 +249,11 @@ export const TaskCard = ({
               onClick={handleDateClick}
               disabled={disabled}
               class={`flex items-center gap-1 px-2 py-0.5 text-base rounded-full
-                ${task.dueDate
-            ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-            : "text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700"
-          } disabled:opacity-50`}
+                ${
+                  task.dueDate
+                    ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                    : "text-neutral-400 dark:text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                } disabled:opacity-50`}
             >
               <Calendar size={12} />
               <span class="text-sm">{task.dueDate ? formatDate(task.dueDate) : "No date"}</span>
@@ -363,10 +366,7 @@ export const TaskCard = ({
           {showDoneSubtasks && (
             <div ref={doneSubtasksRef} class="mt-1 space-y-0.5">
               {doneSubtasks.map((subtask) => (
-                <div
-                  key={subtask.id}
-                  class="group/subtask flex items-center gap-2 pl-4 py-0.5 rounded"
-                >
+                <div key={subtask.id} class="group/subtask flex items-center gap-2 pl-4 py-0.5 rounded">
                   <Checkbox
                     checked={true}
                     onChange={(checked) => handleSubtaskToggleStatus(subtask.id, checked)}
@@ -401,8 +401,8 @@ export const TaskCard = ({
       )}
 
       {/* Add subtask form - only in edit mode */}
-      {isEditMode && (
-        task.subtasks.length >= LIMITS.MAX_SUBTASKS_PER_TASK ? (
+      {isEditMode &&
+        (task.subtasks.length >= LIMITS.MAX_SUBTASKS_PER_TASK ? (
           <p class="mt-2 text-xs text-neutral-500 dark:text-neutral-400 italic">
             If a task needs more than {LIMITS.MAX_SUBTASKS_PER_TASK} subtasks, consider breaking it into smaller tasks. To add more, delete old ones first.
           </p>
@@ -429,8 +429,7 @@ export const TaskCard = ({
               Add
             </button>
           </div>
-        )
-      )}
+        ))}
     </Card>
   );
 };

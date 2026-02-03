@@ -1,6 +1,6 @@
+import { buildApp } from "@broccoliapps/dev-tools";
 import * as path from "path";
 import { fileURLToPath } from "url";
-import { buildApp } from "@broccoliapps/dev-tools";
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -14,7 +14,7 @@ buildApp({
     { name: "www", entry: "src/ui/www/client/index.tsx", cssEntry: "src/ui/www/client/app.css" },
     { name: "app", entry: "src/ui/app/index.tsx", cssEntry: "src/ui/app/app.css" },
   ],
-}).catch((err) => {
+}).catch((err: Error) => {
   console.error(err);
   process.exit(1);
 });

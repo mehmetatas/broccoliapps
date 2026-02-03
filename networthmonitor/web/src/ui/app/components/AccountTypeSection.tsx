@@ -1,5 +1,5 @@
-import { Check } from "lucide-preact";
 import type { AccountDto } from "@broccoliapps/nwm-shared";
+import { Check } from "lucide-preact";
 
 type AccountTypeSectionProps = {
   title: string;
@@ -9,13 +9,7 @@ type AccountTypeSectionProps = {
   selectedColor: string;
 };
 
-export const AccountTypeSection = ({
-  title,
-  accounts,
-  selectedAccountIds,
-  onToggleAccount,
-  selectedColor,
-}: AccountTypeSectionProps) => {
+export const AccountTypeSection = ({ title, accounts, selectedAccountIds, onToggleAccount, selectedColor }: AccountTypeSectionProps) => {
   if (accounts.length === 0) {
     return null;
   }
@@ -31,9 +25,7 @@ export const AccountTypeSection = ({
 
   return (
     <div>
-      <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-2">
-        {title}
-      </p>
+      <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-2">{title}</p>
       <div class="flex flex-wrap gap-2">
         {sortedAccounts.map((account) => {
           const isSelected = selectedAccountIds.includes(account.id);

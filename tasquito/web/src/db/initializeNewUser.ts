@@ -26,10 +26,7 @@ export async function initializeNewUser(userId: string): Promise<void> {
     {
       title: "Create tasks",
       status: "todo" as const,
-      subtasks: [
-        "Type a title and press Enter for quick entry",
-        "Click the expand button for description & due date",
-      ],
+      subtasks: ["Type a title and press Enter for quick entry", "Click the expand button for description & due date"],
     },
     {
       title: "Organize with subtasks",

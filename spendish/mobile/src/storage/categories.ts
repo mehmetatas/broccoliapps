@@ -26,7 +26,7 @@ export function initializeCategories(): void {
   const storage = getStorage();
   const existing = storage.getString(CATEGORIES_KEY);
   if (!existing) {
-    const categories: Category[] = DEFAULT_CATEGORIES.map(cat => ({
+    const categories: Category[] = DEFAULT_CATEGORIES.map((cat) => ({
       id: generateId(),
       ...cat,
     }));

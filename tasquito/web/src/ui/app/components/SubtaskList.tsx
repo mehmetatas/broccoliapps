@@ -1,7 +1,7 @@
+import { Button, Checkbox, EditableText, IconButton, Input } from "@broccoliapps/browser";
+import { LIMITS, type TaskDto, type TaskStatus } from "@broccoliapps/tasquito-shared";
 import { Plus, Trash2 } from "lucide-preact";
 import { useState } from "preact/hooks";
-import { LIMITS, type TaskDto, type TaskStatus } from "@broccoliapps/tasquito-shared";
-import { Button, Checkbox, EditableText, IconButton, Input } from "@broccoliapps/browser";
 
 type SubtaskListProps = {
   subtasks: TaskDto[];
@@ -12,14 +12,7 @@ type SubtaskListProps = {
   disabled?: boolean;
 };
 
-export const SubtaskList = ({
-  subtasks,
-  onToggleStatus,
-  onUpdateTitle,
-  onDelete,
-  onAdd,
-  disabled = false,
-}: SubtaskListProps) => {
+export const SubtaskList = ({ subtasks, onToggleStatus, onUpdateTitle, onDelete, onAdd, disabled = false }: SubtaskListProps) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
 
@@ -45,11 +38,7 @@ export const SubtaskList = ({
     <div class="space-y-2">
       {subtasks.map((subtask) => (
         <div key={subtask.id} class="flex items-center gap-2 group">
-          <Checkbox
-            checked={subtask.status === "done"}
-            onChange={(checked) => onToggleStatus(subtask.id, checked ? "done" : "todo")}
-            disabled={disabled}
-          />
+          <Checkbox checked={subtask.status === "done"} onChange={(checked) => onToggleStatus(subtask.id, checked ? "done" : "todo")} disabled={disabled} />
           <div class="flex-1 min-w-0">
             <EditableText
               value={subtask.title}

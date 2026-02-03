@@ -23,14 +23,7 @@ const sizeClasses: Record<IconButtonSize, string> = {
   lg: "p-2",
 };
 
-export const IconButton = ({
-  icon,
-  variant = "default",
-  size = "md",
-  disabled,
-  class: className,
-  ...props
-}: IconButtonProps) => {
+export const IconButton = ({ icon, variant = "default", size = "md", disabled, class: className, ...props }: IconButtonProps) => {
   return (
     <button
       {...props}

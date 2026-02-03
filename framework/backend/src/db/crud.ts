@@ -1,13 +1,5 @@
-import {
-  executeBatchDelete,
-  executeBatchGet,
-  executeBatchPut,
-  executeDelete,
-  executeGet,
-  executePut,
-  executePutIfNotExists,
-} from "./client";
-import { buildPK, buildSK, fromDdbItem, toDdbItem, type ItemConfig } from "./item";
+import { executeBatchDelete, executeBatchGet, executeBatchPut, executeDelete, executeGet, executePut, executePutIfNotExists } from "./client";
+import { buildPK, buildSK, fromDdbItem, type ItemConfig, toDdbItem } from "./item";
 import { buildQueryForKey } from "./query";
 import { TableConfig } from "./types";
 
@@ -85,7 +77,7 @@ export const createBatchGetFn = <T>(config: ItemConfig) => {
       // For PK+SK tables: key is { pk: {...}, sk: {...} }
       // For PK-only or SK-only tables: key is flat { field1, field2, ... }
       const pkValue = hasPK && hasSK ? (key.pk as Record<string, unknown>) : hasPK ? key : {};
-      const skValue = hasPK && hasSK ? (key.sk as Record<string, unknown>) ?? {} : hasSK ? key : {};
+      const skValue = hasPK && hasSK ? ((key.sk as Record<string, unknown>) ?? {}) : hasSK ? key : {};
 
       const pk = buildPK(config.typeName, config.pk, pkValue);
       const sk = buildSK(config.typeName, config.sk, skValue);
@@ -144,7 +136,7 @@ export const createBatchDeleteFn = (config: ItemConfig) => {
       // For PK+SK tables: key is { pk: {...}, sk: {...} }
       // For PK-only or SK-only tables: key is flat { field1, field2, ... }
       const pkValue = hasPK && hasSK ? (key.pk as Record<string, unknown>) : hasPK ? key : {};
-      const skValue = hasPK && hasSK ? (key.sk as Record<string, unknown>) ?? {} : hasSK ? key : {};
+      const skValue = hasPK && hasSK ? ((key.sk as Record<string, unknown>) ?? {}) : hasSK ? key : {};
 
       return {
         pk: buildPK(config.typeName, config.pk, pkValue),

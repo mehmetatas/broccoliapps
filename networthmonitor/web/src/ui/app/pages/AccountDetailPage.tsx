@@ -1,16 +1,7 @@
 import { Modal, preferences } from "@broccoliapps/browser";
 import { Trash2 } from "lucide-preact";
 import { useMemo, useState } from "preact/hooks";
-import {
-  AccountDetailSkeleton,
-  AccountHeader,
-  BucketPicker,
-  HistoryEditor,
-  MoneyDisplay,
-  PageHeader,
-  RemoveAccountModal,
-  ValueChart,
-} from "../components";
+import { AccountDetailSkeleton, AccountHeader, BucketPicker, HistoryEditor, MoneyDisplay, PageHeader, RemoveAccountModal, ValueChart } from "../components";
 import { useAccountDetail, useExchangeRates } from "../hooks";
 import { convertValue, getEarliestMonth } from "../utils/currencyConversion";
 
@@ -31,14 +22,8 @@ export const AccountDetailPage = ({ id }: AccountDetailPageProps) => {
   }, [detail.originalHistory]);
 
   // Fetch exchange rates if account currency differs from target
-  const currenciesToFetch = detail.account?.currency && detail.account.currency !== targetCurrency
-    ? [detail.account.currency]
-    : [];
-  const { rates: exchangeRates } = useExchangeRates(
-    currenciesToFetch,
-    targetCurrency,
-    earliestMonth
-  );
+  const currenciesToFetch = detail.account?.currency && detail.account.currency !== targetCurrency ? [detail.account.currency] : [];
+  const { rates: exchangeRates } = useExchangeRates(currenciesToFetch, targetCurrency, earliestMonth);
 
   // Convert history values when showing converted currency
   const displayHistory = useMemo(() => {
@@ -102,9 +87,7 @@ export const AccountDetailPage = ({ id }: AccountDetailPageProps) => {
 
           {isArchived && (
             <div class="mb-4 px-4 py-3 bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg flex items-center justify-between">
-              <p class="text-sm text-amber-800 dark:text-amber-200">
-                Archived on {new Date(account.archivedAt!).toLocaleDateString()}
-              </p>
+              <p class="text-sm text-amber-800 dark:text-amber-200">Archived on {new Date(account.archivedAt!).toLocaleDateString()}</p>
               <button
                 onClick={detail.handleUnarchive}
                 disabled={detail.unarchiving}
@@ -124,9 +107,7 @@ export const AccountDetailPage = ({ id }: AccountDetailPageProps) => {
           </div>
 
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-              Value History
-            </h2>
+            <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Value History</h2>
           </div>
 
           <HistoryEditor
@@ -189,12 +170,8 @@ export const AccountDetailPage = ({ id }: AccountDetailPageProps) => {
         confirmVariant="danger"
         isLoading={detail.deleting}
       >
-        <p class="mb-4">
-          This will permanently erase all records of this {account.type === "asset" ? "asset" : "debt"}, as if it never existed.
-        </p>
-        <p>
-          Are you sure? This action cannot be undone.
-        </p>
+        <p class="mb-4">This will permanently erase all records of this {account.type === "asset" ? "asset" : "debt"}, as if it never existed.</p>
+        <p>Are you sure? This action cannot be undone.</p>
       </Modal>
     </div>
   );

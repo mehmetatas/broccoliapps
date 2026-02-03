@@ -23,7 +23,7 @@ export const handleError = (c: Context, error: unknown): Response => {
           message: issue.message,
         })),
       },
-      400
+      400,
     );
   }
 

@@ -1,11 +1,7 @@
 import type { RefObject } from "preact";
 import { useEffect } from "preact/hooks";
 
-export const useClickOutside = (
-  ref: RefObject<HTMLElement>,
-  callback: () => void,
-  enabled: boolean = true
-): void => {
+export const useClickOutside = (ref: RefObject<HTMLElement>, callback: () => void, enabled: boolean = true): void => {
   useEffect(() => {
     if (!enabled) {
       return;

@@ -4,13 +4,7 @@ import { HttpError } from "./page-router";
 
 const MAX_TIMESTAMP_AGE_MS = Duration.seconds(15).toMilliseconds();
 
-export const verifyS2SRequest = (
-  appId: string,
-  timestamp: string,
-  signature: string,
-  path: string,
-  body?: string
-): void => {
+export const verifyS2SRequest = (appId: string, timestamp: string, signature: string, path: string, body?: string): void => {
   // 1. Validate appId is known
   if (!(appId in globalConfig.apps)) {
     throw new HttpError(401, "Unknown app");

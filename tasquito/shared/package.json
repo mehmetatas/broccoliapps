@@ -12,6 +12,10 @@
     "./client": {
       "types": "./dist/src/client/index.d.ts",
       "import": "./dist/src/client/index.js"
+    },
+    "./hooks": {
+      "types": "./dist/src/hooks/index.d.ts",
+      "import": "./dist/src/hooks/index.js"
     }
   },
   "files": [
@@ -27,9 +31,14 @@
   },
   "dependencies": {
     "@broccoliapps/shared": "*",
+    "fractional-indexing": "^3.2.0",
     "valibot": "^1.2.0"
   },
+  "peerDependencies": {
+    "react": ">=17.0.0"
+  },
   "devDependencies": {
+    "@types/react": "^19.2.0",
     "typescript": "^5.9.3"
   }
 }

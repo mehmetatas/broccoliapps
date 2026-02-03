@@ -4,12 +4,7 @@ type Printer = typeof console.debug | typeof console.info | typeof console.warn 
 
 const isLambdaEnv = isLambda();
 
-const printLog = (
-  print: Printer,
-  level: "dbg" | "inf" | "wrn" | "err",
-  message: string,
-  data?: Record<string, unknown>
-) => {
+const printLog = (print: Printer, level: "dbg" | "inf" | "wrn" | "err", message: string, data?: Record<string, unknown>) => {
   if (data?.error instanceof Error) {
     data.error = {
       name: data.error.name,
@@ -31,7 +26,7 @@ const printLog = (
   }
 
   // See: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-logging.html
-  print({ text: message, ...data ?? {} });
+  print({ text: message, ...(data ?? {}) });
 };
 
 export const dbg = (message: string, data?: Record<string, unknown>) => {
@@ -55,8 +50,8 @@ const startTimer = (timerId: string, startData?: Record<string, unknown>) => {
   return {
     stop: (stopData?: Record<string, unknown>) => {
       inf(timerId, {
-        ...startData ?? {},
-        ...stopData ?? {},
+        ...(startData ?? {}),
+        ...(stopData ?? {}),
         __duration: Date.now() - startTime,
         __timer: timerId,
         __logType: "timer",

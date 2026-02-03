@@ -25,9 +25,7 @@ export const UserMenu = () => {
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         class="flex items-center gap-2 px-2 py-1.5 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
       >
-        <span class="w-7 h-7 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-medium">
-          {userInitial}
-        </span>
+        <span class="w-7 h-7 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-medium">{userInitial}</span>
       </button>
 
       {isMenuOpen && (

@@ -43,9 +43,7 @@ export const getAccountDetail = async (id: string): Promise<AccountDetailRespons
   const buckets = getCache().get<Bucket[]>(CACHE_KEYS.buckets);
 
   if (account && buckets) {
-    const accountBuckets = account.bucketIds
-      ? buckets.filter(b => account.bucketIds!.includes(b.id))
-      : [];
+    const accountBuckets = account.bucketIds ? buckets.filter((b) => account.bucketIds!.includes(b.id)) : [];
     return { account, accountBuckets, allBuckets: buckets };
   }
 
@@ -77,14 +75,14 @@ export const getAccountBuckets = async (id: string): Promise<AccountBucketsRespo
   const buckets = getCache().get<Bucket[]>(CACHE_KEYS.buckets);
 
   if (account?.bucketIds && buckets) {
-    const accountBuckets = buckets.filter(b => account.bucketIds!.includes(b.id));
+    const accountBuckets = buckets.filter((b) => account.bucketIds!.includes(b.id));
     return { buckets: accountBuckets };
   }
 
   const data = await getAccountBucketsApi.invoke({ id });
 
   if (account) {
-    const bucketIds = data.buckets.map(b => b.id);
+    const bucketIds = data.buckets.map((b) => b.id);
     setAccountInCache({ ...account, bucketIds });
   }
 
@@ -92,27 +90,21 @@ export const getAccountBuckets = async (id: string): Promise<AccountBucketsRespo
 };
 
 // POST /accounts - create account
-export const postAccount = async (
-  ...args: Parameters<typeof postAccountApi.invoke>
-): Promise<Awaited<ReturnType<typeof postAccountApi.invoke>>> => {
+export const postAccount = async (...args: Parameters<typeof postAccountApi.invoke>): Promise<Awaited<ReturnType<typeof postAccountApi.invoke>>> => {
   const result = await postAccountApi.invoke(...args);
   setAccountInCache(result.account);
   return result;
 };
 
 // PATCH /accounts/:id - update account
-export const patchAccount = async (
-  ...args: Parameters<typeof patchAccountApi.invoke>
-): Promise<Awaited<ReturnType<typeof patchAccountApi.invoke>>> => {
+export const patchAccount = async (...args: Parameters<typeof patchAccountApi.invoke>): Promise<Awaited<ReturnType<typeof patchAccountApi.invoke>>> => {
   const result = await patchAccountApi.invoke(...args);
   setAccountInCache(result.account);
   return result;
 };
 
 // DELETE /accounts/:id - delete account
-export const deleteAccount = async (
-  ...args: Parameters<typeof deleteAccountApi.invoke>
-): Promise<void> => {
+export const deleteAccount = async (...args: Parameters<typeof deleteAccountApi.invoke>): Promise<void> => {
   await deleteAccountApi.invoke(...args);
   getCache().remove(CACHE_KEYS.account(args[0]!.id));
 };
@@ -136,9 +128,7 @@ export const deleteHistoryItem = async (
 };
 
 // PUT /accounts/:id/buckets - set buckets for account
-export const putAccountBuckets = async (
-  ...args: Parameters<typeof putAccountBucketsApi.invoke>
-): Promise<void> => {
+export const putAccountBuckets = async (...args: Parameters<typeof putAccountBucketsApi.invoke>): Promise<void> => {
   await putAccountBucketsApi.invoke(...args);
   updateAccountBucketIds(args[0]!.id, args[0]!.bucketIds);
 };

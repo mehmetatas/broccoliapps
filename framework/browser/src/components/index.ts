@@ -1,4 +1,5 @@
 export { ArchiveConfirmModal } from "./ArchiveConfirmModal";
+export { BottomSheet } from "./BottomSheet";
 export { Button } from "./Button";
 export { Card } from "./Card";
 export { Checkbox } from "./Checkbox";
@@ -16,4 +17,3 @@ export { Spinner } from "./Spinner";
 export { Textarea } from "./Textarea";
 export { ThemeSettings } from "./ThemeSettings";
 export { UserMenu } from "./UserMenu";
-export { BottomSheet } from "./BottomSheet";

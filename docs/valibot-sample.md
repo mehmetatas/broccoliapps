@@ -1,4 +1,3 @@
-
 Complex validation test API
 
 ```

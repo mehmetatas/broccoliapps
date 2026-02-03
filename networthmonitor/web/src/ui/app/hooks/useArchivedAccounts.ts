@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "preact/hooks";
 import type { AccountDto } from "@broccoliapps/nwm-shared";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import { getAccountHistory, getAccounts } from "../api";
 import { getUniqueCurrencies } from "../utils/currencyConversion";
 import { useExchangeRates } from "./useExchangeRates";
@@ -26,7 +26,7 @@ export const useArchivedAccounts = (targetCurrency: string) => {
               maxValue: values.length > 0 ? Math.max(...values) : 0,
               history: result.history,
             };
-          })
+          }),
         );
         const histories = await Promise.all(historyPromises);
 
@@ -67,11 +67,7 @@ export const useArchivedAccounts = (targetCurrency: string) => {
     return earliest;
   }, [accountHistories]);
 
-  const { isLoading: isRatesLoading } = useExchangeRates(
-    currenciesToConvert,
-    targetCurrency,
-    earliestMonth
-  );
+  const { isLoading: isRatesLoading } = useExchangeRates(currenciesToConvert, targetCurrency, earliestMonth);
 
   const archivedAccounts = useMemo(() => {
     return archivedAccountsList.sort((a, b) => (b.archivedAt ?? 0) - (a.archivedAt ?? 0));

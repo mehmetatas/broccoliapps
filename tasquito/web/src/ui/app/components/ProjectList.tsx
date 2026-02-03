@@ -1,6 +1,6 @@
+import { EmptyState } from "@broccoliapps/browser";
 import type { ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
 import { Archive, Check, Clock, LayoutGrid, Loader } from "lucide-preact";
-import { EmptyState } from "@broccoliapps/browser";
 import { ProjectCard } from "./ProjectCard";
 import { ProjectGridSkeleton } from "./Skeleton";
 
@@ -52,9 +52,9 @@ export const ProjectList = ({ projects, isLoading, filter }: ProjectListProps) =
 
   return (
     <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-      {projects.map((project) =>
+      {projects.map((project) => (
         <ProjectCard key={project.id} project={project} />
-      )}
+      ))}
     </div>
   );
 };

@@ -21,7 +21,7 @@ await app("networthmonitor")
   .withScheduledJobs(path.join(__dirname, "../dist/jobs"), {
     "exchange-rate": {
       schedule: "rate(6 hour)",
-      payload: JSON.stringify({})
-    }
+      payload: JSON.stringify({}),
+    },
   })
   .build();

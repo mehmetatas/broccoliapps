@@ -18,17 +18,15 @@ function formatDayLabel(dateString: string): string {
   return new Date(dateString + "T00:00:00").getDate().toString();
 }
 
-export function DailyExpensesChart({
-  data,
-}: DailyExpensesChartProps): React.JSX.Element {
+export function DailyExpensesChart({ data }: DailyExpensesChartProps): React.JSX.Element {
   const { theme, isDark } = useTheme();
 
   // Transform data to chart-kit format
   const chartData = {
-    labels: data.map(d => formatDayLabel(d.date)),
+    labels: data.map((d) => formatDayLabel(d.date)),
     datasets: [
       {
-        data: data.length > 0 ? data.map(d => d.amount) : [0],
+        data: data.length > 0 ? data.map((d) => d.amount) : [0],
         strokeWidth: 2,
       },
     ],
@@ -36,9 +34,7 @@ export function DailyExpensesChart({
 
   // Show every nth label to avoid overcrowding
   const labelStep = data.length > 10 ? Math.ceil(data.length / 7) : 1;
-  const filteredLabels = chartData.labels.map((label, index) =>
-    index % labelStep === 0 ? label : "",
-  );
+  const filteredLabels = chartData.labels.map((label, index) => (index % labelStep === 0 ? label : ""));
 
   const chartConfig = {
     backgroundColor: theme.surface,

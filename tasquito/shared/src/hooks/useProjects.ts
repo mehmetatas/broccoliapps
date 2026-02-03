@@ -1,6 +1,6 @@
-import type { ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
-import { useEffect, useState } from "preact/hooks";
-import { archiveProject, deleteProject, getProjects, invalidateProjectsCache, postProject } from "../api";
+import { useCallback, useEffect, useState } from "react";
+import type { ProjectSummaryDto } from "../api-contracts";
+import { archiveProject, deleteProject, getProjects, invalidateProjectsCache, postProject } from "../client";
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<ProjectSummaryDto[]>([]);
@@ -8,9 +8,9 @@ export const useProjects = () => {
   const [error, setError] = useState<string | null>(null);
   const [limitError, setLimitError] = useState<string | null>(null);
 
-  const clearLimitError = () => setLimitError(null);
+  const clearLimitError = useCallback(() => setLimitError(null), []);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -23,46 +23,45 @@ export const useProjects = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
-  const create = async (name: string) => {
+  const create = useCallback(async (name: string) => {
     try {
       const result = await postProject({ name });
-      const newProject = { ...result.project, openTaskCount: 0, totalTaskCount: 0 };
+      const newProject: ProjectSummaryDto = {
+        ...result.project,
+        openTaskCount: 0,
+        totalTaskCount: 0,
+      };
       setProjects((prev) => [...prev, newProject].sort((a, b) => a.name.localeCompare(b.name)));
       return result.project;
     } catch (err: unknown) {
-      // Check for limit error (403)
       const error = err as { status?: number; message?: string };
       if (error?.status === 403 && error?.message) {
         setLimitError(error.message);
       }
       throw err;
     }
-  };
+  }, []);
 
-  const remove = async (id: string) => {
+  const archive = useCallback(async (id: string) => {
+    const result = await archiveProject(id);
+    setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, isArchived: result.project.isArchived, archivedAt: result.project.archivedAt } : p)));
+  }, []);
+
+  const remove = useCallback(async (id: string) => {
     await deleteProject(id);
     setProjects((prev) => prev.filter((p) => p.id !== id));
-  };
+  }, []);
 
-  const archive = async (id: string) => {
-    const result = await archiveProject(id);
-    setProjects((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, isArchived: result.project.isArchived, archivedAt: result.project.archivedAt } : p
-      )
-    );
-  };
-
-  const refresh = () => {
+  const refresh = useCallback(() => {
     invalidateProjectsCache();
     load();
-  };
+  }, [load]);
 
   return {
     projects,
@@ -71,8 +70,8 @@ export const useProjects = () => {
     limitError,
     clearLimitError,
     create,
-    remove,
     archive,
+    remove,
     refresh,
   };
 };

@@ -182,7 +182,7 @@ describe("table", () => {
               { status: "active", updatedAt: 1000 },
               { status: "active", updatedAt: 2000 },
             ],
-          }
+          },
         )
         .build();
 
@@ -194,9 +194,7 @@ describe("table", () => {
     it("should handle between with different depth bounds", () => {
       const users = table<User>("user").key(["id"], ["status", "updatedAt"]).build();
 
-      const data = users
-        .query({ id: "123" }, { between: [{ status: "active" }, { status: "active", updatedAt: 9999 }] })
-        .build();
+      const data = users.query({ id: "123" }, { between: [{ status: "active" }, { status: "active", updatedAt: 9999 }] }).build();
 
       expect(data.keyConditionExpression).toBe("pk = :pk AND sk BETWEEN :skStart AND :skEnd");
       expect(data.expressionAttributeValues[":skStart"]).toBe("status#active");
@@ -225,10 +223,7 @@ describe("table", () => {
     });
 
     it("should handle GSI with SK", () => {
-      const orders = table<Order>("order")
-        .key(["userId"], ["orderId"])
-        .gsi1("byTotal", ["total"], ["createdAt"])
-        .build();
+      const orders = table<Order>("order").key(["userId"], ["orderId"]).gsi1("byTotal", ["total"], ["createdAt"]).build();
 
       const data = orders.query.byTotal({ total: 100 }, { createdAt: { gte: 1000 } }).build();
 
@@ -496,9 +491,7 @@ describe("table", () => {
         })
         .build();
 
-      expect(data.filterExpression).toBe(
-        "begins_with(#f_name, :f_name) AND #f_status = :f_status AND #f_updatedAt >= :f_updatedAt"
-      );
+      expect(data.filterExpression).toBe("begins_with(#f_name, :f_name) AND #f_status = :f_status AND #f_updatedAt >= :f_updatedAt");
     });
 
     it("should chain filter with other methods", () => {
@@ -559,10 +552,7 @@ describe("table", () => {
       vi.mocked(executePut).mockClear();
 
       type Task = { id: string; projectId: string; parentId?: string };
-      const tasks = table<Task>("task", "test-table")
-        .key(["projectId"], ["id"])
-        .gsi1("byParent", ["projectId"], ["parentId"])
-        .build();
+      const tasks = table<Task>("task", "test-table").key(["projectId"], ["id"]).gsi1("byParent", ["projectId"], ["parentId"]).build();
 
       await tasks.put({ id: "123", projectId: "proj1" }); // parentId is undefined
 
@@ -680,7 +670,7 @@ describe("table", () => {
       expect(executeQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           indexName: "gsi2",
-        })
+        }),
       );
     });
 
@@ -695,7 +685,7 @@ describe("table", () => {
       expect(executeQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           indexName: "gsi3",
-        })
+        }),
       );
     });
 
@@ -710,7 +700,7 @@ describe("table", () => {
       expect(executeQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           indexName: "gsi4",
-        })
+        }),
       );
     });
 
@@ -725,7 +715,7 @@ describe("table", () => {
       expect(executeQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           indexName: "gsi5",
-        })
+        }),
       );
     });
   });
@@ -747,7 +737,7 @@ describe("table", () => {
       expect(executeQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           keyConditionExpression: "pk = :pk",
-        })
+        }),
       );
     });
   });

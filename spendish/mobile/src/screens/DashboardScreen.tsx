@@ -1,13 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { ChevronLeft } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChartCarousel } from "../components/ChartCarousel";
 import { DateRangeModal } from "../components/DateRangeModal";
@@ -68,8 +62,7 @@ export function DashboardScreen(): React.JSX.Element {
   const [showDateModal, setShowDateModal] = useState(false);
 
   // Data state (using mock data for now)
-  const [spendRecords, setSpendRecords] =
-    useState<SpendRecord[]>(MOCK_SPEND_RECORDS);
+  const [spendRecords, setSpendRecords] = useState<SpendRecord[]>(MOCK_SPEND_RECORDS);
 
   const handleRangeSelect = (rangeId: string) => {
     setSelectedRange(rangeId);
@@ -85,21 +78,14 @@ export function DashboardScreen(): React.JSX.Element {
   };
 
   const handleDeleteRecord = useCallback((record: SpendRecord) => {
-    setSpendRecords(prev => prev.filter(r => r.id !== record.id));
+    setSpendRecords((prev) => prev.filter((r) => r.id !== record.id));
   }, []);
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.background }]}
-      edges={["top"]}
-    >
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.7}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} activeOpacity={0.7}>
           <ChevronLeft size={28} color={theme.text} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: theme.text }]}>Dashboard</Text>
@@ -108,11 +94,7 @@ export function DashboardScreen(): React.JSX.Element {
 
       {/* Date Range Pills */}
       <View style={styles.pillContainer}>
-        <PillPicker
-          items={DATE_RANGE_OPTIONS}
-          selectedId={selectedRange}
-          onSelect={handleRangeSelect}
-        />
+        <PillPicker items={DATE_RANGE_OPTIONS} selectedId={selectedRange} onSelect={handleRangeSelect} />
       </View>
 
       {/* Custom date range label */}
@@ -131,33 +113,18 @@ export function DashboardScreen(): React.JSX.Element {
       )}
 
       {/* Scrollable Content */}
-      <ScrollView
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.contentContainer}
-      >
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer}>
         {/* Chart Carousel */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Spending Overview
-          </Text>
-          <ChartCarousel
-            dailyData={MOCK_CHART_DATA}
-            categoryData={MOCK_CATEGORY_DATA}
-          />
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Spending Overview</Text>
+          <ChartCarousel dailyData={MOCK_CHART_DATA} categoryData={MOCK_CATEGORY_DATA} />
         </View>
 
         {/* Spend Records List */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Transactions
-          </Text>
-          {spendRecords.map(record => (
-            <SpendRecordItem
-              key={record.id}
-              record={record}
-              onDelete={handleDeleteRecord}
-            />
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Transactions</Text>
+          {spendRecords.map((record) => (
+            <SpendRecordItem key={record.id} record={record} onDelete={handleDeleteRecord} />
           ))}
         </View>
       </ScrollView>

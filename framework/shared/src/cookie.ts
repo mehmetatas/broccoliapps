@@ -10,7 +10,7 @@ export class Cookie {
   constructor(
     public readonly key: string,
     public readonly value: string,
-    private readonly options: CookieOptions = {}
+    private readonly options: CookieOptions = {},
   ) {}
 
   toString() {

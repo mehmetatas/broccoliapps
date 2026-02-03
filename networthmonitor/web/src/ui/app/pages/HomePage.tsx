@@ -1,6 +1,6 @@
 import { preferences } from "@broccoliapps/browser";
-import { route } from "preact-router";
 import { useEffect, useMemo, useState } from "preact/hooks";
+import { route } from "preact-router";
 import { AccountList, BucketFilterPills, HomePageSkeleton, MoneyDisplay, NewAccountForm, ValueChart } from "../components";
 import { useDashboard, useExchangeRates } from "../hooks";
 import { convertLatestValues, getEarliestMonth, getUniqueCurrencies } from "../utils/currencyConversion";
@@ -32,11 +32,7 @@ export const HomePage = () => {
   }, [accountHistories]);
 
   // Fetch exchange rates for all currencies
-  const { rates: exchangeRates, isLoading: isRatesLoading } = useExchangeRates(
-    currenciesToConvert,
-    targetCurrency,
-    earliestMonth
-  );
+  const { rates: exchangeRates, isLoading: isRatesLoading } = useExchangeRates(currenciesToConvert, targetCurrency, earliestMonth);
 
   // Filter accounts based on selected bucket (hide archived accounts from display)
   const filteredAccounts = useMemo(() => {
@@ -62,12 +58,7 @@ export const HomePage = () => {
     if (!exchangeRates) {
       return {};
     }
-    return calculateNetWorthWithConversion(
-      accountsForNetWorth,
-      accountHistories,
-      exchangeRates,
-      targetCurrency
-    );
+    return calculateNetWorthWithConversion(accountsForNetWorth, accountHistories, exchangeRates, targetCurrency);
   }, [accountsForNetWorth, accountHistories, exchangeRates, targetCurrency]);
 
   // Convert latest values to target currency
@@ -76,13 +67,7 @@ export const HomePage = () => {
       return {};
     }
     const currentMonth = getCurrentMonth();
-    return convertLatestValues(
-      accounts,
-      latestValues,
-      currentMonth,
-      exchangeRates,
-      targetCurrency
-    );
+    return convertLatestValues(accounts, latestValues, currentMonth, exchangeRates, targetCurrency);
   }, [accounts, latestValues, exchangeRates, targetCurrency]);
 
   // Filtered latest values for display (converted)
@@ -120,9 +105,7 @@ export const HomePage = () => {
   if (accounts.length === 0) {
     return (
       <div>
-        <p class="text-neutral-600 dark:text-neutral-400 mb-6 text-center">
-          No assets or debts yet. Add your first one to start tracking your net worth.
-        </p>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6 text-center">No assets or debts yet. Add your first one to start tracking your net worth.</p>
         <div class="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6">
           <NewAccountForm onSuccess={() => window.location.reload()} />
         </div>
@@ -133,57 +116,43 @@ export const HomePage = () => {
   const hasFilteredAccounts = filteredAccounts.length > 0;
   const months = Object.keys(netWorthData).sort((a, b) => b.localeCompare(a));
   const latestMonth = months[0];
-  const currentNetWorth = latestMonth ? netWorthData[latestMonth] ?? 0 : 0;
+  const currentNetWorth = latestMonth ? (netWorthData[latestMonth] ?? 0) : 0;
   const isNegative = currentNetWorth < 0;
 
   return (
     <div>
-      <BucketFilterPills
-        buckets={buckets}
-        selectedBucketId={selectedBucketId}
-        onSelect={setSelectedBucketId}
-      />
+      <BucketFilterPills buckets={buckets} selectedBucketId={selectedBucketId} onSelect={setSelectedBucketId} />
 
       <div class="mb-4">
         <MoneyDisplay amount={currentNetWorth} currency={targetCurrency} size="xl" />
       </div>
 
       <div className="mb-6">
-        <ValueChart
-          data={netWorthData}
-          variant={isNegative ? "negative" : "default"}
-          currency={targetCurrency}
-        />
+        <ValueChart data={netWorthData} variant={isNegative ? "negative" : "default"} currency={targetCurrency} />
       </div>
 
-      {
-        !hasFilteredAccounts && selectedBucketId !== null && (
-          <p class="text-center text-neutral-500 dark:text-neutral-400 mb-6">
-            No assets or debts in this bucket yet.
-          </p>
-        )
-      }
+      {!hasFilteredAccounts && selectedBucketId !== null && (
+        <p class="text-center text-neutral-500 dark:text-neutral-400 mb-6">No assets or debts in this bucket yet.</p>
+      )}
 
-      {
-        filteredAccounts.length > 0 && (
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <AccountList
-              title="Assets"
-              accounts={filteredAccounts.filter((a) => a.type === "asset")}
-              latestValues={filteredLatestValues}
-              originalValues={filteredOriginalValues}
-              displayCurrency={targetCurrency}
-            />
-            <AccountList
-              title="Debts"
-              accounts={filteredAccounts.filter((a) => a.type === "debt")}
-              latestValues={filteredLatestValues}
-              originalValues={filteredOriginalValues}
-              displayCurrency={targetCurrency}
-            />
-          </div>
-        )
-      }
-    </div >
+      {filteredAccounts.length > 0 && (
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <AccountList
+            title="Assets"
+            accounts={filteredAccounts.filter((a) => a.type === "asset")}
+            latestValues={filteredLatestValues}
+            originalValues={filteredOriginalValues}
+            displayCurrency={targetCurrency}
+          />
+          <AccountList
+            title="Debts"
+            accounts={filteredAccounts.filter((a) => a.type === "debt")}
+            latestValues={filteredLatestValues}
+            originalValues={filteredOriginalValues}
+            displayCurrency={targetCurrency}
+          />
+        </div>
+      )}
+    </div>
   );
 };

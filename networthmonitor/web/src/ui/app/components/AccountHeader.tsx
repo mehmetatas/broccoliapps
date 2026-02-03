@@ -1,5 +1,5 @@
-import { ArrowLeft, Check, CreditCard, Loader2, Pencil, TrendingUp, X } from "lucide-preact";
 import type { AccountDto } from "@broccoliapps/nwm-shared";
+import { ArrowLeft, Check, CreditCard, Loader2, Pencil, TrendingUp, X } from "lucide-preact";
 import { AppLink } from "../SpaApp";
 
 type AccountHeaderProps = {
@@ -13,22 +13,10 @@ type AccountHeaderProps = {
   onNameChange: (name: string) => void;
 };
 
-export const AccountHeader = ({
-  account,
-  isEditing,
-  editedName,
-  saving,
-  onStartEdit,
-  onCancelEdit,
-  onSave,
-  onNameChange,
-}: AccountHeaderProps) => {
+export const AccountHeader = ({ account, isEditing, editedName, saving, onStartEdit, onCancelEdit, onSave, onNameChange }: AccountHeaderProps) => {
   return (
     <div class="flex items-center gap-3 mb-6">
-      <AppLink
-        href="/"
-        class="p-2 rounded-lg text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
-      >
+      <AppLink href="/" class="p-2 rounded-lg text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
         <ArrowLeft size={20} />
       </AppLink>
       <div
@@ -81,9 +69,7 @@ export const AccountHeader = ({
           </div>
         ) : (
           <div class="flex items-center gap-2">
-            <h1 class="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-              {account.name}
-            </h1>
+            <h1 class="text-2xl font-bold text-neutral-900 dark:text-neutral-100">{account.name}</h1>
             <button
               onClick={onStartEdit}
               class="p-1.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors"

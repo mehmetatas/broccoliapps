@@ -35,7 +35,7 @@ export const deserializeRequest = async <T>(
   c: Context,
   method: HttpMethod,
   schema: v.BaseSchema<unknown, T, v.BaseIssue<unknown>>,
-  preReadBody?: string
+  preReadBody?: string,
 ): Promise<T> => {
   const data = await mergeRequestData(c, method, preReadBody);
   return v.parse(schema, data);

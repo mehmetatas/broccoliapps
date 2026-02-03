@@ -1,9 +1,9 @@
 import { HttpError, log } from "@broccoliapps/backend";
 import { AppId, Cookie, Duration, globalConfig, random } from "@broccoliapps/shared";
-import { authCodes } from "../../../db/schemas";
 import * as v from "valibot";
 import { verifyAuthorizationCode } from "../../../auth/cognito-server";
 import { getOrCreateUser } from "../../../auth/users";
+import { authCodes } from "../../../db/schemas";
 import { page } from "../lambda";
 
 page
@@ -50,9 +50,10 @@ page
     // Determine redirect URL: mobile deep link or web URL
     const appConfig = globalConfig.apps[app as AppId];
     const mobileScheme = "mobileScheme" in appConfig ? appConfig.mobileScheme : undefined;
-    const redirectUrl = platform === "mobile" && mobileScheme
-      ? `${mobileScheme}://auth/callback?code=${authCode.code}`
-      : `${appConfig.baseUrl}/app/auth/callback?code=${authCode.code}`;
+    const redirectUrl =
+      platform === "mobile" && mobileScheme
+        ? `${mobileScheme}://auth/callback?code=${authCode.code}`
+        : `${appConfig.baseUrl}/app/auth/callback?code=${authCode.code}`;
 
     // Clean up cookies and redirect
     return {

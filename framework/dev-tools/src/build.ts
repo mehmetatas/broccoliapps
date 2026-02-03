@@ -28,7 +28,12 @@ export const buildApp = async (options: BuildAppOptions): Promise<void> => {
 
   // Build ID for cache busting (timestamp format: yyyyMMddHHmmss)
   const isDevBuild = process.env.NODE_ENV === "development";
-  const buildId = isDevBuild ? "" : new Date().toISOString().replace(/[-T:.Z]/g, "").slice(0, 14);
+  const buildId = isDevBuild
+    ? ""
+    : new Date()
+        .toISOString()
+        .replace(/[-T:.Z]/g, "")
+        .slice(0, 14);
 
   const sharedConfig: esbuild.BuildOptions = {
     bundle: true,

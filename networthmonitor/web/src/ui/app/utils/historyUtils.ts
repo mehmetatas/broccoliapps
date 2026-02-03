@@ -1,5 +1,5 @@
 import type { AccountDto } from "@broccoliapps/nwm-shared";
-import { type ExchangeRateMap, convertValue } from "./currencyConversion";
+import { convertValue, type ExchangeRateMap } from "./currencyConversion";
 import { generateMonthRangeAscending, getCurrentMonth } from "./dateUtils";
 
 type HistoryItem = { month: string; value: number };
@@ -18,9 +18,7 @@ export const historyItemsToMap = (items: HistoryItem[]): Record<string, number> 
 /**
  * Convert a history map to an array of history items
  */
-export const historyMapToItems = (
-  map: Record<string, number | undefined>
-): HistoryItem[] => {
+export const historyMapToItems = (map: Record<string, number | undefined>): HistoryItem[] => {
   const items: HistoryItem[] = [];
   for (const [month, value] of Object.entries(map)) {
     if (value !== undefined) {
@@ -33,13 +31,9 @@ export const historyMapToItems = (
 /**
  * Fill missing months in history data with carry-forward values up to the current month
  */
-export const fillToCurrentMonth = (
-  data: Record<string, number | undefined>
-): Record<string, number | undefined> => {
+export const fillToCurrentMonth = (data: Record<string, number | undefined>): Record<string, number | undefined> => {
   // Get entries with defined values
-  const entries = Object.entries(data).filter(
-    (entry): entry is [string, number] => entry[1] !== undefined
-  );
+  const entries = Object.entries(data).filter((entry): entry is [string, number] => entry[1] !== undefined);
 
   if (entries.length === 0) {
     return data;
@@ -76,10 +70,7 @@ export const fillToCurrentMonth = (
  * For active accounts: carry forward the last known value to current month
  * For archived accounts: only use actual history data, no carry forward (drops to 0 after last entry)
  */
-export const calculateNetWorth = (
-  accounts: AccountDto[],
-  accountHistories: Record<string, Record<string, number>>
-): Record<string, number> => {
+export const calculateNetWorth = (accounts: AccountDto[], accountHistories: Record<string, Record<string, number>>): Record<string, number> => {
   const currentMonth = getCurrentMonth();
 
   // Find earliest month from all account histories
@@ -153,9 +144,7 @@ export const calculateNetWorth = (
 /**
  * Get the latest value from a history map
  */
-export const getLatestValue = (
-  history: Record<string, number | undefined>
-): number | undefined => {
+export const getLatestValue = (history: Record<string, number | undefined>): number | undefined => {
   const entries = Object.entries(history)
     .filter(([, v]) => v !== undefined)
     .sort(([a], [b]) => b.localeCompare(a));
@@ -171,7 +160,7 @@ export const calculateNetWorthWithConversion = (
   accounts: AccountDto[],
   accountHistories: Record<string, Record<string, number>>,
   exchangeRates: ExchangeRateMap,
-  targetCurrency: string
+  targetCurrency: string,
 ): Record<string, number> => {
   const currentMonth = getCurrentMonth();
 
@@ -232,13 +221,7 @@ export const calculateNetWorthWithConversion = (
       }
 
       // Convert value to target currency
-      const convertedValue = convertValue(
-        value,
-        account.currency,
-        month,
-        exchangeRates,
-        targetCurrency
-      );
+      const convertedValue = convertValue(value, account.currency, month, exchangeRates, targetCurrency);
 
       if (account.type === "asset") {
         total += convertedValue;

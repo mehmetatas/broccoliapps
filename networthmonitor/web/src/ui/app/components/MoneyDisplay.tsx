@@ -33,15 +33,7 @@ const sizeClasses = {
   },
 };
 
-export const MoneyDisplay = ({
-  amount,
-  currency,
-  convert = false,
-  size = "md",
-  showSign = false,
-  toggler = false,
-  onToggle,
-}: MoneyDisplayProps) => {
+export const MoneyDisplay = ({ amount, currency, convert = false, size = "md", showSign = false, toggler = false, onToggle }: MoneyDisplayProps) => {
   const classes = sizeClasses[size];
   const targetCurrency = (preferences.getAllSync()?.targetCurrency as string) || "USD";
   const exchangeRates = getAggregatedRates();
@@ -61,7 +53,7 @@ export const MoneyDisplay = ({
   const roundedAmount = Math.round(displayAmount);
   const formattedAmount = Math.abs(roundedAmount).toLocaleString();
   const isNegative = roundedAmount < 0;
-  const sign = showSign ? isNegative ? "-" : "+" : isNegative ? "-" : "";
+  const sign = showSign ? (isNegative ? "-" : "+") : isNegative ? "-" : "";
 
   const handleToggle = () => {
     if (canToggle && onToggle) {
@@ -80,10 +72,7 @@ export const MoneyDisplay = ({
         {getCurrencySymbol(displayCurrency)}
         {formattedAmount}
       </span>
-      <span
-        class={`${currencyClasses} ${classes.currency}`}
-        onClick={handleToggle}
-      >
+      <span class={`${currencyClasses} ${classes.currency}`} onClick={handleToggle}>
         {displayCurrency}
       </span>
     </div>

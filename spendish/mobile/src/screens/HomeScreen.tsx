@@ -20,30 +20,15 @@ import {
   Zap,
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Dimensions,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
-import Animated, {
-  FadeIn,
-  FadeOut,
-  LinearTransition,
-} from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RootStackParamList } from "../navigation/types";
 import { getCategories } from "../storage/categories";
-import {
-  deleteSpendRecord,
-  getRecentSpendRecords,
-  saveSpendRecord,
-} from "../storage/spendRecords";
+import { deleteSpendRecord, getRecentSpendRecords, saveSpendRecord } from "../storage/spendRecords";
 import { useTheme } from "../theme/ThemeContext";
 import { SpendRecord } from "../types/spendRecord";
 
@@ -129,16 +114,14 @@ export function HomeScreen(): React.JSX.Element {
   const { theme } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const [amount, setAmount] = useState(1);
-  const [confirmedCategoryId, setConfirmedCategoryId] = useState<string | null>(
-    null,
-  );
+  const [confirmedCategoryId, setConfirmedCategoryId] = useState<string | null>(null);
   const [spendRecords, setSpendRecords] = useState<SpendRecord[]>([]);
   const lastPos = useRef({ x: 0, y: 0 });
   const amountRef = useRef(amount);
   amountRef.current = amount;
 
   const categories = getCategories();
-  const categoriesById = Object.fromEntries(categories.map(c => [c.id, c]));
+  const categoriesById = Object.fromEntries(categories.map((c) => [c.id, c]));
 
   useEffect(() => {
     setSpendRecords(getRecentSpendRecords());
@@ -152,7 +135,7 @@ export function HomeScreen(): React.JSX.Element {
       date,
     });
 
-    setSpendRecords(prev => [newRecord, ...prev]);
+    setSpendRecords((prev) => [newRecord, ...prev]);
     triggerSuccessHaptic();
     setConfirmedCategoryId(categoryId);
 
@@ -163,7 +146,7 @@ export function HomeScreen(): React.JSX.Element {
 
   const handleDeleteRecord = useCallback((record: SpendRecord) => {
     deleteSpendRecord(record);
-    setSpendRecords(prev => prev.filter(r => r.id !== record.id));
+    setSpendRecords((prev) => prev.filter((r) => r.id !== record.id));
     triggerHaptic();
     setTimeout(() => {
       setSpendRecords(getRecentSpendRecords());
@@ -173,11 +156,7 @@ export function HomeScreen(): React.JSX.Element {
   const renderRightActions = useCallback(
     (record: SpendRecord) => (
       <View style={styles.deleteActionContainer}>
-        <TouchableOpacity
-          style={styles.deleteAction}
-          onPress={() => handleDeleteRecord(record)}
-          activeOpacity={0.7}
-        >
+        <TouchableOpacity style={styles.deleteAction} onPress={() => handleDeleteRecord(record)} activeOpacity={0.7}>
           <Trash2 size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
@@ -189,14 +168,14 @@ export function HomeScreen(): React.JSX.Element {
     .onBegin(() => {
       lastPos.current = { x: 0, y: 0 };
     })
-    .onUpdate(event => {
+    .onUpdate((event) => {
       const deltaX = event.translationX - lastPos.current.x;
       const deltaY = event.translationY - lastPos.current.y;
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
       const thresholdsCrossed = Math.floor(distance / STEP_THRESHOLD);
 
       if (thresholdsCrossed > 0) {
-        const scale = thresholdsCrossed * STEP_THRESHOLD / distance;
+        const scale = (thresholdsCrossed * STEP_THRESHOLD) / distance;
         lastPos.current.x += deltaX * scale;
         lastPos.current.y += deltaY * scale;
 
@@ -222,81 +201,38 @@ export function HomeScreen(): React.JSX.Element {
 
   return (
     <GestureDetector gesture={panGesture}>
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.background }]}
-        edges={["top"]}
-      >
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={["top"]}>
         <View style={styles.amountRow}>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => navigation.navigate("Dashboard")}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity style={styles.headerButton} onPress={() => navigation.navigate("Dashboard")} activeOpacity={0.7}>
             <PieChart size={24} color={theme.text} />
           </TouchableOpacity>
           <Text style={[styles.amount, { color: theme.text }]}>${amount}</Text>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => navigation.navigate("Settings")}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity style={styles.headerButton} onPress={() => navigation.navigate("Settings")} activeOpacity={0.7}>
             <Settings size={24} color={theme.text} />
           </TouchableOpacity>
         </View>
 
-        <Text style={[styles.spendTitle, { color: theme.text }]}>
-          Recent Spends
-        </Text>
+        <Text style={[styles.spendTitle, { color: theme.text }]}>Recent Spends</Text>
 
         <ScrollView style={styles.spendList}>
-          {spendRecords.slice(0, RECENT_SPENDS_LIMIT).map(record => {
+          {spendRecords.slice(0, RECENT_SPENDS_LIMIT).map((record) => {
             const category = categoriesById[record.category];
             const Icon = category ? ICON_MAP[category.icon] : null;
             return (
-              <Animated.View
-                key={record.id}
-                entering={FadeIn.duration(200)}
-                exiting={FadeOut.duration(200)}
-                layout={LinearTransition.springify()}
-              >
+              <Animated.View key={record.id} entering={FadeIn.duration(200)} exiting={FadeOut.duration(200)} layout={LinearTransition.springify()}>
                 <ReanimatedSwipeable
                   renderRightActions={() => renderRightActions(record)}
                   onSwipeableOpen={() => handleDeleteRecord(record)}
                   overshootRight={false}
                   rightThreshold={SWIPE_DELETE_THRESHOLD}
                 >
-                  <View
-                    style={[
-                      styles.spendItem,
-                      { backgroundColor: theme.surface },
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.spendIconContainer,
-                        { backgroundColor: theme.background },
-                      ]}
-                    >
-                      {Icon && <Icon size={20} color={theme.text} />}
-                    </View>
+                  <View style={[styles.spendItem, { backgroundColor: theme.surface }]}>
+                    <View style={[styles.spendIconContainer, { backgroundColor: theme.background }]}>{Icon && <Icon size={20} color={theme.text} />}</View>
                     <View style={styles.spendInfo}>
-                      <Text
-                        style={[styles.spendCategory, { color: theme.text }]}
-                      >
-                        {category?.label ?? "Unknown"}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.spendDate,
-                          { color: theme.textSecondary },
-                        ]}
-                      >
-                        {formatDate(record.date)}
-                      </Text>
+                      <Text style={[styles.spendCategory, { color: theme.text }]}>{category?.label ?? "Unknown"}</Text>
+                      <Text style={[styles.spendDate, { color: theme.textSecondary }]}>{formatDate(record.date)}</Text>
                     </View>
-                    <Text style={[styles.spendAmount, { color: theme.text }]}>
-                      ${record.amount}
-                    </Text>
+                    <Text style={[styles.spendAmount, { color: theme.text }]}>${record.amount}</Text>
                   </View>
                 </ReanimatedSwipeable>
               </Animated.View>
@@ -309,28 +245,13 @@ export function HomeScreen(): React.JSX.Element {
             {categories.map(({ id, label, icon }) => {
               const isConfirmed = confirmedCategoryId === id;
               const Icon = ICON_MAP[icon];
-              const backgroundColor = isConfirmed
-                ? SUCCESS_COLOR
-                : theme.surface;
+              const backgroundColor = isConfirmed ? SUCCESS_COLOR : theme.surface;
               const iconColor = isConfirmed ? "#FFFFFF" : theme.text;
 
               return (
-                <TouchableOpacity
-                  key={id}
-                  style={[styles.categoryButton, { backgroundColor }]}
-                  onPress={() => handleCategoryPress(id)}
-                  activeOpacity={0.7}
-                >
-                  {isConfirmed ?
-                    <Check size={24} color={iconColor} />
-                    :
-                    Icon && <Icon size={24} color={iconColor} />
-                  }
-                  {!isConfirmed && (
-                    <Text style={[styles.categoryLabel, { color: iconColor }]}>
-                      {label}
-                    </Text>
-                  )}
+                <TouchableOpacity key={id} style={[styles.categoryButton, { backgroundColor }]} onPress={() => handleCategoryPress(id)} activeOpacity={0.7}>
+                  {isConfirmed ? <Check size={24} color={iconColor} /> : Icon && <Icon size={24} color={iconColor} />}
+                  {!isConfirmed && <Text style={[styles.categoryLabel, { color: iconColor }]}>{label}</Text>}
                 </TouchableOpacity>
               );
             })}

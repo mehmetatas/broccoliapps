@@ -1,6 +1,6 @@
+import type { AccountDto, BucketDto } from "@broccoliapps/nwm-shared";
 import { Check, ChevronDown, ChevronRight, Loader2, Pencil, Trash2, X } from "lucide-preact";
 import type { TargetedKeyboardEvent } from "preact";
-import type { AccountDto, BucketDto } from "@broccoliapps/nwm-shared";
 import { AccountTypeSection } from "./AccountTypeSection";
 
 type BucketListItemProps = {
@@ -94,18 +94,14 @@ export const BucketListItem = ({
           ) : (
             <>
               <div class="flex-1 flex items-center gap-2">
-                <span class="font-medium text-neutral-900 dark:text-neutral-100">
-                  {bucket.name}
-                </span>
+                <span class="font-medium text-neutral-900 dark:text-neutral-100">{bucket.name}</span>
                 <span class="text-xs text-neutral-500 dark:text-neutral-400">
                   {assetCount > 0 && `${assetCount} ${assetCount === 1 ? "asset" : "assets"}`}
                   {assetCount > 0 && debtCount > 0 && ", "}
                   {debtCount > 0 && `${debtCount} ${debtCount === 1 ? "debt" : "debts"}`}
                   {assetCount === 0 && debtCount === 0 && "empty"}
                 </span>
-                {savingAccounts &&
-                  <Loader2 size={14} class="animate-spin text-neutral-400" />
-                }
+                {savingAccounts && <Loader2 size={14} class="animate-spin text-neutral-400" />}
               </div>
               <button
                 onClick={onStartEdit}
@@ -127,9 +123,7 @@ export const BucketListItem = ({
       {isExpanded && (
         <div class="border-t border-neutral-200 dark:border-neutral-700 px-4 py-3">
           {openAccounts.length === 0 ? (
-            <p class="text-sm text-neutral-500 dark:text-neutral-400">
-              No accounts available
-            </p>
+            <p class="text-sm text-neutral-500 dark:text-neutral-400">No accounts available</p>
           ) : (
             <div class="space-y-4">
               <AccountTypeSection

@@ -1,15 +1,8 @@
 import { useModal } from "@broccoliapps/browser";
-import { route } from "preact-router";
-import { useEffect, useState } from "preact/hooks";
 import type { AccountDto, BucketDto } from "@broccoliapps/nwm-shared";
-import {
-  deleteAccount,
-  deleteHistoryItem,
-  getAccountDetail,
-  patchAccount,
-  postHistoryItem,
-  putAccountBuckets,
-} from "../api";
+import { useEffect, useState } from "preact/hooks";
+import { route } from "preact-router";
+import { deleteAccount, deleteHistoryItem, getAccountDetail, patchAccount, postHistoryItem, putAccountBuckets } from "../api";
 
 export const useAccountDetail = (id: string | undefined) => {
   const [account, setAccount] = useState<AccountDto | null>(null);

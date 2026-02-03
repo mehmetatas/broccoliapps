@@ -1,18 +1,9 @@
 import { HttpError } from "@broccoliapps/backend";
 import { random } from "@broccoliapps/shared";
+import { deleteTask, getTask, getTasks, LIMIT_MESSAGES, LIMITS, patchTask, postSubtask, postTask } from "@broccoliapps/tasquito-shared";
 import { generateKeyBetween } from "fractional-indexing";
 import { projects } from "../../db/projects";
-import { tasks, type Task } from "../../db/tasks";
-import {
-  deleteTask,
-  getTask,
-  getTasks,
-  LIMITS,
-  LIMIT_MESSAGES,
-  patchTask,
-  postSubtask,
-  postTask,
-} from "@broccoliapps/tasquito-shared";
+import { type Task, tasks } from "../../db/tasks";
 import { api } from "../lambda";
 
 // Ensure task has a sortOrder (for backward compatibility with existing data)
@@ -26,7 +17,7 @@ const updateProjectCounts = async (
   userId: string,
   projectId: string,
   deltaOpen: number,
-  deltaTotal: number
+  deltaTotal: number,
 ): Promise<{ openTaskCount: number; totalTaskCount: number }> => {
   const project = await projects.get({ userId }, { id: projectId });
   if (!project) {
@@ -219,11 +210,11 @@ api.register(patchTask, async (req, res, ctx) => {
 
   const updatedTask = {
     ...task,
-    ...req.title !== undefined && { title: req.title },
-    ...req.description !== undefined && { description: req.description },
-    ...req.dueDate !== undefined && { dueDate: req.dueDate ?? undefined },
-    ...req.status !== undefined && { status: req.status },
-    ...req.sortOrder !== undefined && { sortOrder: req.sortOrder },
+    ...(req.title !== undefined && { title: req.title }),
+    ...(req.description !== undefined && { description: req.description }),
+    ...(req.dueDate !== undefined && { dueDate: req.dueDate ?? undefined }),
+    ...(req.status !== undefined && { status: req.status }),
+    ...(req.sortOrder !== undefined && { sortOrder: req.sortOrder }),
     updatedAt: Date.now(),
   };
 
@@ -254,11 +245,7 @@ api.register(deleteTask, async (req, res, ctx) => {
     const allTasks = await tasks.query({ userId, projectId: req.projectId }).all();
     const subtasks = allTasks.filter((t) => t.parentId === task.id);
 
-    await Promise.all(
-      subtasks.map((subtask) =>
-        tasks.delete({ userId, projectId: req.projectId }, { id: subtask.id })
-      )
-    );
+    await Promise.all(subtasks.map((subtask) => tasks.delete({ userId, projectId: req.projectId }, { id: subtask.id })));
   }
 
   // Delete the task

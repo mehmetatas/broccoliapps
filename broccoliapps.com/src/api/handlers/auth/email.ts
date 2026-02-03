@@ -1,6 +1,6 @@
 import { HttpError, log, rateLimiter } from "@broccoliapps/backend";
-import { magicLinkTokens } from "../../../db/schemas";
 import { type AppId, Duration, random, centralSendEmail as sendMagicLink } from "@broccoliapps/shared";
+import { magicLinkTokens } from "../../../db/schemas";
 import { sendMagicLinkEmail } from "../../../email";
 import { api } from "../../lambda";
 
@@ -15,7 +15,7 @@ api.register(sendMagicLink, async (req, res) => {
           context: "email",
           action: "magic-link",
         },
-        { email: req.email }
+        { email: req.email },
       );
     } catch {
       throw new HttpError(429, "Too many requests. Please try again later.");
@@ -29,7 +29,7 @@ api.register(sendMagicLink, async (req, res) => {
       token,
       email: req.email,
       app: req.app,
-      ...req.platform && { platform: req.platform },
+      ...(req.platform && { platform: req.platform }),
       createdAt: Date.now(),
       expiresAt: expires.toMilliseconds(),
       ttl: expires.toSeconds(),

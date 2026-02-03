@@ -13,29 +13,25 @@ type FilterPillsProps<T extends string> = {
   onSelect: (value: T) => void;
 };
 
-export const FilterPills = <T extends string>({
-  options,
-  selected,
-  onSelect,
-}: FilterPillsProps<T>) => {
+export const FilterPills = <T extends string>({ options, selected, onSelect }: FilterPillsProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleSelect = useCallback((value: T, el: HTMLButtonElement) => {
-    onSelect(value);
-    // Scroll the selected pill to center
-    const container = containerRef.current;
-    if (!container) {
-      return;
-    }
-    const scrollLeft = el.offsetLeft - container.clientWidth / 2 + el.offsetWidth / 2;
-    container.scrollTo({ left: scrollLeft, behavior: "smooth" });
-  }, [onSelect]);
+  const handleSelect = useCallback(
+    (value: T, el: HTMLButtonElement) => {
+      onSelect(value);
+      // Scroll the selected pill to center
+      const container = containerRef.current;
+      if (!container) {
+        return;
+      }
+      const scrollLeft = el.offsetLeft - container.clientWidth / 2 + el.offsetWidth / 2;
+      container.scrollTo({ left: scrollLeft, behavior: "smooth" });
+    },
+    [onSelect],
+  );
 
   return (
-    <div
-      ref={containerRef}
-      class="flex gap-2 overflow-x-auto scrollbar-hide"
-    >
+    <div ref={containerRef} class="flex gap-2 overflow-x-auto scrollbar-hide">
       {options.map((option) => (
         <button
           key={option.value}

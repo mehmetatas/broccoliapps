@@ -8,11 +8,7 @@ export const getCacheExpiry = (): number => Date.now() + CACHE_TTL;
  * Query with cache-aside pattern: return cached value if present,
  * otherwise fetch, cache, and return.
  */
-export const cachedQuery = async <T>(
-  cache: CacheProvider,
-  key: string,
-  fetchFn: () => Promise<T>,
-): Promise<T> => {
+export const cachedQuery = async <T>(cache: CacheProvider, key: string, fetchFn: () => Promise<T>): Promise<T> => {
   const cached = cache.get<T>(key);
   if (cached !== null) {
     return cached;

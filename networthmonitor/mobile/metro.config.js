@@ -1,7 +1,7 @@
-const path = require('path');
-const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const path = require("path");
+const { getDefaultConfig, mergeConfig } = require("@react-native/metro-config");
 
-const monorepoRoot = path.resolve(__dirname, '../..');
+const monorepoRoot = path.resolve(__dirname, "../..");
 
 /**
  * Metro configuration
@@ -13,13 +13,10 @@ const config = {
   watchFolders: [monorepoRoot],
   resolver: {
     unstable_enablePackageExports: true,
-    nodeModulesPaths: [
-      path.resolve(__dirname, 'node_modules'),
-      path.resolve(monorepoRoot, 'node_modules'),
-    ],
+    nodeModulesPaths: [path.resolve(__dirname, "node_modules"), path.resolve(monorepoRoot, "node_modules")],
     extraNodeModules: {
-      react: path.resolve(__dirname, 'node_modules/react'),
-      'react-native': path.resolve(__dirname, 'node_modules/react-native'),
+      react: path.resolve(__dirname, "node_modules/react"),
+      "react-native": path.resolve(__dirname, "node_modules/react-native"),
     },
   },
 };

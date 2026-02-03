@@ -1,13 +1,5 @@
 /** @jsxImportSource react */
-import {
-  Body,
-  Container,
-  Head,
-  Html,
-  Preview,
-  Section,
-  Text,
-} from "@react-email/components";
+import { Body, Container, Head, Html, Preview, Section, Text } from "@react-email/components";
 import * as React from "react";
 
 export type BaseEmailProps = {
@@ -22,10 +14,7 @@ export const BaseEmail = ({ preview, children }: BaseEmailProps) => (
     <Body style={main}>
       <Container style={container}>
         <Section style={content}>{children}</Section>
-        <Text style={footer}>
-          This email was sent by Broccoli Apps. If you did not request this
-          email, you can safely ignore it.
-        </Text>
+        <Text style={footer}>This email was sent by Broccoli Apps. If you did not request this email, you can safely ignore it.</Text>
       </Container>
     </Body>
   </Html>
@@ -33,8 +22,7 @@ export const BaseEmail = ({ preview, children }: BaseEmailProps) => (
 
 const main = {
   backgroundColor: "#f6f9fc",
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
 };
 
 const container = {

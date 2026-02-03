@@ -188,16 +188,16 @@ All three sign-in flows produce the same artifact: a short-lived auth code store
 
 ### Auth Code Structure
 
-| Field       | Description                                    |
-|-------------|------------------------------------------------|
-| `code`      | Random token (partition key)                   |
-| `app`       | Which app initiated the auth                   |
-| `email`     | User's email address                           |
-| `name`      | User's display name                            |
-| `userId`    | Central user ID                                |
-| `provider`  | `"google"`, `"apple"`, or `"email"`            |
-| `expiresAt` | Expiration timestamp (ms)                      |
-| `ttl`       | DynamoDB TTL (seconds) — **1 minute**          |
+| Field       | Description                           |
+| ----------- | ------------------------------------- |
+| `code`      | Random token (partition key)          |
+| `app`       | Which app initiated the auth          |
+| `email`     | User's email address                  |
+| `name`      | User's display name                   |
+| `userId`    | Central user ID                       |
+| `provider`  | `"google"`, `"apple"`, or `"email"`   |
+| `expiresAt` | Expiration timestamp (ms)             |
+| `ttl`       | DynamoDB TTL (seconds) — **1 minute** |
 
 ### Exchange Flow
 
@@ -270,13 +270,13 @@ Auth codes, magic link tokens, and (on rotation) refresh tokens are deleted imme
 
 ### TTLs
 
-| Token            | TTL          |
-|------------------|--------------|
-| PKCE cookies     | 5 minutes    |
-| Auth code        | 1 minute     |
-| Magic link token | 15 minutes   |
-| Access token     | 1 day (prod) |
-| Refresh token    | 1 year (prod)|
+| Token            | TTL           |
+| ---------------- | ------------- |
+| PKCE cookies     | 5 minutes     |
+| Auth code        | 1 minute      |
+| Magic link token | 15 minutes    |
+| Access token     | 1 day (prod)  |
+| Refresh token    | 1 year (prod) |
 
 All DynamoDB records include a `ttl` field for automatic expiration cleanup.
 
@@ -300,11 +300,11 @@ The Tasquito mobile app supports all three sign-in methods. The reusable `Login`
 
 ### Overview
 
-| Method | iOS | Android |
-|---|---|---|
-| Google | InAppBrowser OAuth | InAppBrowser OAuth |
-| Apple | Native `appleAuth` | InAppBrowser OAuth fallback |
-| Email | Magic link → deep link | Magic link → deep link |
+| Method | iOS                    | Android                     |
+| ------ | ---------------------- | --------------------------- |
+| Google | InAppBrowser OAuth     | InAppBrowser OAuth          |
+| Apple  | Native `appleAuth`     | InAppBrowser OAuth fallback |
+| Email  | Magic link → deep link | Magic link → deep link      |
 
 All three methods ultimately produce the same `AuthExchangeResponse` containing `accessToken`, `refreshToken`, and their expiration timestamps.
 
@@ -423,8 +423,8 @@ Tokens are stored in the iOS Keychain / Android Keystore via `react-native-keych
 type StoredTokens = {
   accessToken: string;
   refreshToken: string;
-  accessTokenExpiresAt: number;   // ms since epoch
-  refreshTokenExpiresAt: number;  // ms since epoch
+  accessTokenExpiresAt: number; // ms since epoch
+  refreshTokenExpiresAt: number; // ms since epoch
 };
 ```
 
@@ -433,12 +433,15 @@ type StoredTokens = {
 The `AuthContext` registers deep link listeners for `tasquito://auth/callback` to handle the email magic link callback.
 
 **Cold start** (app not running when link tapped):
+
 - `Linking.getInitialURL()` is called on mount to check if the app was opened via a deep link.
 
 **Warm start** (app in background when link tapped):
+
 - `Linking.addEventListener('url', ...)` fires when a deep link arrives while the app is running.
 
 Both paths call the same `handleDeepLink` function which:
+
 1. Checks the URL contains `auth/callback`.
 2. Extracts the `code` query parameter.
 3. Sets `isExchangingToken = true` (shows loading state).
@@ -451,26 +454,26 @@ URL scheme: `tasquito://auth/callback?code={authCode}`
 
 All contracts are defined in `framework/shared/src/auth.ts` with DTOs in `framework/shared/src/auth.dto.ts` (validated with `valibot`).
 
-| Endpoint | Method | Request | Response |
-|---|---|---|---|
-| `/auth/exchange` | POST | `{ code: string }` | `{ accessToken, accessTokenExpiresAt, refreshToken, refreshTokenExpiresAt, user }` |
-| `/auth/verify-apple` | POST | `{ identityToken, authorizationCode, user, fullName? }` | Same as `/auth/exchange` |
-| `/auth/send-magic-link` | POST | `{ email: string, platform?: "mobile" }` | `{ success: boolean }` |
-| `/auth/refresh` | POST | `{ refreshToken: string }` | `{ accessToken, accessTokenExpiresAt, refreshToken, refreshTokenExpiresAt }` |
+| Endpoint                | Method | Request                                                 | Response                                                                           |
+| ----------------------- | ------ | ------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `/auth/exchange`        | POST   | `{ code: string }`                                      | `{ accessToken, accessTokenExpiresAt, refreshToken, refreshTokenExpiresAt, user }` |
+| `/auth/verify-apple`    | POST   | `{ identityToken, authorizationCode, user, fullName? }` | Same as `/auth/exchange`                                                           |
+| `/auth/send-magic-link` | POST   | `{ email: string, platform?: "mobile" }`                | `{ success: boolean }`                                                             |
+| `/auth/refresh`         | POST   | `{ refreshToken: string }`                              | `{ accessToken, accessTokenExpiresAt, refreshToken, refreshTokenExpiresAt }`       |
 
 `user` object shape: `{ id, email, name, isNewUser }`
 
 ### Key Files
 
-| File | Purpose |
-|---|---|
-| `framework/mobile/src/Login.tsx` | Reusable login component with all three sign-in methods |
-| `framework/mobile/src/types.ts` | `LoginProps` type definition |
-| `framework/mobile/src/theme.ts` | Login screen theming |
+| File                                          | Purpose                                                             |
+| --------------------------------------------- | ------------------------------------------------------------------- |
+| `framework/mobile/src/Login.tsx`              | Reusable login component with all three sign-in methods             |
+| `framework/mobile/src/types.ts`               | `LoginProps` type definition                                        |
+| `framework/mobile/src/theme.ts`               | Login screen theming                                                |
 | `tasquito/mobile/src/screens/LoginScreen.tsx` | Tasquito-specific screen wrapper, connects `Login` to `AuthContext` |
-| `tasquito/mobile/src/auth/AuthContext.tsx` | Auth state management, token refresh, deep link handling |
-| `tasquito/mobile/src/auth/storage.ts` | Keychain token storage (`react-native-keychain`) |
-| `tasquito/mobile/src/config.ts` | API base URL (`https://www.tasquito.com`) |
-| `framework/shared/src/auth.ts` | API contract definitions |
-| `framework/shared/src/auth.dto.ts` | Request/response DTOs with valibot validation |
-| `framework/shared/src/global-config.ts` | App base URLs and `mobileScheme` configuration |
+| `tasquito/mobile/src/auth/AuthContext.tsx`    | Auth state management, token refresh, deep link handling            |
+| `tasquito/mobile/src/auth/storage.ts`         | Keychain token storage (`react-native-keychain`)                    |
+| `tasquito/mobile/src/config.ts`               | API base URL (`https://www.tasquito.com`)                           |
+| `framework/shared/src/auth.ts`                | API contract definitions                                            |
+| `framework/shared/src/auth.dto.ts`            | Request/response DTOs with valibot validation                       |
+| `framework/shared/src/global-config.ts`       | App base URLs and `mobileScheme` configuration                      |

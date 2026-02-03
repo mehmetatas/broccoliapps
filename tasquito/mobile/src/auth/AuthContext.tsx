@@ -7,10 +7,7 @@ const storage = createTokenStorage("com.broccoliapps.tasquito");
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   return (
-    <AuthProviderBase
-      apiBaseUrl={globalConfig.apps.tasquito.baseUrl}
-      storage={storage}
-      onInitClient={(cache) => initClient(cache)}>
+    <AuthProviderBase apiBaseUrl={globalConfig.apps.tasquito.baseUrl} storage={storage} onInitClient={(cache) => initClient(cache)}>
       {children}
     </AuthProviderBase>
   );

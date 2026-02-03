@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  Dimensions,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Dimensions, NativeScrollEvent, NativeSyntheticEvent, ScrollView, StyleSheet, View } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 import { CategoryPieChart } from "./CategoryPieChart";
 import { DailyExpensesChart } from "./DailyExpensesChart";
@@ -19,10 +12,7 @@ interface ChartCarouselProps {
 const { width: screenWidth } = Dimensions.get("window");
 const CHART_WIDTH = screenWidth - 32;
 
-export function ChartCarousel({
-  dailyData,
-  categoryData,
-}: ChartCarouselProps): React.JSX.Element {
+export function ChartCarousel({ dailyData, categoryData }: ChartCarouselProps): React.JSX.Element {
   const { theme } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -59,14 +49,12 @@ export function ChartCarousel({
 
       {/* Dot Indicators */}
       <View style={styles.dotsContainer}>
-        {[0, 1].map(index => (
+        {[0, 1].map((index) => (
           <View
             key={index}
             style={[
               styles.dot,
-              index === currentIndex
-                ? [styles.dotActive, { backgroundColor: theme.text }]
-                : [styles.dotInactive, { backgroundColor: theme.textSecondary }],
+              index === currentIndex ? [styles.dotActive, { backgroundColor: theme.text }] : [styles.dotInactive, { backgroundColor: theme.textSecondary }],
             ]}
           />
         ))}

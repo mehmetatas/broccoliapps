@@ -43,7 +43,7 @@ export const projectWithTasksDto = {
     v.object({
       ...taskDto,
       subtasks: v.array(v.object(taskDto)),
-    })
+    }),
   ),
 };
 export type ProjectWithTasksDto = v.InferOutput<v.ObjectSchema<typeof projectWithTasksDto, undefined>>;

@@ -1,15 +1,15 @@
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React, { useEffect } from "react";
 import { StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
+import { RootStackParamList } from "./src/navigation/types";
+import { DashboardScreen } from "./src/screens/DashboardScreen";
 import { HomeScreen } from "./src/screens/HomeScreen";
 import { SettingsScreen } from "./src/screens/SettingsScreen";
-import { DashboardScreen } from "./src/screens/DashboardScreen";
-import { RootStackParamList } from "./src/navigation/types";
 import { initializeCategories } from "./src/storage/categories";
+import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 

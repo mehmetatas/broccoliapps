@@ -1,6 +1,6 @@
+import { getStoredTheme, type Theme, ThemeSettings } from "@broccoliapps/browser";
 import { ArrowLeft, LogOut } from "lucide-preact";
 import { useState } from "preact/hooks";
-import { ThemeSettings, type Theme, getStoredTheme } from "@broccoliapps/browser";
 import { signOut } from "../api";
 import { AppLink } from "../SpaApp";
 

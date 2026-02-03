@@ -89,16 +89,11 @@ export const BucketPicker = ({
       {showHeader && (
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
-            <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-              Buckets
-            </h2>
+            <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Buckets</h2>
             {creatingBucket && <Loader2 size={16} class="animate-spin text-neutral-400" />}
           </div>
           {showManageLink && (
-            <AppLink
-              href="/buckets"
-              class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline"
-            >
+            <AppLink href="/buckets" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline">
               Manage
             </AppLink>
           )}
@@ -133,11 +128,7 @@ export const BucketPicker = ({
                 </button>
               );
             })}
-          {buckets.length === 0 && (
-            <p class="text-sm text-neutral-500 dark:text-neutral-400">
-              No buckets yet
-            </p>
-          )}
+          {buckets.length === 0 && <p class="text-sm text-neutral-500 dark:text-neutral-400">No buckets yet</p>}
         </div>
         <div class="flex items-center gap-2 pt-3 border-t border-neutral-200 dark:border-neutral-700">
           <input

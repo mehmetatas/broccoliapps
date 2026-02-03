@@ -1,5 +1,5 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-import { globalConfig, type AppId } from "@broccoliapps/shared";
+import { type AppId, globalConfig } from "@broccoliapps/shared";
 import { renderMagicLinkEmail } from "./templates";
 
 const ses = new SESClient({});
@@ -41,15 +41,15 @@ export const sendMagicLinkEmail = async ({ to, app, token }: SendMagicLinkEmailP
           },
         },
       },
-    })
+    }),
   );
 };
 
 const formatAppName = (app: AppId): string => {
   const names: Record<AppId, string> = {
     "broccoliapps-com": "Broccoli Apps",
-    "networthmonitor": "Net Worth Monitor",
-    "tasquito": "Tasquito",
+    networthmonitor: "Net Worth Monitor",
+    tasquito: "Tasquito",
   };
   return names[app] ?? app;
 };

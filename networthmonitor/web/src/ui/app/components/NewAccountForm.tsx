@@ -1,7 +1,7 @@
 import { Button, Input, preferences } from "@broccoliapps/browser";
-import { route } from "preact-router";
-import { useState } from "preact/hooks";
 import type { BucketDto, UpdateFrequency } from "@broccoliapps/nwm-shared";
+import { useState } from "preact/hooks";
+import { route } from "preact-router";
 import { getBuckets, postAccount, putAccountBuckets } from "../api";
 import { getCurrentMonth, shouldShowMonth } from "../utils/dateUtils";
 import { BucketPicker } from "./BucketPicker";
@@ -67,7 +67,9 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
     setHistory((prev) => ({ ...prev, [currentMonth]: currentValue }));
     // Preload buckets for step 3
     if (!preloadedBuckets) {
-      getBuckets().then((r) => setPreloadedBuckets(r.buckets)).catch(console.error);
+      getBuckets()
+        .then((r) => setPreloadedBuckets(r.buckets))
+        .catch(console.error);
     }
     setStep(2);
   };
@@ -174,22 +176,11 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
     <div>
       {viewMode === "quick" && step === 1 && (
         <div class="space-y-6">
-          <Input
-            label="Name"
-            value={name}
-            onInput={(e) => setName(e.currentTarget.value)}
-            placeholder="e.g., Main Savings"
-          />
+          <Input label="Name" value={name} onInput={(e) => setName(e.currentTarget.value)} placeholder="e.g., Main Savings" />
 
           <TypeToggle value={type} onChange={setType} />
 
-          <MoneyInput
-            label="Current Value"
-            value={currentValue}
-            onChange={setCurrentValue}
-            currency={currency}
-            placeholder="0"
-          />
+          <MoneyInput label="Current Value" value={currentValue} onChange={setCurrentValue} currency={currency} placeholder="0" />
 
           <label class="flex items-center gap-2 cursor-pointer">
             <input
@@ -198,20 +189,12 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
               onChange={(e) => setCreateAnother((e.target as HTMLInputElement).checked)}
               class="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-indigo-600 focus:ring-indigo-500"
             />
-            <span class="text-sm text-neutral-600 dark:text-neutral-400">
-              Create another
-            </span>
+            <span class="text-sm text-neutral-600 dark:text-neutral-400">Create another</span>
           </label>
 
-          {error &&
-            <p class="text-sm text-red-600 dark:text-red-400">{error}</p>
-          }
+          {error && <p class="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-          <Button
-            onClick={handleQuickCreate}
-            disabled={isSubmitting}
-            class="w-full"
-          >
+          <Button onClick={handleQuickCreate} disabled={isSubmitting} class="w-full">
             {isSubmitting ? "Creating..." : "Add"}
           </Button>
 
@@ -229,52 +212,27 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
 
       {viewMode === "advanced" && step === 1 && (
         <div class="space-y-6">
-          <Input
-            label="Name"
-            value={name}
-            onInput={(e) => setName(e.currentTarget.value)}
-            placeholder="e.g., Main Savings"
-          />
+          <Input label="Name" value={name} onInput={(e) => setName(e.currentTarget.value)} placeholder="e.g., Main Savings" />
 
           <TypeToggle value={type} onChange={setType} />
 
-          <MoneyInput
-            label="Current Value"
-            value={currentValue}
-            onChange={setCurrentValue}
-            currency={currency}
-            placeholder="0"
-          />
+          <MoneyInput label="Current Value" value={currentValue} onChange={setCurrentValue} currency={currency} placeholder="0" />
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-              Currency
-            </label>
+            <label class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Currency</label>
             <CurrencyPicker value={currency} onChange={setCurrency} />
-            <p class="text-xs text-neutral-500 dark:text-neutral-400">
-              Currency and type cannot be changed after creation.
-            </p>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400">Currency and type cannot be changed after creation.</p>
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-              Update Frequency
-            </label>
+            <label class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Update Frequency</label>
             <FrequencyPicker value={updateFrequency} onChange={handleFrequencyChange} />
-            <p class="text-xs text-neutral-500 dark:text-neutral-400">
-              How often you'll update this account's value.
-            </p>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400">How often you'll update this account's value.</p>
           </div>
 
-          {error &&
-            <p class="text-sm text-red-600 dark:text-red-400">{error}</p>
-          }
+          {error && <p class="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-          <Button
-            onClick={handleNext}
-            disabled={isSubmitting}
-            class="w-full"
-          >
+          <Button onClick={handleNext} disabled={isSubmitting} class="w-full">
             Next
           </Button>
 
@@ -292,39 +250,20 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
 
       {step === 2 && (
         <div class="space-y-6">
-          <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-            Enter value history for {name}
-          </h2>
+          <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Enter value history for {name}</h2>
           <div class="space-y-2">
             <ValueChart data={history} variant={type === "debt" ? "negative" : "default"} currency={currency} />
-            <HistoryEditor
-              history={history}
-              onChange={handleHistoryChange}
-              currency={currency}
-              updateFrequency={updateFrequency}
-            />
+            <HistoryEditor history={history} onChange={handleHistoryChange} currency={currency} updateFrequency={updateFrequency} />
           </div>
-          <p class="text-xs text-neutral-500 dark:text-neutral-400">
-            Enter at least 1 value. You can complete the history later.
-          </p>
+          <p class="text-xs text-neutral-500 dark:text-neutral-400">Enter at least 1 value. You can complete the history later.</p>
 
-          {error &&
-            <p class="text-sm text-red-600 dark:text-red-400">{error}</p>
-          }
+          {error && <p class="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
           <div class="flex gap-3">
-            <Button
-              onClick={handleBack}
-              variant="secondary"
-              class="flex-1"
-            >
+            <Button onClick={handleBack} variant="secondary" class="flex-1">
               Back
             </Button>
-            <Button
-              onClick={handleHistoryNext}
-              disabled={!hasAtLeastOneValue}
-              class="flex-1"
-            >
+            <Button onClick={handleHistoryNext} disabled={!hasAtLeastOneValue} class="flex-1">
               Next
             </Button>
           </div>
@@ -347,30 +286,18 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
             />
           </div>
 
-          {error &&
-            <p class="text-sm text-red-600 dark:text-red-400">{error}</p>
-          }
+          {error && <p class="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
           <div class="flex gap-3">
-            <Button
-              onClick={handleBack}
-              variant="secondary"
-              disabled={isSubmitting}
-              class="flex-1"
-            >
+            <Button onClick={handleBack} variant="secondary" disabled={isSubmitting} class="flex-1">
               Back
             </Button>
-            <Button
-              onClick={handleCreate}
-              disabled={isSubmitting}
-              class="flex-1"
-            >
+            <Button onClick={handleCreate} disabled={isSubmitting} class="flex-1">
               {isSubmitting ? "Creating..." : "Create"}
             </Button>
           </div>
         </div>
       )}
-
     </div>
   );
 };

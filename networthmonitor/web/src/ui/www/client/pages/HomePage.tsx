@@ -27,9 +27,7 @@ export const HomePage = () => {
       {/* Left half - Product info (visible on mobile too) */}
       <div class="flex w-full lg:w-1/2 flex-col justify-center bg-gradient-to-br from-blue-600 to-blue-800 p-8 pb-24 lg:p-12 lg:pb-12 text-white">
         <h1 class="text-4xl lg:text-5xl font-bold mb-6">Net Worth Monitor</h1>
-        <p class="text-lg lg:text-xl text-blue-100 mb-8">
-          Track and grow your wealth with clarity and confidence.
-        </p>
+        <p class="text-lg lg:text-xl text-blue-100 mb-8">Track and grow your wealth with clarity and confidence.</p>
         <ul class="space-y-4 text-blue-100">
           <li class="flex items-center gap-3">
             <svg class="h-6 w-6 flex-shrink-0 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -59,16 +57,13 @@ export const HomePage = () => {
             <div class="rounded-xl bg-white p-8 shadow-lg text-center">
               <h2 class="mb-4 text-2xl font-semibold text-gray-900">Welcome Back</h2>
               <p class="mb-6 text-gray-600">You're already signed in.</p>
-              <button
-                onClick={goToApp}
-                class="w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition hover:bg-blue-700"
-              >
+              <button onClick={goToApp} class="w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition hover:bg-blue-700">
                 Go to App
               </button>
             </div>
-          ) :
+          ) : (
             <AuthCard appId="networthmonitor" accent={ACCENT} />
-          }
+          )}
         </div>
       </div>
 

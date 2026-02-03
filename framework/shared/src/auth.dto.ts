@@ -65,10 +65,12 @@ export const verifyAppleRequest = {
   identityToken: v.string(),
   authorizationCode: v.string(),
   user: v.string(),
-  fullName: v.optional(v.object({
-    givenName: v.optional(v.nullable(v.string())),
-    familyName: v.optional(v.nullable(v.string())),
-  })),
+  fullName: v.optional(
+    v.object({
+      givenName: v.optional(v.nullable(v.string())),
+      familyName: v.optional(v.nullable(v.string())),
+    }),
+  ),
 };
 export type VerifyAppleRequest = v.InferOutput<v.ObjectSchema<typeof verifyAppleRequest, undefined>>;
 

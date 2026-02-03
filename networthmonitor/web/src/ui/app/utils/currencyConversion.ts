@@ -9,10 +9,7 @@ export type ExchangeRateMap = Record<string, Record<string, number>>;
 /**
  * Get unique currencies from accounts that need conversion (excluding target currency)
  */
-export const getUniqueCurrencies = (
-  accounts: AccountDto[],
-  targetCurrency: string
-): string[] => {
+export const getUniqueCurrencies = (accounts: AccountDto[], targetCurrency: string): string[] => {
   const currencies = new Set<string>();
   for (const account of accounts) {
     if (account.currency !== targetCurrency) {
@@ -25,9 +22,7 @@ export const getUniqueCurrencies = (
 /**
  * Find the earliest month from all account histories
  */
-export const getEarliestMonth = (
-  accountHistories: Record<string, Record<string, number>>
-): string | null => {
+export const getEarliestMonth = (accountHistories: Record<string, Record<string, number>>): string | null => {
   let earliest: string | null = null;
   for (const history of Object.values(accountHistories)) {
     for (const month of Object.keys(history)) {
@@ -42,10 +37,7 @@ export const getEarliestMonth = (
 /**
  * Get the rate for a specific month, using carry-forward if exact month not available
  */
-const getRateForMonth = (
-  rates: Record<string, number>,
-  month: string
-): number | undefined => {
+const getRateForMonth = (rates: Record<string, number>, month: string): number | undefined => {
   // Direct match
   if (rates[month] !== undefined) {
     return rates[month];
@@ -69,13 +61,7 @@ const getRateForMonth = (
 /**
  * Convert a value from one currency to target currency for a specific month
  */
-export const convertValue = (
-  value: number,
-  fromCurrency: string,
-  month: string,
-  rates: ExchangeRateMap,
-  targetCurrency: string
-): number => {
+export const convertValue = (value: number, fromCurrency: string, month: string, rates: ExchangeRateMap, targetCurrency: string): number => {
   // No conversion needed
   if (fromCurrency === targetCurrency) {
     return value;
@@ -102,7 +88,7 @@ export const convertLatestValues = (
   latestValues: Record<string, number>,
   currentMonth: string,
   rates: ExchangeRateMap,
-  targetCurrency: string
+  targetCurrency: string,
 ): Record<string, number> => {
   const converted: Record<string, number> = {};
 
@@ -112,13 +98,7 @@ export const convertLatestValues = (
       continue;
     }
 
-    converted[account.id] = convertValue(
-      value,
-      account.currency,
-      currentMonth,
-      rates,
-      targetCurrency
-    );
+    converted[account.id] = convertValue(value, account.currency, currentMonth, rates, targetCurrency);
   }
 
   return converted;

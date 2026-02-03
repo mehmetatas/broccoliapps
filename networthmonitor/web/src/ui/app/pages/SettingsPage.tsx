@@ -1,4 +1,4 @@
-import { type Theme, ThemeSettings, getStoredTheme, preferences } from "@broccoliapps/browser";
+import { getStoredTheme, preferences, type Theme, ThemeSettings } from "@broccoliapps/browser";
 import { useState } from "preact/hooks";
 import { signOut } from "../api";
 import { PageHeader, TargetCurrencySettings } from "../components";
@@ -30,12 +30,7 @@ export const SettingsPage = () => {
       <PageHeader title="Settings" backHref="/" />
       <div class="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-6 space-y-6">
         <ThemeSettings value={theme} onChange={setTheme} />
-        <TargetCurrencySettings
-          value={currency}
-          onChange={handleCurrencyChange}
-          saving={saving}
-          saved={saved}
-        />
+        <TargetCurrencySettings value={currency} onChange={handleCurrencyChange} saving={saving} saved={saved} />
       </div>
 
       <div class="mt-8 pt-8 border-t border-neutral-200 dark:border-neutral-700">

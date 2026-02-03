@@ -14,11 +14,7 @@ type UseExchangeRatesResult = {
  * @param targetCurrency - The target currency to convert to
  * @param earliestMonth - The earliest month to fetch rates from (YYYY-MM format)
  */
-export function useExchangeRates(
-  currencies: string[],
-  targetCurrency: string,
-  earliestMonth: string | null
-): UseExchangeRatesResult {
+export function useExchangeRates(currencies: string[], targetCurrency: string, earliestMonth: string | null): UseExchangeRatesResult {
   const [rates, setRates] = useState<ExchangeRateMap | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

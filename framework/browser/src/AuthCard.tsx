@@ -128,13 +128,19 @@ export const AuthCard = ({ appId, accent, onClose }: AuthCardProps) => {
         >
           {emailStatus === "sending" ? "Sending..." : "Continue with Email"}
         </button>
-        {error &&
-          <p class="text-sm text-red-600">{error}</p>
-        }
+        {error && <p class="text-sm text-red-600">{error}</p>}
       </div>
 
       <p class="mt-6 text-center text-xs text-gray-500">
-        By continuing, you agree to our <a href="/terms" target="_blank" class="underline">Terms of Service</a> and <a href="/privacy" target="_blank" class="underline">Privacy Policy</a>.
+        By continuing, you agree to our{" "}
+        <a href="/terms" target="_blank" class="underline">
+          Terms of Service
+        </a>{" "}
+        and{" "}
+        <a href="/privacy" target="_blank" class="underline">
+          Privacy Policy
+        </a>
+        .
       </p>
     </div>
   );

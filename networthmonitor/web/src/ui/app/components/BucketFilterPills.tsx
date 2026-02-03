@@ -1,6 +1,6 @@
+import type { BucketDto } from "@broccoliapps/nwm-shared";
 import { Check } from "lucide-preact";
 import { useCallback, useRef } from "preact/hooks";
-import type { BucketDto } from "@broccoliapps/nwm-shared";
 
 type BucketFilterPillsProps = {
   buckets: BucketDto[];
@@ -8,11 +8,7 @@ type BucketFilterPillsProps = {
   onSelect: (bucketId: string | null) => void;
 };
 
-export const BucketFilterPills = ({
-  buckets,
-  selectedBucketId,
-  onSelect,
-}: BucketFilterPillsProps) => {
+export const BucketFilterPills = ({ buckets, selectedBucketId, onSelect }: BucketFilterPillsProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollToCenter = useCallback((element: HTMLButtonElement) => {
@@ -24,11 +20,7 @@ export const BucketFilterPills = ({
 
   return (
     <div class="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 mb-6">
-      <div
-        ref={scrollRef}
-        class="flex gap-2 p-3 overflow-x-auto scrollbar-hide"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
+      <div ref={scrollRef} class="flex gap-2 p-3 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
         <button
           type="button"
           onClick={(e) => {

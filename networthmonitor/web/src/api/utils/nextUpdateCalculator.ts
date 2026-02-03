@@ -1,9 +1,6 @@
 import type { UpdateFrequency } from "../../db/accounts";
 
-export const calculateNextUpdate = (
-  history: Record<string, number>,
-  updateFrequency: UpdateFrequency
-): string => {
+export const calculateNextUpdate = (history: Record<string, number>, updateFrequency: UpdateFrequency): string => {
   const months = Object.keys(history);
   if (months.length === 0) {
     const now = new Date();

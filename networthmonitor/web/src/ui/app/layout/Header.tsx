@@ -1,7 +1,7 @@
 import { useClickOutside } from "@broccoliapps/browser";
+import type { AccountDto, UserDto } from "@broccoliapps/nwm-shared";
 import { Bell } from "lucide-preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import type { AccountDto, UserDto } from "@broccoliapps/nwm-shared";
 import { getDashboard, getUser, getUserSync } from "../api";
 import { hasMissedUpdate } from "../utils/dateUtils";
 
@@ -21,7 +21,9 @@ export const Header = () => {
   useEffect(() => {
     // Fetch user if not in cache
     if (!user) {
-      getUser().then(setUser).catch(() => {});
+      getUser()
+        .then(setUser)
+        .catch(() => {});
     }
   }, []);
 
@@ -30,9 +32,7 @@ export const Header = () => {
       return;
     }
     getDashboard().then((data) => {
-      const needsUpdate = data.accounts.filter(
-        (account) => !account.archivedAt && hasMissedUpdate(account.nextUpdate)
-      );
+      const needsUpdate = data.accounts.filter((account) => !account.archivedAt && hasMissedUpdate(account.nextUpdate));
       setAccountsNeedingUpdate(needsUpdate);
     });
   }, [user]);
@@ -62,9 +62,7 @@ export const Header = () => {
                 {notificationsOpen && (
                   <div class="absolute right-0 mt-1 w-64 bg-white dark:bg-neutral-800 rounded-md shadow-lg border border-neutral-200 dark:border-neutral-700 py-1 z-50">
                     <div class="px-3 py-2 border-b border-neutral-200 dark:border-neutral-700">
-                      <p class="text-sm font-medium text-neutral-800 dark:text-neutral-200">
-                        Accounts needing update
-                      </p>
+                      <p class="text-sm font-medium text-neutral-800 dark:text-neutral-200">Accounts needing update</p>
                     </div>
                     {accountsNeedingUpdate.map((account) => (
                       <a
@@ -80,10 +78,7 @@ export const Header = () => {
                 )}
               </div>
             )}
-            <a
-              href="/app/new"
-              class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
-            >
+            <a href="/app/new" class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
               Create
             </a>
             <div class="relative" ref={dropdownRef}>
@@ -105,22 +100,13 @@ export const Header = () => {
                     <p class="text-sm font-medium text-neutral-800 dark:text-neutral-200">{user.name}</p>
                     <p class="text-xs text-neutral-500 dark:text-neutral-400">{user.email}</p>
                   </div>
-                  <a
-                    href="/app/buckets"
-                    class="block px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700"
-                  >
+                  <a href="/app/buckets" class="block px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700">
                     Buckets
                   </a>
-                  <a
-                    href="/app/archived"
-                    class="block px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700"
-                  >
+                  <a href="/app/archived" class="block px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700">
                     Archived
                   </a>
-                  <a
-                    href="/app/settings"
-                    class="block px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700"
-                  >
+                  <a href="/app/settings" class="block px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700">
                     Settings
                   </a>
                 </div>

@@ -60,17 +60,14 @@ const callTokenEndpoint = async (request: Record<string, string>): Promise<Cogni
     throw new Error(
       `Failed to fetch tokens: ${(resp as CognitoError).error || "Unknown error"} ${
         (resp as CognitoError).error_description || ""
-      } Cognito response (${response.status})`
+      } Cognito response (${response.status})`,
     );
   }
 
   return resp as CognitoTokenData;
 };
 
-export const verifyAuthorizationCode = async (
-  code: string,
-  codeVerifier: string
-): Promise<AuthorizationCodeResponse> => {
+export const verifyAuthorizationCode = async (code: string, codeVerifier: string): Promise<AuthorizationCodeResponse> => {
   const clientSecret = await params.get(config.cognito.userPoolClientSecretName);
 
   const tokenData = await callTokenEndpoint({
@@ -88,8 +85,7 @@ export const verifyAuthorizationCode = async (
 
   const idTokenPayload = decodeJwt<CognitoIdTokenPayload>(tokenData.id_token);
   const cognitoProvider = idTokenPayload.identities?.[0]?.providerName?.toLowerCase();
-  const provider =
-    cognitoProvider === "SigninWithApple" ? "apple" : (cognitoProvider?.toLocaleLowerCase() as "google" | "facebook");
+  const provider = cognitoProvider === "SigninWithApple" ? "apple" : (cognitoProvider?.toLocaleLowerCase() as "google" | "facebook");
 
   const email = idTokenPayload.email;
   const name = idTokenPayload.name ?? email.split("@")[0] ?? "";

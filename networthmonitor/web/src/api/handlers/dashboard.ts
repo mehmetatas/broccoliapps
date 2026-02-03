@@ -1,6 +1,6 @@
+import { getDashboard } from "@broccoliapps/nwm-shared";
 import { accounts, historyItems } from "../../db/accounts";
 import { buckets } from "../../db/buckets";
-import { getDashboard } from "@broccoliapps/nwm-shared";
 import { api } from "../lambda";
 
 // GET /dashboard - get all accounts, buckets, and histories in a single call
@@ -8,15 +8,10 @@ api.register(getDashboard, async (_, res, ctx) => {
   const { userId } = await ctx.getUser();
 
   // Fetch accounts and buckets in parallel
-  const [accountList, bucketList] = await Promise.all([
-    accounts.query({ userId }).all(),
-    buckets.query({ userId }).all(),
-  ]);
+  const [accountList, bucketList] = await Promise.all([accounts.query({ userId }).all(), buckets.query({ userId }).all()]);
 
   // Fetch history for all accounts in parallel
-  const historyResults = await Promise.all(
-    accountList.map((acc) => historyItems.query({ userId, accountId: acc.id }).all())
-  );
+  const historyResults = await Promise.all(accountList.map((acc) => historyItems.query({ userId, accountId: acc.id }).all()));
 
   // Map accounts with embedded history
   const accountsWithHistory = accountList.map((acc, i) => {

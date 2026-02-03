@@ -1,4 +1,3 @@
-
 ## AWS Infra
 
 - Lambda
@@ -63,7 +62,6 @@
 - Payments
   - EventBridge Bus
 
-
 ```
   project("appname")
     .withDdb(...)
@@ -83,4 +81,4 @@
 
 - Payments: Stripe
 - Email: SendGrid
-- Captcha: CloudFlare Turstile or Google Captcha 
+- Captcha: CloudFlare Turstile or Google Captcha

@@ -1,4 +1,4 @@
-import { ApiError, type ApiContract, type HttpMethod, type HttpResponse, type ResponseSchema, type Schema } from "@broccoliapps/shared";
+import { type ApiContract, ApiError, type HttpMethod, type HttpResponse, type ResponseSchema, type Schema } from "@broccoliapps/shared";
 import type { Context } from "hono";
 import * as v from "valibot";
 import { registerAuthHandlers, type UseAuthOptions } from "../auth/handlers";
@@ -8,7 +8,7 @@ import { RequestContext } from "./context";
 import { deserializeRequest } from "./deserializer";
 import { HttpRouter, setCookies } from "./http-router";
 import { HttpError } from "./page-router";
-import { createApiResponse, type ApiResponse } from "./response";
+import { type ApiResponse, createApiResponse } from "./response";
 import { verifyS2SRequest } from "./s2s";
 import { HttpHandler } from "./types";
 
@@ -50,16 +50,11 @@ export class ApiRouter extends HttpRouter {
    */
   register<TReq extends Record<string, unknown>, TRes>(
     contract: ApiContract<TReq, TRes>,
-    fn: (req: TReq, res: ApiResponse<TRes>, ctx: RequestContext) => Promise<HttpResponse<TRes>>
+    fn: (req: TReq, res: ApiResponse<TRes>, ctx: RequestContext) => Promise<HttpResponse<TRes>>,
   ): this {
     const res = createApiResponse<TRes>();
-    this.registerRoute(
-      contract.method,
-      contract.path,
-      contract.schema,
-      contract.responseSchema,
-      contract.isS2S,
-      (req: TReq, ctx: RequestContext) => fn(req, res, ctx)
+    this.registerRoute(contract.method, contract.path, contract.schema, contract.responseSchema, contract.isS2S, (req: TReq, ctx: RequestContext) =>
+      fn(req, res, ctx),
     );
     return this;
   }
@@ -70,7 +65,7 @@ export class ApiRouter extends HttpRouter {
     schema: Schema<TReq>,
     responseSchema: ResponseSchema<TRes> | undefined,
     isS2S: boolean,
-    handler: HttpHandler<TReq, TRes>
+    handler: HttpHandler<TReq, TRes>,
   ): void {
     const honoHandler = async (c: Context): Promise<Response> => {
       try {

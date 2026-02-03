@@ -1,19 +1,19 @@
 import { HttpError, ttl } from "@broccoliapps/backend";
 import { random } from "@broccoliapps/shared";
-import { generateKeyBetween } from "fractional-indexing";
-import { projects } from "../../db/projects";
-import { tasks, type Task } from "../../db/tasks";
 import {
   archiveProject,
   deleteProject,
   getProject,
   getProjects,
-  LIMITS,
   LIMIT_MESSAGES,
+  LIMITS,
   patchProject,
   postProject,
   unarchiveProject,
 } from "@broccoliapps/tasquito-shared";
+import { generateKeyBetween } from "fractional-indexing";
+import { projects } from "../../db/projects";
+import { type Task, tasks } from "../../db/tasks";
 import { api } from "../lambda";
 
 // Ensure task has a sortOrder (for backward compatibility with existing data)
@@ -168,7 +168,7 @@ api.register(patchProject, async (req, res, ctx) => {
 
   const updatedProject = {
     ...project,
-    ...req.name !== undefined && { name: req.name },
+    ...(req.name !== undefined && { name: req.name }),
     updatedAt: Date.now(),
   };
 
@@ -188,9 +188,7 @@ api.register(deleteProject, async (req, res, ctx) => {
 
   // Delete all tasks in this project
   const projectTasks = await tasks.query({ userId, projectId: project.id }).all();
-  await Promise.all(
-    projectTasks.map((task) => tasks.delete({ userId, projectId: project.id }, { id: task.id }))
-  );
+  await Promise.all(projectTasks.map((task) => tasks.delete({ userId, projectId: project.id }, { id: task.id })));
 
   // Delete the project
   await projects.delete({ userId }, { id: req.id });
@@ -208,7 +206,7 @@ api.register(archiveProject, async (req, res, ctx) => {
   }
 
   const now = Date.now();
-  const archiveTtl = ttl(2, "wk");
+  const archiveTtl = ttl(LIMITS.ARCHIVE_TTL_DAYS, "day");
 
   // Update the project with archive status and TTL
   const updatedProject = await projects.put({
@@ -226,8 +224,8 @@ api.register(archiveProject, async (req, res, ctx) => {
       tasks.put({
         ...task,
         ttl: archiveTtl,
-      })
-    )
+      }),
+    ),
   );
 
   return res.ok({
@@ -276,8 +274,8 @@ api.register(unarchiveProject, async (req, res, ctx) => {
       tasks.put({
         ...task,
         ttl: undefined,
-      })
-    )
+      }),
+    ),
   );
 
   return res.ok({

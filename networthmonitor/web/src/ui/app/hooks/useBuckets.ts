@@ -1,15 +1,7 @@
 import { useModal } from "@broccoliapps/browser";
-import { useEffect, useState } from "preact/hooks";
 import type { AccountDto, BucketDto } from "@broccoliapps/nwm-shared";
-import {
-  deleteBucket,
-  getAccounts,
-  getBucketAccounts,
-  getBuckets,
-  patchBucket,
-  postBucket,
-  putBucketAccounts,
-} from "../api";
+import { useEffect, useState } from "preact/hooks";
+import { deleteBucket, getAccounts, getBucketAccounts, getBuckets, patchBucket, postBucket, putBucketAccounts } from "../api";
 
 export const useBuckets = () => {
   const [buckets, setBuckets] = useState<BucketDto[]>([]);
@@ -40,10 +32,7 @@ export const useBuckets = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [bucketsResult, accountsResult] = await Promise.all([
-          getBuckets(),
-          getAccounts(),
-        ]);
+        const [bucketsResult, accountsResult] = await Promise.all([getBuckets(), getAccounts()]);
         setBuckets(bucketsResult.buckets);
         setAccounts(accountsResult.accounts);
 
@@ -52,7 +41,7 @@ export const useBuckets = () => {
           bucketsResult.buckets.map(async (bucket) => {
             const bucketAccounts = await getBucketAccounts(bucket.id);
             accountsMap[bucket.id] = bucketAccounts.accounts.map((a) => a.id);
-          })
+          }),
         );
         setAccountsByBucket(accountsMap);
       } catch (err) {
@@ -100,7 +89,7 @@ export const useBuckets = () => {
     setSavingName(true);
     try {
       const { bucket: updated } = await patchBucket({ id: bucketId, name: editedName.trim() });
-      setBuckets((prev) => prev.map((b) => b.id === bucketId ? updated : b));
+      setBuckets((prev) => prev.map((b) => (b.id === bucketId ? updated : b)));
       setEditingBucketId(null);
       setEditedName("");
     } catch (err) {
@@ -147,9 +136,7 @@ export const useBuckets = () => {
   const toggleAccount = async (bucketId: string, accountId: string) => {
     const currentAccounts = accountsByBucket[bucketId] || [];
     const isAdding = !currentAccounts.includes(accountId);
-    const newAccountIds = isAdding
-      ? [...currentAccounts, accountId]
-      : currentAccounts.filter((id) => id !== accountId);
+    const newAccountIds = isAdding ? [...currentAccounts, accountId] : currentAccounts.filter((id) => id !== accountId);
 
     // Optimistic update
     setAccountsByBucket((prev) => ({ ...prev, [bucketId]: newAccountIds }));

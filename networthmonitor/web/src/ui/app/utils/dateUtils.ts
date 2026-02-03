@@ -67,14 +67,14 @@ export const shouldShowMonth = (monthStr: string, frequency?: UpdateFrequency): 
   const month = parseInt(monthStr.split("-")[1] ?? "01", 10);
 
   switch (frequency) {
-  case "quarterly":
-    return [1, 4, 7, 10].includes(month); // Jan, Apr, Jul, Oct
-  case "biannually":
-    return [1, 7].includes(month); // Jan, Jul
-  case "yearly":
-    return month === 1; // Jan only
-  default:
-    return true;
+    case "quarterly":
+      return [1, 4, 7, 10].includes(month); // Jan, Apr, Jul, Oct
+    case "biannually":
+      return [1, 7].includes(month); // Jan, Jul
+    case "yearly":
+      return month === 1; // Jan only
+    default:
+      return true;
   }
 };
 
@@ -106,14 +106,14 @@ export const formatMonthLabel = (key: string): string => {
  */
 export const getMinMonthsBack = (frequency?: UpdateFrequency): number => {
   switch (frequency) {
-  case "yearly":
-    return 12;
-  case "biannually":
-    return 6;
-  case "quarterly":
-    return 3;
-  default:
-    return 1;
+    case "yearly":
+      return 12;
+    case "biannually":
+      return 6;
+    case "quarterly":
+      return 3;
+    default:
+      return 1;
   }
 };
 

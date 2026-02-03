@@ -1,6 +1,5 @@
 /** @jsxImportSource react */
 import { Button, Heading, Text } from "@react-email/components";
-import * as React from "react";
 import { BaseEmail } from "./base";
 
 export type MagicLinkEmailProps = {
@@ -11,16 +10,11 @@ export type MagicLinkEmailProps = {
 export const MagicLinkEmail = ({ appName, magicLinkUrl }: MagicLinkEmailProps) => (
   <BaseEmail preview={`Sign in to ${appName}`}>
     <Heading style={heading}>Sign in to {appName}</Heading>
-    <Text style={paragraph}>
-      Click the button below to sign in to your account. This link will expire
-      in 15 minutes.
-    </Text>
+    <Text style={paragraph}>Click the button below to sign in to your account. This link will expire in 15 minutes.</Text>
     <Button style={button} href={magicLinkUrl}>
       Sign in to {appName}
     </Button>
-    <Text style={paragraph}>
-      If the button doesn't work, copy and paste this link into your browser:
-    </Text>
+    <Text style={paragraph}>If the button doesn't work, copy and paste this link into your browser:</Text>
     <Text style={link}>{magicLinkUrl}</Text>
   </BaseEmail>
 );

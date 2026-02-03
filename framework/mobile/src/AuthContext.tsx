@@ -1,20 +1,8 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {Linking} from "react-native";
-import {
-  refreshToken as refreshTokenContract,
-  authExchange,
-  type CacheProvider,
-} from "@broccoliapps/shared";
-import {initializeMobileClient} from "./client";
-import {type StoredTokens, type TokenStorage} from "./storage";
+import { authExchange, type CacheProvider, refreshToken as refreshTokenContract } from "@broccoliapps/shared";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { Linking } from "react-native";
+import { clearClientCache, initializeMobileClient } from "./client";
+import { type StoredTokens, type TokenStorage } from "./storage";
 
 type AuthContextType = {
   isLoading: boolean;
@@ -37,7 +25,7 @@ type AuthProviderProps = {
   children: React.ReactNode;
 };
 
-export const AuthProvider = ({apiBaseUrl, storage, onInitClient, children}: AuthProviderProps) => {
+export const AuthProvider = ({ apiBaseUrl, storage, onInitClient, children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isExchangingToken, setIsExchangingToken] = useState(false);
   const [tokens, setTokens] = useState<StoredTokens | null>(null);
@@ -55,10 +43,7 @@ export const AuthProvider = ({apiBaseUrl, storage, onInitClient, children}: Auth
 
     // Try to refresh
     try {
-      const result = await refreshTokenContract.invoke(
-        {refreshToken: current.refreshToken},
-        {baseUrl: apiBaseUrl, skipAuth: true},
-      );
+      const result = await refreshTokenContract.invoke({ refreshToken: current.refreshToken }, { baseUrl: apiBaseUrl, skipAuth: true });
 
       const newTokens: StoredTokens = {
         accessToken: result.accessToken,
@@ -106,18 +91,21 @@ export const AuthProvider = ({apiBaseUrl, storage, onInitClient, children}: Auth
     checkAuth();
   }, [storage]);
 
-  const login = useCallback(async (newTokens: StoredTokens) => {
-    await storage.save(newTokens);
-    setTokens(newTokens);
-  }, [storage]);
+  const login = useCallback(
+    async (newTokens: StoredTokens) => {
+      await storage.save(newTokens);
+      setTokens(newTokens);
+    },
+    [storage],
+  );
 
   // Handle deep links for email sign-in callback
   useEffect(() => {
     // On cold start, fetch may fail if the network stack isn't ready yet.
-    const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
+    const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
     const invokeWithRetry = async (code: string, retries = 2) => {
       try {
-        return await authExchange.invoke({code}, {baseUrl: apiBaseUrl, skipAuth: true});
+        return await authExchange.invoke({ code }, { baseUrl: apiBaseUrl, skipAuth: true });
       } catch (e) {
         if (retries > 0) {
           await delay(500);
@@ -157,20 +145,19 @@ export const AuthProvider = ({apiBaseUrl, storage, onInitClient, children}: Auth
     };
 
     // Handle cold start (app not running when link tapped)
-    Linking.getInitialURL().then(url => {
+    Linking.getInitialURL().then((url) => {
       if (url) {
         handleDeepLink(url);
       }
     });
 
     // Handle warm start (app in background when link tapped)
-    const sub = Linking.addEventListener("url", ({url}) =>
-      handleDeepLink(url),
-    );
+    const sub = Linking.addEventListener("url", ({ url }) => handleDeepLink(url));
     return () => sub.remove();
   }, [apiBaseUrl, login]);
 
   const logout = useCallback(async () => {
+    clearClientCache();
     await storage.clear();
     setTokens(null);
   }, [storage]);

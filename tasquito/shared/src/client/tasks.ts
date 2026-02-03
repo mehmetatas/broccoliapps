@@ -89,20 +89,14 @@ export const postTask = async (data: {
 };
 
 // POST /projects/:projectId/tasks/:taskId/subtasks - create subtask with cache update
-export const postSubtask = async (
-  projectId: string,
-  taskId: string,
-  title: string
-): Promise<{ task: Task }> => {
+export const postSubtask = async (projectId: string, taskId: string, title: string): Promise<{ task: Task }> => {
   const result = await postSubtaskApi.invoke({ projectId, taskId, title });
   setTaskInCache(result.task);
   return result;
 };
 
 // PATCH /projects/:projectId/tasks/:id - update task with cache update
-export const patchTask = async (
-  ...args: Parameters<typeof patchTaskApi.invoke>
-): Promise<{ task: Task }> => {
+export const patchTask = async (...args: Parameters<typeof patchTaskApi.invoke>): Promise<{ task: Task }> => {
   const result = await patchTaskApi.invoke(...args);
   setTaskInCache(result.task);
   if (result.projectCounts) {

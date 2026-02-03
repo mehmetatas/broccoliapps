@@ -22,13 +22,7 @@ type EmptyObject = {};
 export type SKOperator<V> = { beginsWith: V } | { gte: V } | { lte: V } | { gt: V } | { lt: V };
 
 // Filter operator (extends SK operator with between)
-export type FilterOperator<V> =
-  | { beginsWith: V }
-  | { gte: V }
-  | { lte: V }
-  | { gt: V }
-  | { lt: V }
-  | { between: [V, V] };
+export type FilterOperator<V> = { beginsWith: V } | { gte: V } | { lte: V } | { gt: V } | { lt: V } | { between: [V, V] };
 
 // Filter value - exact match or operator
 export type FilterValue<T, K extends keyof T> = T[K] | FilterOperator<T[K]>;
@@ -127,11 +121,7 @@ export type SKPrefixWithOperator<
       : never;
 
 // Between bound type - partial prefix of fields
-export type SKBetweenBound<
-  T,
-  Fields extends readonly (keyof T)[],
-  AllFields extends keyof T = Fields[number],
-> = Fields extends readonly []
+export type SKBetweenBound<T, Fields extends readonly (keyof T)[], AllFields extends keyof T = Fields[number]> = Fields extends readonly []
   ? { [K in AllFields]?: never }
   : Fields extends readonly [infer First extends keyof T]
     ? { [K in AllFields]?: never } | ({ [K in First]: T[K] } & { [K in Exclude<AllFields, First>]?: never })
@@ -275,70 +265,62 @@ export interface BatchDeleteFnSKOnly<T, SKFields extends readonly (keyof T)[]> {
 }
 
 // Table builder interface
-export interface TableBuilder<
-  T,
-  PKFields extends readonly (keyof T)[] = readonly [],
-  SKFields extends readonly (keyof T)[] = readonly [],
-  GSIs = EmptyObject,
-> {
+export interface TableBuilder<T, PKFields extends readonly (keyof T)[] = readonly [], SKFields extends readonly (keyof T)[] = readonly [], GSIs = EmptyObject> {
   // Set key with just PK fields
   key<const PK extends readonly (keyof T)[]>(pk: PK): TableBuilder<T, PK, readonly [], GSIs>;
 
   // Set key with PK and SK fields
-  key<const PK extends readonly (keyof T)[], const SK extends readonly (keyof T)[]>(
-    pk: PK,
-    sk: SK
-  ): TableBuilder<T, PK, SK, GSIs>;
+  key<const PK extends readonly (keyof T)[], const SK extends readonly (keyof T)[]>(pk: PK, sk: SK): TableBuilder<T, PK, SK, GSIs>;
 
   // Add GSI with just PK
   gsi1<Name extends string, const GPK extends readonly (keyof T)[]>(
     name: Name,
-    pk: GPK
+    pk: GPK,
   ): TableBuilder<T, PKFields, SKFields, GSIs & Record<Name, QueryFnPKOnly<T, GPK>>>;
   gsi1<Name extends string, const GPK extends readonly (keyof T)[], const GSK extends readonly (keyof T)[]>(
     name: Name,
     pk: GPK,
-    sk: GSK
+    sk: GSK,
   ): TableBuilder<T, PKFields, SKFields, GSIs & Record<Name, QueryFnPKSK<T, GPK, GSK>>>;
 
   gsi2<Name extends string, const GPK extends readonly (keyof T)[]>(
     name: Name,
-    pk: GPK
+    pk: GPK,
   ): TableBuilder<T, PKFields, SKFields, GSIs & Record<Name, QueryFnPKOnly<T, GPK>>>;
   gsi2<Name extends string, const GPK extends readonly (keyof T)[], const GSK extends readonly (keyof T)[]>(
     name: Name,
     pk: GPK,
-    sk: GSK
+    sk: GSK,
   ): TableBuilder<T, PKFields, SKFields, GSIs & Record<Name, QueryFnPKSK<T, GPK, GSK>>>;
 
   gsi3<Name extends string, const GPK extends readonly (keyof T)[]>(
     name: Name,
-    pk: GPK
+    pk: GPK,
   ): TableBuilder<T, PKFields, SKFields, GSIs & Record<Name, QueryFnPKOnly<T, GPK>>>;
   gsi3<Name extends string, const GPK extends readonly (keyof T)[], const GSK extends readonly (keyof T)[]>(
     name: Name,
     pk: GPK,
-    sk: GSK
+    sk: GSK,
   ): TableBuilder<T, PKFields, SKFields, GSIs & Record<Name, QueryFnPKSK<T, GPK, GSK>>>;
 
   gsi4<Name extends string, const GPK extends readonly (keyof T)[]>(
     name: Name,
-    pk: GPK
+    pk: GPK,
   ): TableBuilder<T, PKFields, SKFields, GSIs & Record<Name, QueryFnPKOnly<T, GPK>>>;
   gsi4<Name extends string, const GPK extends readonly (keyof T)[], const GSK extends readonly (keyof T)[]>(
     name: Name,
     pk: GPK,
-    sk: GSK
+    sk: GSK,
   ): TableBuilder<T, PKFields, SKFields, GSIs & Record<Name, QueryFnPKSK<T, GPK, GSK>>>;
 
   gsi5<Name extends string, const GPK extends readonly (keyof T)[]>(
     name: Name,
-    pk: GPK
+    pk: GPK,
   ): TableBuilder<T, PKFields, SKFields, GSIs & Record<Name, QueryFnPKOnly<T, GPK>>>;
   gsi5<Name extends string, const GPK extends readonly (keyof T)[], const GSK extends readonly (keyof T)[]>(
     name: Name,
     pk: GPK,
-    sk: GSK
+    sk: GSK,
   ): TableBuilder<T, PKFields, SKFields, GSIs & Record<Name, QueryFnPKSK<T, GPK, GSK>>>;
 
   build(): {

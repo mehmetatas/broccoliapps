@@ -35,7 +35,7 @@ export function getRecentSpendRecords(count = 10): SpendRecord[] {
   const storage = getStorage();
   const keys = storage
     .getAllKeys()
-    .filter(key => key.startsWith("spend:"))
+    .filter((key) => key.startsWith("spend:"))
     .sort((a, b) => b.localeCompare(a)); // newest first. reverse sorted by key which is yyyy-mm
 
   const records: SpendRecord[] = [];
@@ -82,6 +82,6 @@ export function deleteSpendRecord(record: SpendRecord): void {
   const key = getStorageKey(yearMonth);
 
   const existingRecords = getSpendRecordsForMonth(yearMonth);
-  const filtered = existingRecords.filter(r => r.id !== record.id);
+  const filtered = existingRecords.filter((r) => r.id !== record.id);
   storage.set(key, JSON.stringify(filtered));
 }

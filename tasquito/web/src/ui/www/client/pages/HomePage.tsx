@@ -28,9 +28,7 @@ export const HomePage = () => {
       {/* Left half - Product info */}
       <div class="flex w-full lg:w-1/2 flex-col justify-center bg-gradient-to-br from-emerald-600 to-emerald-800 p-8 pb-24 lg:p-12 lg:pb-12 text-white">
         <h1 class="text-4xl lg:text-5xl font-bold mb-6">Tasquito</h1>
-        <p class="text-lg lg:text-xl text-emerald-100 mb-8">
-          Simple, fast task management. Get things done.
-        </p>
+        <p class="text-lg lg:text-xl text-emerald-100 mb-8">Simple, fast task management. Get things done.</p>
         <ul class="space-y-4 text-emerald-100">
           <li class="flex items-center gap-3">
             <svg class="h-6 w-6 flex-shrink-0 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -60,16 +58,13 @@ export const HomePage = () => {
             <div class="rounded-xl bg-white p-8 shadow-lg text-center">
               <h2 class="mb-4 text-2xl font-semibold text-gray-900">Welcome Back</h2>
               <p class="mb-6 text-gray-600">You're already signed in.</p>
-              <button
-                onClick={goToApp}
-                class="w-full rounded-lg bg-emerald-600 px-4 py-3 font-medium text-white transition hover:bg-emerald-700"
-              >
+              <button onClick={goToApp} class="w-full rounded-lg bg-emerald-600 px-4 py-3 font-medium text-white transition hover:bg-emerald-700">
                 Go to App
               </button>
             </div>
-          ) :
+          ) : (
             <AuthCard appId="tasquito" accent={ACCENT} />
-          }
+          )}
         </div>
       </div>
 

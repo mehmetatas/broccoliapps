@@ -1,8 +1,4 @@
 import { HttpError } from "@broccoliapps/backend";
-import { random } from "@broccoliapps/shared";
-import { accounts, historyItems } from "../../db/accounts";
-import { calculateNextUpdate } from "../utils/nextUpdateCalculator";
-import { buckets } from "../../db/buckets";
 import {
   deleteAccount,
   deleteHistoryItem,
@@ -16,7 +12,11 @@ import {
   postHistoryItem,
   putAccountBuckets,
 } from "@broccoliapps/nwm-shared";
+import { random } from "@broccoliapps/shared";
+import { accounts, historyItems } from "../../db/accounts";
+import { buckets } from "../../db/buckets";
 import { api } from "../lambda";
+import { calculateNextUpdate } from "../utils/nextUpdateCalculator";
 
 // GET /accounts/:id/detail - get account with all related data (register most specific routes first)
 api.register(getAccountDetail, async (req, res, ctx) => {
@@ -28,10 +28,7 @@ api.register(getAccountDetail, async (req, res, ctx) => {
   }
 
   // Fetch history items and all buckets in parallel
-  const [items, allBuckets] = await Promise.all([
-    historyItems.query({ userId, accountId: req.id }).all(),
-    buckets.query({ userId }).all(),
-  ]);
+  const [items, allBuckets] = await Promise.all([historyItems.query({ userId, accountId: req.id }).all(), buckets.query({ userId }).all()]);
 
   // Convert history items to Record<string, number> map
   const history: Record<string, number> = {};
@@ -174,9 +171,7 @@ api.register(putAccountBuckets, async (req, res, ctx) => {
   // Batch fetch and update all affected buckets
   const allAffectedBucketIds = [...addedBucketIds, ...removedBucketIds];
   if (allAffectedBucketIds.length > 0) {
-    const affectedBuckets = await buckets.batchGet(
-      allAffectedBucketIds.map((id) => ({ pk: { userId }, sk: { id } }))
-    );
+    const affectedBuckets = await buckets.batchGet(allAffectedBucketIds.map((id) => ({ pk: { userId }, sk: { id } })));
 
     const updatedBuckets = affectedBuckets.map((bucket) => {
       const accountIds = bucket.accountIds ?? [];
@@ -254,16 +249,14 @@ api.register(deleteAccount, async (req, res, ctx) => {
       items.map((item) => ({
         pk: { userId, accountId: req.id },
         sk: { month: item.month },
-      }))
+      })),
     );
   }
 
   // Remove this account ID from all associated buckets' accountIds
   const bucketIds = account.bucketIds ?? [];
   if (bucketIds.length > 0) {
-    const associatedBuckets = await buckets.batchGet(
-      bucketIds.map((id) => ({ pk: { userId }, sk: { id } }))
-    );
+    const associatedBuckets = await buckets.batchGet(bucketIds.map((id) => ({ pk: { userId }, sk: { id } })));
 
     const updatedBuckets = associatedBuckets.map((bucket) => ({
       ...bucket,
@@ -293,7 +286,7 @@ api.register(postAccount, async (req, res, ctx) => {
     currency: req.currency,
     createdAt: Date.now(),
     nextUpdate,
-    ...req.updateFrequency && { updateFrequency: req.updateFrequency },
+    ...(req.updateFrequency && { updateFrequency: req.updateFrequency }),
   });
 
   // Create history items from Record

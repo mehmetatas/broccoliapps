@@ -13,10 +13,7 @@ type UseAsyncDataReturn<T> = {
  * @param deps - Dependency array for when to refetch (like useEffect deps)
  * @returns Object with data, loading, error states and refetch function
  */
-export function useAsyncData<T>(
-  fetchFn: () => Promise<T>,
-  deps: unknown[] = []
-): UseAsyncDataReturn<T> {
+export function useAsyncData<T>(fetchFn: () => Promise<T>, deps: unknown[] = []): UseAsyncDataReturn<T> {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

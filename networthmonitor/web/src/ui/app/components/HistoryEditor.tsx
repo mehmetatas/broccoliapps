@@ -1,13 +1,6 @@
-import { useEffect, useRef } from "preact/hooks";
 import type { UpdateFrequency } from "@broccoliapps/nwm-shared";
-import {
-  formatMonth,
-  generateMonthRange,
-  getCurrentMonth,
-  getMinMonthsBack,
-  getPreviousMonth,
-  shouldShowMonth,
-} from "../utils/dateUtils";
+import { useEffect, useRef } from "preact/hooks";
+import { formatMonth, generateMonthRange, getCurrentMonth, getMinMonthsBack, getPreviousMonth, shouldShowMonth } from "../utils/dateUtils";
 import { MoneyInput } from "./MoneyInput";
 
 type HistoryEditorProps = {
@@ -21,11 +14,7 @@ type HistoryEditorProps = {
   updateFrequency?: UpdateFrequency;
 };
 
-const getDisplayMonths = (
-  history: Record<string, number | undefined>,
-  currentMonth: string,
-  updateFrequency?: UpdateFrequency
-): string[] => {
+const getDisplayMonths = (history: Record<string, number | undefined>, currentMonth: string, updateFrequency?: UpdateFrequency): string[] => {
   const enteredMonths = Object.entries(history)
     .filter(([_, value]) => value !== undefined)
     .map(([month]) => month)
@@ -43,22 +32,11 @@ const getDisplayMonths = (
   return generateMonthRange(startMonth, currentMonth);
 };
 
-export const HistoryEditor = ({
-  history,
-  onChange,
-  onBlur,
-  currency,
-  savingMonths = {},
-  savedMonths = {},
-  disabled,
-  updateFrequency,
-}: HistoryEditorProps) => {
+export const HistoryEditor = ({ history, onChange, onBlur, currency, savingMonths = {}, savedMonths = {}, disabled, updateFrequency }: HistoryEditorProps) => {
   const currentMonth = getCurrentMonth();
   const allMonths = getDisplayMonths(history, currentMonth, updateFrequency);
   // Filter by frequency, but always include months that have existing values
-  const sortedMonths = allMonths.filter(
-    (month) => history[month] !== undefined || shouldShowMonth(month, updateFrequency)
-  );
+  const sortedMonths = allMonths.filter((month) => history[month] !== undefined || shouldShowMonth(month, updateFrequency));
   const containerRef = useRef<HTMLDivElement>(null);
   const prevMonthCountRef = useRef(sortedMonths.length);
 

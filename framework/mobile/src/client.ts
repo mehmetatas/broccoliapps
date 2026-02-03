@@ -1,11 +1,11 @@
-import {setBaseUrl, setTokenProvider} from "@broccoliapps/shared";
-import type {CacheProvider} from "@broccoliapps/shared";
+import type { CacheProvider } from "@broccoliapps/shared";
+import { setBaseUrl, setTokenProvider } from "@broccoliapps/shared";
 
 class MemoryCacheProvider implements CacheProvider {
-  private store = new Map<string, {value: unknown; expiresAt?: number}>();
+  private store = new Map<string, { value: unknown; expiresAt?: number }>();
 
   set<T>(key: string, value: T, expiresAt?: number): void {
-    this.store.set(key, {value, expiresAt});
+    this.store.set(key, { value, expiresAt });
   }
 
   get<T>(key: string): T | null {
@@ -33,7 +33,7 @@ class MemoryCacheProvider implements CacheProvider {
   }
 
   keys(prefix: string): string[] {
-    return Array.from(this.store.keys()).filter(k => k.startsWith(prefix));
+    return Array.from(this.store.keys()).filter((k) => k.startsWith(prefix));
   }
 
   clear(): void {
@@ -42,19 +42,21 @@ class MemoryCacheProvider implements CacheProvider {
 }
 
 let initialized = false;
+let cacheInstance: MemoryCacheProvider | null = null;
 
-export const initializeMobileClient = (
-  apiBaseUrl: string,
-  getAccessToken: () => Promise<string | undefined>,
-  onInit?: (cache: CacheProvider) => void,
-) => {
+export const initializeMobileClient = (apiBaseUrl: string, getAccessToken: () => Promise<string | undefined>, onInit?: (cache: CacheProvider) => void) => {
   if (initialized) {
     return;
   }
 
   const cacheProvider = new MemoryCacheProvider();
+  cacheInstance = cacheProvider;
   onInit?.(cacheProvider);
   setBaseUrl(apiBaseUrl);
-  setTokenProvider({get: getAccessToken});
+  setTokenProvider({ get: getAccessToken });
   initialized = true;
+};
+
+export const clearClientCache = () => {
+  cacheInstance?.clear();
 };
