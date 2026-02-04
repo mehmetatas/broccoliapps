@@ -155,9 +155,11 @@ describe("Rate Limiter Integration Tests", () => {
         period: "1m" as const,
       };
       const context = { userId: `${TEST_PREFIX}-user-1m` };
+      const fixedTime = Date.now();
+      const now = () => fixedTime;
 
-      await expect(rateLimiter.enforce(rule, context)).resolves.toBeUndefined();
-      await expect(rateLimiter.enforce(rule, context)).rejects.toThrow("Rate limit exceeded");
+      await expect(rateLimiter.enforce(rule, context, now)).resolves.toBeUndefined();
+      await expect(rateLimiter.enforce(rule, context, now)).rejects.toThrow("Rate limit exceeded");
     });
 
     it("should work with 1 hour period", async () => {
@@ -168,9 +170,11 @@ describe("Rate Limiter Integration Tests", () => {
         period: "1h" as const,
       };
       const context = { userId: `${TEST_PREFIX}-user-1h` };
+      const fixedTime = Date.now();
+      const now = () => fixedTime;
 
-      await expect(rateLimiter.enforce(rule, context)).resolves.toBeUndefined();
-      await expect(rateLimiter.enforce(rule, context)).rejects.toThrow("Rate limit exceeded");
+      await expect(rateLimiter.enforce(rule, context, now)).resolves.toBeUndefined();
+      await expect(rateLimiter.enforce(rule, context, now)).rejects.toThrow("Rate limit exceeded");
     });
 
     it("should work with 1 day period", async () => {
@@ -181,9 +185,11 @@ describe("Rate Limiter Integration Tests", () => {
         period: "1d" as const,
       };
       const context = { userId: `${TEST_PREFIX}-user-1d` };
+      const fixedTime = Date.now();
+      const now = () => fixedTime;
 
-      await expect(rateLimiter.enforce(rule, context)).resolves.toBeUndefined();
-      await expect(rateLimiter.enforce(rule, context)).rejects.toThrow("Rate limit exceeded");
+      await expect(rateLimiter.enforce(rule, context, now)).resolves.toBeUndefined();
+      await expect(rateLimiter.enforce(rule, context, now)).rejects.toThrow("Rate limit exceeded");
     });
 
     it("should work with 30 day period", async () => {
@@ -194,9 +200,11 @@ describe("Rate Limiter Integration Tests", () => {
         period: "30d" as const,
       };
       const context = { userId: `${TEST_PREFIX}-user-30d` };
+      const fixedTime = Date.now();
+      const now = () => fixedTime;
 
-      await expect(rateLimiter.enforce(rule, context)).resolves.toBeUndefined();
-      await expect(rateLimiter.enforce(rule, context)).rejects.toThrow("Rate limit exceeded");
+      await expect(rateLimiter.enforce(rule, context, now)).resolves.toBeUndefined();
+      await expect(rateLimiter.enforce(rule, context, now)).rejects.toThrow("Rate limit exceeded");
     });
   });
 
@@ -209,9 +217,11 @@ describe("Rate Limiter Integration Tests", () => {
         period: "1m" as const,
       };
       const context = { userId: `${TEST_PREFIX}-user-limit1` };
+      const fixedTime = Date.now();
+      const now = () => fixedTime;
 
-      await expect(rateLimiter.enforce(rule, context)).resolves.toBeUndefined();
-      await expect(rateLimiter.enforce(rule, context)).rejects.toThrow("Rate limit exceeded");
+      await expect(rateLimiter.enforce(rule, context, now)).resolves.toBeUndefined();
+      await expect(rateLimiter.enforce(rule, context, now)).rejects.toThrow("Rate limit exceeded");
     });
 
     it("should handle higher limits", async () => {
