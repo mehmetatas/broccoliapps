@@ -5,7 +5,7 @@ import type { RootStackParamList } from "../navigation/types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Details">;
 
-export function DetailsScreen({ navigation }: Props) {
+export const DetailsScreen = ({ navigation }: Props) => {
   const { logout } = useAuth();
   const { colors } = useTheme();
 
@@ -21,7 +21,7 @@ export function DetailsScreen({ navigation }: Props) {
       </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

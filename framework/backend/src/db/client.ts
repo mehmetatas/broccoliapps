@@ -14,7 +14,7 @@ import type { DdbItem, QueryResult } from "./types";
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
-export interface QueryParams {
+export type QueryParams = {
   tableName: string;
   indexName?: string;
   keyConditionExpression: string;
@@ -25,7 +25,7 @@ export interface QueryParams {
   filterExpression?: string;
   filterAttributeNames?: Record<string, string>;
   filterAttributeValues?: Record<string, unknown>;
-}
+};
 
 const encodeCursor = (key: Record<string, unknown> | undefined): string | undefined =>
   key ? Buffer.from(JSON.stringify(key)).toString("base64url") : undefined;
@@ -63,10 +63,10 @@ export const executeQuery = async <T>(params: QueryParams): Promise<QueryResult<
   };
 };
 
-export interface CountResult {
+export type CountResult = {
   count: number;
   cursor?: string;
-}
+};
 
 export const executeCountQuery = async (params: QueryParams): Promise<CountResult> => {
   const response = await docClient.send(
@@ -82,10 +82,10 @@ export const executeCountQuery = async (params: QueryParams): Promise<CountResul
   };
 };
 
-export interface PutParams<T> {
+export type PutParams<T> = {
   tableName: string;
   item: DdbItem<T>;
-}
+};
 
 export const executePut = async <T>(params: PutParams<T>): Promise<void> => {
   await docClient.send(
@@ -114,11 +114,11 @@ export const executePutIfNotExists = async <T>(params: PutParams<T>): Promise<bo
   }
 };
 
-export interface GetParams {
+export type GetParams = {
   tableName: string;
   pk: string;
   sk: string;
-}
+};
 
 export const executeGet = async <T>(params: GetParams): Promise<DdbItem<T> | undefined> => {
   const response = await docClient.send(
@@ -130,11 +130,11 @@ export const executeGet = async <T>(params: GetParams): Promise<DdbItem<T> | und
   return response.Item as DdbItem<T> | undefined;
 };
 
-export interface DeleteParams {
+export type DeleteParams = {
   tableName: string;
   pk: string;
   sk: string;
-}
+};
 
 export const executeDelete = async (params: DeleteParams): Promise<void> => {
   await docClient.send(
@@ -145,10 +145,10 @@ export const executeDelete = async (params: DeleteParams): Promise<void> => {
   );
 };
 
-export interface BatchGetParams {
+export type BatchGetParams = {
   tableName: string;
   keys: { pk: string; sk: string }[];
-}
+};
 
 export const executeBatchGet = async <T>(params: BatchGetParams): Promise<DdbItem<T>[]> => {
   const keys = uniqueByKey(params.keys);
@@ -170,10 +170,10 @@ export const executeBatchGet = async <T>(params: BatchGetParams): Promise<DdbIte
   return (response.Responses?.[params.tableName] ?? []) as DdbItem<T>[];
 };
 
-export interface BatchPutParams<T> {
+export type BatchPutParams<T> = {
   tableName: string;
   items: DdbItem<T>[];
-}
+};
 
 export const executeBatchPut = async <T>(params: BatchPutParams<T>): Promise<void> => {
   const items = uniqueByKey(params.items);
@@ -197,10 +197,10 @@ export const executeBatchPut = async <T>(params: BatchPutParams<T>): Promise<voi
   }
 };
 
-export interface BatchDeleteParams {
+export type BatchDeleteParams = {
   tableName: string;
   keys: { pk: string; sk: string }[];
-}
+};
 
 export const executeBatchDelete = async (params: BatchDeleteParams): Promise<void> => {
   console.log("Deleting: " + params.keys.length);

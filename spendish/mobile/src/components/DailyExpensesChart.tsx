@@ -3,22 +3,22 @@ import { Dimensions, StyleSheet, View } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { useTheme } from "../theme/ThemeContext";
 
-interface ChartDataPoint {
+type ChartDataPoint = {
   date: string;
   amount: number;
-}
+};
 
-interface DailyExpensesChartProps {
+type DailyExpensesChartProps = {
   data: ChartDataPoint[];
-}
+};
 
 const screenWidth = Dimensions.get("window").width;
 
-function formatDayLabel(dateString: string): string {
+const formatDayLabel = (dateString: string): string => {
   return new Date(dateString + "T00:00:00").getDate().toString();
-}
+};
 
-export function DailyExpensesChart({ data }: DailyExpensesChartProps): React.JSX.Element {
+export const DailyExpensesChart = ({ data }: DailyExpensesChartProps): React.JSX.Element => {
   const { theme, isDark } = useTheme();
 
   // Transform data to chart-kit format
@@ -80,7 +80,7 @@ export function DailyExpensesChart({ data }: DailyExpensesChartProps): React.JSX
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

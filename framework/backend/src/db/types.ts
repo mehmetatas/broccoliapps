@@ -33,13 +33,13 @@ export type Filter<T> = {
 };
 
 // Query result type
-export interface QueryResult<T> {
+export type QueryResult<T> = {
   items: T[];
   cursor?: string;
-}
+};
 
 // Raw query data returned by build()
-export interface QueryData {
+export type QueryData = {
   tableName: string;
   indexName?: string;
   keyConditionExpression: string;
@@ -50,10 +50,10 @@ export interface QueryData {
   filterExpression?: string;
   filterAttributeNames?: Record<string, string>;
   filterAttributeValues?: Record<string, unknown>;
-}
+};
 
 // Query object - holds query parameters and can be executed
-export interface Query<T> {
+export type Query<T> = {
   // Chainable methods
   limit(n: number): Query<T>;
   cursor(c?: string): Query<T>;
@@ -67,7 +67,7 @@ export interface Query<T> {
   execute(): Promise<QueryResult<T>>;
   all(): Promise<T[]>;
   count(): Promise<number>;
-}
+};
 
 // Forbid all SK fields (truly empty SK filter)
 export type SKEmpty<T, Fields extends readonly (keyof T)[]> = {
@@ -148,124 +148,124 @@ export type PKValue<T, Fields extends readonly (keyof T)[]> = {
 };
 
 // Query function for table with PK only (no SK fields)
-export interface QueryFnPKOnly<T, PKFields extends readonly (keyof T)[]> {
+export type QueryFnPKOnly<T, PKFields extends readonly (keyof T)[]> = {
   (pk: PKValue<T, PKFields>): Query<T>;
-}
+};
 
 // Query function for table with PK and SK
-export interface QueryFnPKSK<T, PKFields extends readonly (keyof T)[], SKFields extends readonly (keyof T)[]> {
+export type QueryFnPKSK<T, PKFields extends readonly (keyof T)[], SKFields extends readonly (keyof T)[]> = {
   (pk: PKValue<T, PKFields>): Query<T>;
   (pk: PKValue<T, PKFields>, sk: SKFilter<T, SKFields>): Query<T>;
-}
+};
 
 // Query function for table with no key (just typeName)
-export interface QueryFnNoKey<T> {
+export type QueryFnNoKey<T> = {
   (): Query<T>;
-}
+};
 
 // Query function for table with SK only (no PK fields)
-export interface QueryFnSKOnly<T, SKFields extends readonly (keyof T)[]> {
+export type QueryFnSKOnly<T, SKFields extends readonly (keyof T)[]> = {
   (): Query<T>;
   (sk: SKFilter<T, SKFields>): Query<T>;
-}
+};
 
 // Put function type
-export interface PutFn<T> {
+export type PutFn<T> = {
   (item: T): Promise<T>;
-}
+};
 
 // PutIfNotExists function type - returns true if created, false if already exists
-export interface PutIfNotExistsFn<T> {
+export type PutIfNotExistsFn<T> = {
   (item: T): Promise<boolean>;
-}
+};
 
 // BatchPut function type
-export interface BatchPutFn<T> {
+export type BatchPutFn<T> = {
   (items: T[]): Promise<void>;
-}
+};
 
 // Get function for table with PK only (no SK fields)
-export interface GetFnPKOnly<T, PKFields extends readonly (keyof T)[]> {
+export type GetFnPKOnly<T, PKFields extends readonly (keyof T)[]> = {
   (pk: PKValue<T, PKFields>): Promise<T | undefined>;
-}
+};
 
 // Get function for table with PK and SK
-export interface GetFnPKSK<T, PKFields extends readonly (keyof T)[], SKFields extends readonly (keyof T)[]> {
+export type GetFnPKSK<T, PKFields extends readonly (keyof T)[], SKFields extends readonly (keyof T)[]> = {
   (pk: PKValue<T, PKFields>, sk: PKValue<T, SKFields>): Promise<T | undefined>;
-}
+};
 
 // Get function for table with no key (just typeName)
-export interface GetFnNoKey<T> {
+export type GetFnNoKey<T> = {
   (): Promise<T | undefined>;
-}
+};
 
 // Get function for table with SK only (no PK fields)
-export interface GetFnSKOnly<T, SKFields extends readonly (keyof T)[]> {
+export type GetFnSKOnly<T, SKFields extends readonly (keyof T)[]> = {
   (sk: PKValue<T, SKFields>): Promise<T | undefined>;
-}
+};
 
 // Delete function for table with PK only (no SK fields)
-export interface DeleteFnPKOnly<T, PKFields extends readonly (keyof T)[]> {
+export type DeleteFnPKOnly<T, PKFields extends readonly (keyof T)[]> = {
   (pk: PKValue<T, PKFields>): Promise<void>;
-}
+};
 
 // Delete function for table with PK and SK
-export interface DeleteFnPKSK<T, PKFields extends readonly (keyof T)[], SKFields extends readonly (keyof T)[]> {
+export type DeleteFnPKSK<T, PKFields extends readonly (keyof T)[], SKFields extends readonly (keyof T)[]> = {
   (pk: PKValue<T, PKFields>, sk: PKValue<T, SKFields>): Promise<void>;
-}
+};
 
 // Delete function for table with no key (just typeName)
-export interface DeleteFnNoKey {
+export type DeleteFnNoKey = {
   (): Promise<void>;
-}
+};
 
 // Delete function for table with SK only (no PK fields)
-export interface DeleteFnSKOnly<T, SKFields extends readonly (keyof T)[]> {
+export type DeleteFnSKOnly<T, SKFields extends readonly (keyof T)[]> = {
   (sk: PKValue<T, SKFields>): Promise<void>;
-}
+};
 
 // BatchGet function for table with PK only (no SK fields)
-export interface BatchGetFnPKOnly<T, PKFields extends readonly (keyof T)[]> {
+export type BatchGetFnPKOnly<T, PKFields extends readonly (keyof T)[]> = {
   (keys: PKValue<T, PKFields>[]): Promise<T[]>;
-}
+};
 
 // BatchGet function for table with PK and SK
-export interface BatchGetFnPKSK<T, PKFields extends readonly (keyof T)[], SKFields extends readonly (keyof T)[]> {
+export type BatchGetFnPKSK<T, PKFields extends readonly (keyof T)[], SKFields extends readonly (keyof T)[]> = {
   (keys: { pk: PKValue<T, PKFields>; sk: PKValue<T, SKFields> }[]): Promise<T[]>;
-}
+};
 
 // BatchGet function for table with no key (just typeName) - not useful but for completeness
-export interface BatchGetFnNoKey<T> {
+export type BatchGetFnNoKey<T> = {
   (): Promise<T[]>;
-}
+};
 
 // BatchGet function for table with SK only (no PK fields)
-export interface BatchGetFnSKOnly<T, SKFields extends readonly (keyof T)[]> {
+export type BatchGetFnSKOnly<T, SKFields extends readonly (keyof T)[]> = {
   (keys: PKValue<T, SKFields>[]): Promise<T[]>;
-}
+};
 
 // BatchDelete function for table with PK only (no SK fields)
-export interface BatchDeleteFnPKOnly<T, PKFields extends readonly (keyof T)[]> {
+export type BatchDeleteFnPKOnly<T, PKFields extends readonly (keyof T)[]> = {
   (keys: PKValue<T, PKFields>[]): Promise<void>;
-}
+};
 
 // BatchDelete function for table with PK and SK
-export interface BatchDeleteFnPKSK<T, PKFields extends readonly (keyof T)[], SKFields extends readonly (keyof T)[]> {
+export type BatchDeleteFnPKSK<T, PKFields extends readonly (keyof T)[], SKFields extends readonly (keyof T)[]> = {
   (keys: { pk: PKValue<T, PKFields>; sk: PKValue<T, SKFields> }[]): Promise<void>;
-}
+};
 
 // BatchDelete function for table with no key (just typeName)
-export interface BatchDeleteFnNoKey {
+export type BatchDeleteFnNoKey = {
   (): Promise<void>;
-}
+};
 
 // BatchDelete function for table with SK only (no PK fields)
-export interface BatchDeleteFnSKOnly<T, SKFields extends readonly (keyof T)[]> {
+export type BatchDeleteFnSKOnly<T, SKFields extends readonly (keyof T)[]> = {
   (keys: PKValue<T, SKFields>[]): Promise<void>;
-}
+};
 
 // Table builder interface
-export interface TableBuilder<T, PKFields extends readonly (keyof T)[] = readonly [], SKFields extends readonly (keyof T)[] = readonly [], GSIs = EmptyObject> {
+export type TableBuilder<T, PKFields extends readonly (keyof T)[] = readonly [], SKFields extends readonly (keyof T)[] = readonly [], GSIs = EmptyObject> = {
   // Set key with just PK fields
   key<const PK extends readonly (keyof T)[]>(pk: PK): TableBuilder<T, PK, readonly [], GSIs>;
 
@@ -364,12 +364,12 @@ export interface TableBuilder<T, PKFields extends readonly (keyof T)[] = readonl
         ? BatchDeleteFnPKOnly<T, PKFields>
         : BatchDeleteFnPKSK<T, PKFields, SKFields>;
   };
-}
+};
 
-export interface TableConfig {
+export type TableConfig = {
   typeName: string;
   tableName: string;
   pk: string[];
   sk: string[];
   gsis: Record<string, { index: string; pk: string[]; sk: string[] }>;
-}
+};

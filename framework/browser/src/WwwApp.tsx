@@ -13,7 +13,7 @@ type AppProps = {
   status: number;
 };
 
-export function createWwwApp(config: WwwAppConfig): ComponentType<AppProps> {
+export const createWwwApp = (config: WwwAppConfig): ComponentType<AppProps> => {
   const { routesWithLayout, routesWithoutLayout = {}, Layout, ErrorPage } = config;
 
   // Route component that wraps page with Layout based on withLayout prop
@@ -57,4 +57,4 @@ export function createWwwApp(config: WwwAppConfig): ComponentType<AppProps> {
       </Router>
     );
   };
-}
+};

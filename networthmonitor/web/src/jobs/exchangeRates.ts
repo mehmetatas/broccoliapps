@@ -6,7 +6,7 @@ type ExchangeRateApiResponse = {
   rates: Record<string, number>;
 };
 
-export async function updateExchangeRates(): Promise<void> {
+export const updateExchangeRates = async (): Promise<void> => {
   // Fetch exchange rates from API
   const response = await fetch("https://open.er-api.com/v6/latest/USD");
   if (!response.ok) {
@@ -53,9 +53,9 @@ export async function updateExchangeRates(): Promise<void> {
   if (dayOfMonth === 1) {
     await deletePreviousMonthDailyRates(year, parseInt(month), currencies);
   }
-}
+};
 
-async function updateMonthlyAverage(monthStr: string, currencies: string[]): Promise<void> {
+const updateMonthlyAverage = async (monthStr: string, currencies: string[]): Promise<void> => {
   const monthPrefix = `${monthStr}-`;
 
   // Query daily rates for each currency (new table has currency as PK)
@@ -90,9 +90,9 @@ async function updateMonthlyAverage(monthStr: string, currencies: string[]): Pro
   console.log(
     `Updated monthly average for ${monthStr} (${Object.keys(ratesByCurrency).length} currencies, based on ${allDailyRates.length / Object.keys(ratesByCurrency).length} days)`,
   );
-}
+};
 
-async function deletePreviousMonthDailyRates(currentYear: number, currentMonth: number, currencies: string[]): Promise<void> {
+const deletePreviousMonthDailyRates = async (currentYear: number, currentMonth: number, currencies: string[]): Promise<void> => {
   // Calculate previous month
   let prevYear = currentYear;
   let prevMonth = currentMonth - 1;
@@ -117,4 +117,4 @@ async function deletePreviousMonthDailyRates(currentYear: number, currentMonth: 
   // Delete using proper key structure
   await exchangeRates.batchDelete(allDailyRates.map((r) => ({ pk: { currency: r.currency }, sk: { date: r.date } })));
   console.log(`Deleted ${allDailyRates.length} daily rates for previous month`);
-}
+};

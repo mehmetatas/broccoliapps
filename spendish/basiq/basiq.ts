@@ -6,13 +6,13 @@ const BASIQ_VERSION = "3.0";
 
 // Type Definitions
 
-export interface TokenResponse {
+export type TokenResponse = {
   access_token: string;
   expires_in: number;
   token_type: string;
-}
+};
 
-export interface User {
+export type User = {
   type: string;
   id: string;
   email?: string;
@@ -26,9 +26,9 @@ export interface User {
     accounts?: string;
     transactions?: string;
   };
-}
+};
 
-export interface CreateUserParams {
+export type CreateUserParams = {
   email?: string;
   mobile?: string;
   firstName?: string;
@@ -36,9 +36,9 @@ export interface CreateUserParams {
   lastName?: string;
   businessName?: string;
   businessIdNo?: string;
-}
+};
 
-export interface AuthLink {
+export type AuthLink = {
   type: string;
   userId: string;
   mobile?: string;
@@ -47,18 +47,18 @@ export interface AuthLink {
     self: string;
     public: string;
   };
-}
+};
 
-export interface JobStep {
+export type JobStep = {
   title: string;
   status: string;
   result?: {
     type: string;
     url?: string;
   };
-}
+};
 
-export interface Job {
+export type Job = {
   type: string;
   id: string;
   steps: JobStep[];
@@ -66,9 +66,9 @@ export interface Job {
     self: string;
     source?: string;
   };
-}
+};
 
-export interface Account {
+export type Account = {
   type: string;
   id: string;
   accountNo?: string;
@@ -87,9 +87,9 @@ export interface Account {
     self: string;
     transactions?: string;
   };
-}
+};
 
-export interface Transaction {
+export type Transaction = {
   type: string;
   id: string;
   status: string;
@@ -122,9 +122,9 @@ export interface Transaction {
     self: string;
     account?: string;
   };
-}
+};
 
-export interface Connection {
+export type Connection = {
   type: string;
   id: string;
   status: string;
@@ -142,9 +142,9 @@ export interface Connection {
     accounts?: string;
     transactions?: string;
   };
-}
+};
 
-export interface ListResponse<T> {
+export type ListResponse<T> = {
   type: string;
   count?: number;
   size?: number;
@@ -154,9 +154,9 @@ export interface ListResponse<T> {
     next?: string;
     prev?: string;
   };
-}
+};
 
-export interface BasiqError {
+export type BasiqError = {
   type: string;
   correlationId?: string;
   data?: Array<{
@@ -169,7 +169,7 @@ export interface BasiqError {
       pointer?: string;
     };
   }>;
-}
+};
 
 export class BasiqApiError extends Error {
   public statusCode: number;

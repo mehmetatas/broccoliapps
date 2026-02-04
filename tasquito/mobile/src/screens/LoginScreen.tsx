@@ -2,7 +2,7 @@ import { type AuthExchangeResponse, Login, useAuth, useTheme } from "@broccoliap
 import { StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export function LoginScreen() {
+export const LoginScreen = () => {
   const { login } = useAuth();
   const { colors, isDark } = useTheme();
 
@@ -21,4 +21,4 @@ export function LoginScreen() {
       <Login title="Tasquito" slogan="Simple, fast task management" appId="tasquito" onLoginSuccess={onLoginSuccess} />
     </SafeAreaView>
   );
-}
+};

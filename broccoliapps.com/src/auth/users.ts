@@ -1,7 +1,7 @@
 import { db } from "@broccoliapps/backend";
 import { random } from "@broccoliapps/shared";
 
-export async function getOrCreateUser(email: string, name: string, signInProvider: string) {
+export const getOrCreateUser = async (email: string, name: string, signInProvider: string) => {
   // Look up by email
   const existingUsers = await db.shared.users.query.byEmail({ email }).limit(1).execute();
   const existing = existingUsers.items[0];
@@ -20,4 +20,4 @@ export async function getOrCreateUser(email: string, name: string, signInProvide
     createdAt: now,
     updatedAt: now,
   });
-}
+};

@@ -3,15 +3,15 @@ import React, { useState } from "react";
 import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 
-interface DateRangeModalProps {
+type DateRangeModalProps = {
   visible: boolean;
   onClose: () => void;
   onConfirm: (startDate: Date, endDate: Date) => void;
   initialStartDate?: Date;
   initialEndDate?: Date;
-}
+};
 
-export function DateRangeModal({ visible, onClose, onConfirm, initialStartDate, initialEndDate }: DateRangeModalProps): React.JSX.Element {
+export const DateRangeModal = ({ visible, onClose, onConfirm, initialStartDate, initialEndDate }: DateRangeModalProps): React.JSX.Element => {
   const { theme, isDark } = useTheme();
   const [startDate, setStartDate] = useState(initialStartDate || new Date());
   const [endDate, setEndDate] = useState(initialEndDate || new Date());
@@ -108,7 +108,7 @@ export function DateRangeModal({ visible, onClose, onConfirm, initialStartDate, 
       </View>
     </Modal>
   );
-}
+};
 
 const styles = StyleSheet.create({
   overlay: {

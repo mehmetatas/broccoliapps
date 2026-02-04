@@ -19,7 +19,7 @@ const parseCodeFromUrl = (url: string): string | null => {
   }
 };
 
-export function Login({ title, slogan, appId, onLoginSuccess, colors: colorOverrides }: LoginProps) {
+export const Login = ({ title, slogan, appId, onLoginSuccess, colors: colorOverrides }: LoginProps) => {
   const { colors } = useLoginTheme(colorOverrides);
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
@@ -266,7 +266,7 @@ export function Login({ title, slogan, appId, onLoginSuccess, colors: colorOverr
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

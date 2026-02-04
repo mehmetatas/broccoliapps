@@ -1,9 +1,9 @@
 import { Category } from "../types/category";
 import { getStorage } from "./mmkv";
 
-function generateId(): string {
+const generateId = (): string => {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
-}
+};
 
 const CATEGORIES_KEY = "categories";
 
@@ -22,7 +22,7 @@ const DEFAULT_CATEGORIES: Omit<Category, "id">[] = [
   { label: "Gift & Donation", icon: "Gift" },
 ];
 
-export function initializeCategories(): void {
+export const initializeCategories = (): void => {
   const storage = getStorage();
   const existing = storage.getString(CATEGORIES_KEY);
   if (!existing) {
@@ -32,18 +32,18 @@ export function initializeCategories(): void {
     }));
     storage.set(CATEGORIES_KEY, JSON.stringify(categories));
   }
-}
+};
 
-export function getCategories(): Category[] {
+export const getCategories = (): Category[] => {
   const storage = getStorage();
   const data = storage.getString(CATEGORIES_KEY);
   if (!data) {
     return [];
   }
   return JSON.parse(data) as Category[];
-}
+};
 
-export function saveCategories(categories: Category[]): void {
+export const saveCategories = (categories: Category[]): void => {
   const storage = getStorage();
   storage.set(CATEGORIES_KEY, JSON.stringify(categories));
-}
+};

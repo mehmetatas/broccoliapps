@@ -188,7 +188,7 @@ const buildPK = (typeName: string, pkFields: string[], pkValue: Record<string, u
   return pk;
 };
 
-interface QueryState {
+type QueryState = {
   tableName: string;
   indexName?: string;
   keyConditionExpression: string;
@@ -199,7 +199,7 @@ interface QueryState {
   filterExpression?: string;
   filterAttributeNames?: Record<string, string>;
   filterAttributeValues?: Record<string, unknown>;
-}
+};
 
 const createQuery = <T>(state: QueryState): Query<T> => ({
   limit: (n: number) => createQuery<T>({ ...state, _limit: n }),

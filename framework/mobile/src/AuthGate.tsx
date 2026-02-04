@@ -11,7 +11,7 @@ type AuthGateProps = {
   children: React.ReactNode;
 };
 
-export function AuthGate({ colors, loginScreen, children }: AuthGateProps) {
+export const AuthGate = ({ colors, loginScreen, children }: AuthGateProps) => {
   const { isLoading, isAuthenticated, isExchangingToken } = useAuth();
 
   if (isLoading) {
@@ -36,7 +36,7 @@ export function AuthGate({ colors, loginScreen, children }: AuthGateProps) {
   }
 
   return <>{children}</>;
-}
+};
 
 const styles = StyleSheet.create({
   loading: {

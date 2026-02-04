@@ -4,24 +4,24 @@ import * as fs from "fs";
 import * as path from "path";
 import { findForbiddenDeps, formatForbiddenDepsError } from "./dependency-verification";
 
-export interface LambdaConfig {
+export type LambdaConfig = {
   entry: string;
   outdir: string;
   forbiddenDeps?: string[];
-}
+};
 
-export interface ClientConfig {
+export type ClientConfig = {
   name: string;
   entry: string;
   cssEntry: string;
-}
+};
 
-export interface BuildAppOptions {
+export type BuildAppOptions = {
   rootDir: string;
   lambdas: LambdaConfig[];
   clients?: ClientConfig[];
   staticDir?: string; // defaults to "static"
-}
+};
 
 export const buildApp = async (options: BuildAppOptions): Promise<void> => {
   const { rootDir, lambdas, clients, staticDir = "static" } = options;

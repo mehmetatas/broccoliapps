@@ -6,9 +6,9 @@ if (import.meta.env.DEV) {
 }
 
 declare global {
-  interface Window {
+  type Window = {
     __PAGE_PROPS__: Record<string, unknown>;
-  }
+  };
 }
 
 const hydrateApp = () => {

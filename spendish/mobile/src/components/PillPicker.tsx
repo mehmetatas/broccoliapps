@@ -9,7 +9,7 @@ export type PillPickerProps = {
   small?: boolean;
 };
 
-export function PillPicker({ items, selectedId, onSelect, small = false }: PillPickerProps): React.JSX.Element {
+export const PillPicker = ({ items, selectedId, onSelect, small = false }: PillPickerProps): React.JSX.Element => {
   const { theme } = useTheme();
   const flatListRef = useRef<FlatList>(null);
   const entries = Object.entries(items);
@@ -82,7 +82,7 @@ export function PillPicker({ items, selectedId, onSelect, small = false }: PillP
       }}
     />
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

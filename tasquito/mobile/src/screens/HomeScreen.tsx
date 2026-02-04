@@ -35,7 +35,7 @@ const emptyMessages: Record<ProjectFilter, string> = {
   archived: "No archived projects.",
 };
 
-export function HomeScreen({ navigation }: Props) {
+export const HomeScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
   const { logout } = useAuth();
   const [filter, setFilter] = useState<ProjectFilter>("all");
@@ -145,7 +145,7 @@ export function HomeScreen({ navigation }: Props) {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   safe: {

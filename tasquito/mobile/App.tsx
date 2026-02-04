@@ -12,7 +12,7 @@ import { ProjectDetailScreen } from "./src/screens/ProjectDetailScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function AppContent() {
+const AppContent = () => {
   const { colors } = useTheme();
 
   return (
@@ -25,9 +25,9 @@ function AppContent() {
       </NavigationContainer>
     </AuthGate>
   );
-}
+};
 
-function App() {
+const App = () => {
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
@@ -37,7 +37,7 @@ function App() {
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

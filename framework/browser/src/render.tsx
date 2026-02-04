@@ -27,7 +27,7 @@ type RenderHtmlProps = {
   children: ComponentChildren;
 };
 
-export function createRender(Html: ComponentType<RenderHtmlProps>): (element: VNode, options?: PageOptions) => RenderResult {
+export const createRender = (Html: ComponentType<RenderHtmlProps>): ((element: VNode, options?: PageOptions) => RenderResult) => {
   return (element: VNode, options: PageOptions = {}): RenderResult => {
     const pageProps = element.props as Record<string, unknown>;
 
@@ -44,4 +44,4 @@ export function createRender(Html: ComponentType<RenderHtmlProps>): (element: VN
       headers: options.headers,
     };
   };
-}
+};

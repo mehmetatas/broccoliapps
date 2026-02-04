@@ -10,13 +10,13 @@ process.env.TABLE_NAME = "broccoliapps-com";
 
 const TEST_PREFIX = `test-${Date.now()}`;
 
-interface TestItem {
+type TestItem = {
   id: string;
   status: string;
   email: string;
   name: string;
   score: number;
-}
+};
 
 // Track created items for cleanup
 const createdKeys: { pk: { id: string }; sk: { status: string } }[] = [];

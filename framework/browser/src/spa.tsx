@@ -5,7 +5,7 @@ import { AUTH_CACHE_KEYS } from "./auth-cache";
 import { cache } from "./cache";
 import { applyTheme, getStoredTheme } from "./theme";
 
-export function initSpaApp(config: { app: ComponentType }): void {
+export const initSpaApp = (config: { app: ComponentType }): void => {
   // Apply theme on initial load
   applyTheme();
 
@@ -51,4 +51,4 @@ export function initSpaApp(config: { app: ComponentType }): void {
   } else {
     renderApp();
   }
-}
+};

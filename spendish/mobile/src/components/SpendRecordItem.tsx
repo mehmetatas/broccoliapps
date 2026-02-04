@@ -25,20 +25,20 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Gift,
 };
 
-function formatDate(dateString: string): string {
+const formatDate = (dateString: string): string => {
   const date = new Date(dateString + "T00:00:00");
   const month = date.toLocaleDateString("en-US", { month: "short" });
   const day = date.getDate();
   const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
   return `${month} ${day}, ${weekday}`;
-}
+};
 
-interface SpendRecordItemProps {
+type SpendRecordItemProps = {
   record: SpendRecord;
   onDelete: (record: SpendRecord) => void;
-}
+};
 
-export function SpendRecordItem({ record, onDelete }: SpendRecordItemProps): React.JSX.Element {
+export const SpendRecordItem = ({ record, onDelete }: SpendRecordItemProps): React.JSX.Element => {
   const { theme } = useTheme();
   const categories = getCategories();
   const categoriesById = Object.fromEntries(categories.map((c) => [c.id, c]));
@@ -75,7 +75,7 @@ export function SpendRecordItem({ record, onDelete }: SpendRecordItemProps): Rea
       </ReanimatedSwipeable>
     </Animated.View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   spendItem: {

@@ -36,10 +36,12 @@ const AppRoute = ({
   ) : (
     <Page {...routeParams} />
   );
-export function createSpaRouter(config: SpaRouterConfig): {
+export const createSpaRouter = (
+  config: SpaRouterConfig,
+): {
   App: ComponentType;
   AppLink: ComponentType<AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }>;
-} {
+} => {
   const { routes, Layout, unauthPaths = [] } = config;
 
   const AppLink = ({ href, ...rest }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => {
@@ -68,4 +70,4 @@ export function createSpaRouter(config: SpaRouterConfig): {
   };
 
   return { App, AppLink };
-}
+};

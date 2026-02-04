@@ -13,7 +13,7 @@ type UseModalReturn<T = undefined> = {
  * @param initialOpen - Initial open state (default: false)
  * @returns Object with isOpen state, data, and control functions
  */
-export function useModal<T = undefined>(initialOpen: boolean = false): UseModalReturn<T> {
+export const useModal = <T = undefined>(initialOpen: boolean = false): UseModalReturn<T> => {
   const [isOpen, setIsOpen] = useState(initialOpen);
   const [data, setData] = useState<T | null>(null);
 
@@ -32,4 +32,4 @@ export function useModal<T = undefined>(initialOpen: boolean = false): UseModalR
   }, []);
 
   return { isOpen, data, open, close, toggle };
-}
+};

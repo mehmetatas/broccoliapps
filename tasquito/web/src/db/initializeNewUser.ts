@@ -3,7 +3,7 @@ import { generateKeyBetween } from "fractional-indexing";
 import { projects } from "./projects";
 import { tasks } from "./tasks";
 
-export async function initializeNewUser(userId: string): Promise<void> {
+export const initializeNewUser = async (userId: string): Promise<void> => {
   const now = Date.now();
   const projectId = random.id();
 
@@ -74,4 +74,4 @@ export async function initializeNewUser(userId: string): Promise<void> {
     }
     prevTaskOrder = taskOrder;
   }
-}
+};

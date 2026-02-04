@@ -1,9 +1,9 @@
 import type * as esbuild from "esbuild";
 
-export interface ForbiddenDepResult {
+export type ForbiddenDepResult = {
   dep: string;
   chain: string[];
-}
+};
 
 // Build reverse import map: file -> files that import it
 const buildImportedByMap = (metafile: esbuild.Metafile): Map<string, string[]> => {

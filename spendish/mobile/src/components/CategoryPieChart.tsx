@@ -4,14 +4,14 @@ import { PieChart } from "react-native-chart-kit";
 import { getCategories } from "../storage/categories";
 import { useTheme } from "../theme/ThemeContext";
 
-interface CategoryDataPoint {
+type CategoryDataPoint = {
   category: string;
   amount: number;
-}
+};
 
-interface CategoryPieChartProps {
+type CategoryPieChartProps = {
   data: CategoryDataPoint[];
-}
+};
 
 const screenWidth = Dimensions.get("window").width;
 const CHART_WIDTH = screenWidth - 32;
@@ -32,7 +32,7 @@ const CATEGORY_COLORS = [
   "#58D68D", // Emerald
 ];
 
-export function CategoryPieChart({ data }: CategoryPieChartProps): React.JSX.Element {
+export const CategoryPieChart = ({ data }: CategoryPieChartProps): React.JSX.Element => {
   const { theme } = useTheme();
   const [showPercentage, setShowPercentage] = useState(false);
 
@@ -80,7 +80,7 @@ export function CategoryPieChart({ data }: CategoryPieChartProps): React.JSX.Ele
       />
     </TouchableOpacity>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

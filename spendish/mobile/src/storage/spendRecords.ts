@@ -6,7 +6,7 @@ import { getStorage } from "./mmkv";
 const timeIdOffset = Date.UTC(2026); // number of seconds from 2026-01-01 00:00:00 (UTC)
 const TIME_ID_LENGTH = 6; // Enough for ~70 years
 const RANDOM_ID_LENGTH = 4;
-function generateId(): string {
+const generateId = (): string => {
   return (
     Math.round((Date.now() - timeIdOffset) / 1000)
       .toString(36)
@@ -15,13 +15,13 @@ function generateId(): string {
       .toString(36)
       .substring(2, 2 + RANDOM_ID_LENGTH) // 2 to remove '0.' from the beginning
   );
-}
+};
 
-function getStorageKey(yearMonth: string): string {
+const getStorageKey = (yearMonth: string): string => {
   return `spend:${yearMonth}`;
-}
+};
 
-export function getSpendRecordsForMonth(yearMonth: string): SpendRecord[] {
+export const getSpendRecordsForMonth = (yearMonth: string): SpendRecord[] => {
   const storage = getStorage();
   const key = getStorageKey(yearMonth);
   const data = storage.getString(key);
@@ -29,9 +29,9 @@ export function getSpendRecordsForMonth(yearMonth: string): SpendRecord[] {
     return [];
   }
   return JSON.parse(data) as SpendRecord[];
-}
+};
 
-export function getRecentSpendRecords(count = 10): SpendRecord[] {
+export const getRecentSpendRecords = (count = 10): SpendRecord[] => {
   const storage = getStorage();
   const keys = storage
     .getAllKeys()
@@ -57,9 +57,9 @@ export function getRecentSpendRecords(count = 10): SpendRecord[] {
   }
 
   return records;
-}
+};
 
-export function saveSpendRecord(record: Omit<SpendRecord, "id">): SpendRecord {
+export const saveSpendRecord = (record: Omit<SpendRecord, "id">): SpendRecord => {
   const storage = getStorage();
   const yearMonth = record.date.substring(0, 7);
   const key = getStorageKey(yearMonth);
@@ -74,9 +74,9 @@ export function saveSpendRecord(record: Omit<SpendRecord, "id">): SpendRecord {
   storage.set(key, JSON.stringify(existingRecords));
 
   return newRecord;
-}
+};
 
-export function deleteSpendRecord(record: SpendRecord): void {
+export const deleteSpendRecord = (record: SpendRecord): void => {
   const storage = getStorage();
   const yearMonth = record.date.substring(0, 7);
   const key = getStorageKey(yearMonth);
@@ -84,4 +84,4 @@ export function deleteSpendRecord(record: SpendRecord): void {
   const existingRecords = getSpendRecordsForMonth(yearMonth);
   const filtered = existingRecords.filter((r) => r.id !== record.id);
   storage.set(key, JSON.stringify(filtered));
-}
+};

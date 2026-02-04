@@ -2,12 +2,13 @@ import type { ComponentType } from "preact";
 import { hydrate } from "preact";
 
 declare global {
+  // biome-ignore lint/style/useConsistentTypeDefinitions: declaration merging requires interface
   interface Window {
     __PAGE_PROPS__: Record<string, unknown>;
   }
 }
 
-export function hydrateWww(App: ComponentType<{ pageProps: Record<string, unknown>; status: number }>): void {
+export const hydrateWww = (App: ComponentType<{ pageProps: Record<string, unknown>; status: number }>): void => {
   const hydrateApp = () => {
     const appElement = document.getElementById("app");
     if (!appElement) {
@@ -31,4 +32,4 @@ export function hydrateWww(App: ComponentType<{ pageProps: Record<string, unknow
   } else {
     hydrateApp();
   }
-}
+};

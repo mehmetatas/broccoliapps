@@ -4,8 +4,9 @@ import { LIMITS } from "@broccoliapps/tasquito-shared";
 import { useProject } from "@broccoliapps/tasquito-shared/hooks";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Archive, ArchiveRestore, Trash2 } from "lucide-react-native";
-import { useMemo, useRef, useState } from "react";
-import { Alert, FlatList, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Alert, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import DraggableFlatList, { type RenderItemParams } from "react-native-draggable-flatlist";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TaskCard } from "../components/TaskCard";
 import { TaskCardSkeleton, TaskListSkeleton } from "../components/TaskCardSkeleton";
@@ -16,7 +17,7 @@ type TaskWithSubtasks = TaskDto & { subtasks: TaskDto[] };
 
 type Props = NativeStackScreenProps<RootStackParamList, "ProjectDetail">;
 
-export function ProjectDetailScreen({ navigation, route }: Props) {
+export const ProjectDetailScreen = ({ navigation, route }: Props) => {
   const { projectId } = route.params;
   const { colors } = useTheme();
   const [showDone, setShowDone] = useState(false);
@@ -33,6 +34,7 @@ export function ProjectDetailScreen({ navigation, route }: Props) {
     updateTaskStatus,
     removeTask,
     updateName,
+    reorderTask,
     archive,
     unarchive,
     remove,
@@ -73,10 +75,40 @@ export function ProjectDetailScreen({ navigation, route }: Props) {
     return Math.max(0, LIMITS.ARCHIVE_TTL_DAYS - elapsed);
   }, [project?.archivedAt]);
 
-  const handleToggleStatus = (task: TaskWithSubtasks) => {
-    const newStatus = task.status === "todo" ? "done" : "todo";
-    updateTaskStatus(task.id, newStatus);
-  };
+  const handleToggleStatus = useCallback(
+    (task: TaskWithSubtasks) => {
+      const newStatus = task.status === "todo" ? "done" : "todo";
+      updateTaskStatus(task.id, newStatus);
+    },
+    [updateTaskStatus],
+  );
+
+  const handleDragEnd = useCallback(
+    ({ data, from, to }: { data: TaskWithSubtasks[]; from: number; to: number }) => {
+      if (from === to) {
+        return;
+      }
+      const draggedTask = data[to];
+      const afterTask = to > 0 ? data[to - 1] : null;
+      const beforeTask = to < data.length - 1 ? data[to + 1] : null;
+      reorderTask(draggedTask.id, afterTask?.id ?? null, beforeTask?.id ?? null);
+    },
+    [reorderTask],
+  );
+
+  const renderDraggableItem = useCallback(
+    ({ item, drag, isActive }: RenderItemParams<TaskWithSubtasks>) => (
+      <TaskCard
+        task={item}
+        isArchived={isArchived}
+        drag={isArchived ? undefined : drag}
+        isActive={isActive}
+        onToggleStatus={() => handleToggleStatus(item)}
+        onDelete={() => removeTask(item.id)}
+      />
+    ),
+    [isArchived, handleToggleStatus, removeTask],
+  );
 
   const handleArchivePress = () => {
     Alert.alert("Archive Project", `"${project?.name}" will be automatically deleted after ${LIMITS.ARCHIVE_TTL_DAYS} days.`, [
@@ -236,12 +268,11 @@ export function ProjectDetailScreen({ navigation, route }: Props) {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={["top"]}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <FlatList<TaskWithSubtasks>
+        <DraggableFlatList<TaskWithSubtasks>
           data={todoTasks}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TaskCard task={item} isArchived={isArchived} onToggleStatus={() => handleToggleStatus(item)} onDelete={() => removeTask(item.id)} />
-          )}
+          renderItem={renderDraggableItem}
+          onDragEnd={handleDragEnd}
           ListHeaderComponent={ListHeader}
           ListEmptyComponent={ListEmpty}
           ListFooterComponent={ListFooter}
@@ -252,7 +283,7 @@ export function ProjectDetailScreen({ navigation, route }: Props) {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   safe: {

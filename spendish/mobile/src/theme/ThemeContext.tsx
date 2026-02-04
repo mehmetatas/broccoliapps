@@ -24,14 +24,14 @@ const colors = {
 
 export type Theme = typeof colors.dark;
 
-interface ThemeContextValue {
+type ThemeContextValue = {
   theme: Theme;
   isDark: boolean;
-}
+};
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
 
@@ -44,12 +44,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
-}
+};
 
-export function useTheme(): ThemeContextValue {
+export const useTheme = (): ThemeContextValue => {
   const context = useContext(ThemeContext);
   if (!context) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
-}
+};

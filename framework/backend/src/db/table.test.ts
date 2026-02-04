@@ -11,20 +11,20 @@ vi.mock("./client", () => ({
 }));
 
 // Test interfaces
-interface User {
+type User = {
   id: string;
   email: string;
   status: string;
   updatedAt: number;
   name: string;
-}
+};
 
-interface Order {
+type Order = {
   userId: string;
   orderId: string;
   total: number;
   createdAt: number;
-}
+};
 
 describe("table", () => {
   describe("PK building", () => {
@@ -307,10 +307,10 @@ describe("table", () => {
 
   describe("edge cases", () => {
     it("should handle numeric values in PK", () => {
-      interface Item {
+      type Item = {
         count: number;
         name: string;
-      }
+      };
       const items = table<Item>("item").key(["count"]).build();
       const data = items.query({ count: 42 }).build();
 

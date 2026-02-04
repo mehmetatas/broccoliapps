@@ -40,13 +40,13 @@ const allFieldsDefined = (fields: string[], record: Record<string, unknown>): bo
 // DDB internal fields to strip from results
 const DDB_FIELDS = ["pk", "sk", "gsi1_pk", "gsi1_sk", "gsi2_pk", "gsi2_sk", "gsi3_pk", "gsi3_sk", "gsi4_pk", "gsi4_sk", "gsi5_pk", "gsi5_sk", "_type"];
 
-export interface ItemConfig {
+export type ItemConfig = {
   typeName: string;
   tableName: string;
   pk: string[];
   sk: string[];
   gsis: Record<string, { index: string; pk: string[]; sk: string[] }>;
-}
+};
 
 // Convert user item to DdbItem
 export const toDdbItem = <T>(config: ItemConfig, item: T): DdbItem<T> => {

@@ -51,18 +51,18 @@ const darkColors: AppColors = {
   activityIndicator: "#f5f5f5",
 };
 
-export function useLoginTheme(overrides?: Partial<LoginColors>) {
+export const useLoginTheme = (overrides?: Partial<LoginColors>) => {
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
   const base = isDark ? darkColors : lightColors;
   const colors: LoginColors = overrides ? { ...base, ...overrides } : base;
   return { colors, isDark };
-}
+};
 
-export function useTheme(overrides?: Partial<AppColors>) {
+export const useTheme = (overrides?: Partial<AppColors>) => {
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
   const base = isDark ? darkColors : lightColors;
   const colors: AppColors = overrides ? { ...base, ...overrides } : base;
   return { colors, isDark };
-}
+};

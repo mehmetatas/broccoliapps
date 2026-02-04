@@ -3,23 +3,26 @@ import type { TaskDto } from "@broccoliapps/tasquito-shared";
 import { Trash2 } from "lucide-react-native";
 import { useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Swipeable from "react-native-gesture-handler/Swipeable";
+import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 
 type TaskWithSubtasks = TaskDto & { subtasks: TaskDto[] };
 
 type Props = {
   task: TaskWithSubtasks;
   isArchived?: boolean;
+  drag?: () => void;
+  isActive?: boolean;
   onToggleStatus: () => void;
   onDelete: () => void;
 };
 
-export const TaskCard = ({ task, isArchived, onToggleStatus, onDelete }: Props) => {
+export const TaskCard = ({ task, isArchived, drag, isActive, onToggleStatus, onDelete }: Props) => {
   const { colors } = useTheme();
   const isDone = task.status === "done";
   const subtaskCount = task.subtasks.length;
   const doneSubtaskCount = task.subtasks.filter((st) => st.status === "done").length;
-  const swipeableRef = useRef<Swipeable>(null);
+  const swipeableRef = useRef<ReanimatedSwipeable>(null);
 
   const renderRightActions = () => (
     <TouchableOpacity
@@ -42,9 +45,15 @@ export const TaskCard = ({ task, isArchived, onToggleStatus, onDelete }: Props) 
           backgroundColor: colors.backgroundSecondary,
           borderColor: colors.border,
         },
+        isActive && styles.cardActive,
       ]}
       activeOpacity={0.7}
       disabled={isArchived}
+      onLongPress={() => {
+        ReactNativeHapticFeedback.trigger("impactMedium");
+        drag?.();
+      }}
+      delayLongPress={150}
     >
       <TouchableOpacity
         style={[styles.checkbox, isDone ? styles.checkboxDone : { borderColor: colors.border, backgroundColor: "transparent" }]}
@@ -72,9 +81,9 @@ export const TaskCard = ({ task, isArchived, onToggleStatus, onDelete }: Props) 
   }
 
   return (
-    <Swipeable ref={swipeableRef} renderRightActions={renderRightActions} overshootRight={false}>
+    <ReanimatedSwipeable ref={swipeableRef} renderRightActions={renderRightActions} overshootRight={false} containerStyle={styles.swipeableOverflow}>
       {cardContent}
-    </Swipeable>
+    </ReanimatedSwipeable>
   );
 };
 
@@ -87,6 +96,13 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 10,
     gap: 12,
+  },
+  cardActive: {
+    transform: [{ rotate: "-2deg" }],
+    opacity: 0.8,
+  },
+  swipeableOverflow: {
+    overflow: "visible",
   },
   checkbox: {
     width: 24,

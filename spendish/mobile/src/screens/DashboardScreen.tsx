@@ -51,7 +51,7 @@ const MOCK_CATEGORY_DATA = [
   { category: "personal-care", amount: 45 },
 ];
 
-export function DashboardScreen(): React.JSX.Element {
+export const DashboardScreen = (): React.JSX.Element => {
   const { theme } = useTheme();
   const navigation = useNavigation();
 
@@ -139,7 +139,7 @@ export function DashboardScreen(): React.JSX.Element {
       />
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

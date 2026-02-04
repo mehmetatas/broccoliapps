@@ -20,7 +20,13 @@
     "rules": {
       "recommended": false,
       "style": {
-        "useBlockStatements": "error"
+        "useBlockStatements": "error",
+        "useConsistentTypeDefinitions": {
+          "level": "error",
+          "options": {
+            "style": "type"
+          }
+        }
       },
       "complexity": {
         "useArrowFunction": "error"

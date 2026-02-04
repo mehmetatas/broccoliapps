@@ -42,33 +42,33 @@ const hapticOptions = {
   ignoreAndroidSystemSettings: false,
 };
 
-function triggerHaptic() {
+const triggerHaptic = () => {
   ReactNativeHapticFeedback.trigger("selection", hapticOptions);
-}
+};
 
-function triggerSuccessHaptic() {
+const triggerSuccessHaptic = () => {
   ReactNativeHapticFeedback.trigger("notificationSuccess", hapticOptions);
-}
+};
 
 const SUCCESS_COLOR = "#4CAF50";
 
-function getLocalDateString(): string {
+const getLocalDateString = (): string => {
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
-}
+};
 
-function formatDate(dateString: string): string {
+const formatDate = (dateString: string): string => {
   const date = new Date(dateString + "T00:00:00");
   const month = date.toLocaleDateString("en-US", { month: "short" });
   const day = date.getDate();
   const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
   return `${month} ${day}, ${weekday}`;
-}
+};
 
-function getStepValue(amount: number): number {
+const getStepValue = (amount: number): number => {
   if (amount < 10) {
     return 1;
   }
@@ -91,7 +91,7 @@ function getStepValue(amount: number): number {
     return 100;
   }
   return 1000;
-}
+};
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Home,
@@ -110,7 +110,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Home">;
 
-export function HomeScreen(): React.JSX.Element {
+export const HomeScreen = (): React.JSX.Element => {
   const { theme } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const [amount, setAmount] = useState(1);
@@ -260,7 +260,7 @@ export function HomeScreen(): React.JSX.Element {
       </SafeAreaView>
     </GestureDetector>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

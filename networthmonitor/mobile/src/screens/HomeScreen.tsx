@@ -5,7 +5,7 @@ import type { RootStackParamList } from "../navigation/types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
-export function HomeScreen({ navigation }: Props) {
+export const HomeScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
 
   return (
@@ -17,7 +17,7 @@ export function HomeScreen({ navigation }: Props) {
       </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

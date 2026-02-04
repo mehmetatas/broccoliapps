@@ -475,7 +475,7 @@
     <script>
       // === CONFIGURATION ===
       const GOOGLE_SCRIPT_URL =
-        "https://script.google.com/macros/s/AKfycbx8IHVQXB5THjLIZR0AHlLv6aA8JDs4HmpspDZ85yr2UibaB5DFBJsqoGtha6o1-lA3/exec";
+        "https://script.google.com/macros/s/AKfycbxhOJYIJ1Q2tkAdyDhcBj7YU_nVU0Rx8SKAqDfLheTdu1v8kL-y-QjU7m4GGuJe5twe/exec";
 
       async function sendEvent(event, data) {
         // Fetch country from IP
@@ -491,7 +491,7 @@
         return fetch(GOOGLE_SCRIPT_URL, {
           method: "POST",
           mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain" },
           body: JSON.stringify({
             event,
             data,

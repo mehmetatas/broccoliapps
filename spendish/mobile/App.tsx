@@ -13,7 +13,7 @@ import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function AppNavigator(): React.JSX.Element {
+const AppNavigator = (): React.JSX.Element => {
   const { isDark } = useTheme();
 
   return (
@@ -26,9 +26,9 @@ function AppNavigator(): React.JSX.Element {
       </Stack.Navigator>
     </NavigationContainer>
   );
-}
+};
 
-function App(): React.JSX.Element {
+const App = (): React.JSX.Element => {
   useEffect(() => {
     initializeCategories();
   }, []);
@@ -42,6 +42,6 @@ function App(): React.JSX.Element {
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
-}
+};
 
 export default App;

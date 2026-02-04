@@ -4,15 +4,15 @@ import { useTheme } from "../theme/ThemeContext";
 import { CategoryPieChart } from "./CategoryPieChart";
 import { DailyExpensesChart } from "./DailyExpensesChart";
 
-interface ChartCarouselProps {
+type ChartCarouselProps = {
   dailyData: { date: string; amount: number }[];
   categoryData: { category: string; amount: number }[];
-}
+};
 
 const { width: screenWidth } = Dimensions.get("window");
 const CHART_WIDTH = screenWidth - 32;
 
-export function ChartCarousel({ dailyData, categoryData }: ChartCarouselProps): React.JSX.Element {
+export const ChartCarousel = ({ dailyData, categoryData }: ChartCarouselProps): React.JSX.Element => {
   const { theme } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -61,7 +61,7 @@ export function ChartCarousel({ dailyData, categoryData }: ChartCarouselProps): 
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {},

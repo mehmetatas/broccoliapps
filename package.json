@@ -31,6 +31,6 @@
     "deploy:tasquito": "npm run build:framework && npm run deploy -w @broccoliapps/tasquito-web"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.13"
+    "@biomejs/biome": "^2.3.14"
   }
 }

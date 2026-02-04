@@ -5,7 +5,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeContext";
 
-export function SettingsScreen(): React.JSX.Element {
+export const SettingsScreen = (): React.JSX.Element => {
   const { theme } = useTheme();
   const navigation = useNavigation();
 
@@ -23,7 +23,7 @@ export function SettingsScreen(): React.JSX.Element {
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
