@@ -30,8 +30,7 @@ const SkeletonCard = () => {
       style={[
         styles.card,
         {
-          backgroundColor: colors.backgroundSecondary,
-          borderColor: colors.border,
+          borderBottomColor: colors.divider,
           opacity,
         },
       ]}
@@ -59,21 +58,20 @@ export const TaskListSkeleton = () => {
 
 const styles = StyleSheet.create({
   container: {
-    gap: 10,
+    gap: 0,
   },
   card: {
     flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderRadius: 12,
+    alignItems: "flex-start",
+    borderBottomWidth: StyleSheet.hairlineWidth,
     padding: 16,
-    marginBottom: 10,
+    marginBottom: 0,
     gap: 12,
   },
   checkboxPlaceholder: {
     width: 24,
     height: 24,
-    borderRadius: 6,
+    borderRadius: 12,
   },
   textContainer: {
     flex: 1,

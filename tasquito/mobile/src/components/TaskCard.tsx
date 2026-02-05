@@ -434,6 +434,7 @@ export const TaskCard = ({
               onSubmitEditing={handleSubtaskTitleSubmit}
               onBlur={handleSubtaskTitleSubmit}
               returnKeyType="done"
+              maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
               autoFocus
             />
           ) : (
@@ -533,6 +534,7 @@ export const TaskCard = ({
               onSubmitEditing={handleSubtaskTitleSubmit}
               onBlur={handleSubtaskTitleSubmit}
               returnKeyType="done"
+              maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
               autoFocus
             />
           ) : (
@@ -632,6 +634,7 @@ export const TaskCard = ({
                 onSubmitEditing={handleTaskTitleSubmit}
                 onBlur={handleTaskTitleSubmit}
                 returnKeyType="done"
+                maxLength={LIMITS.MAX_TASK_TITLE_LENGTH}
                 autoFocus
               />
             ) : (
@@ -706,6 +709,7 @@ export const TaskCard = ({
                   placeholderTextColor={colors.textMuted}
                   returnKeyType="done"
                   submitBehavior="submit"
+                  maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
                   autoFocus
                 />
                 <TouchableOpacity onPress={handleAddSubtaskBlur} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -731,6 +735,7 @@ export const TaskCard = ({
                 multiline
                 textAlignVertical="top"
                 scrollEnabled={false}
+                maxLength={LIMITS.MAX_TASK_DESCRIPTION_LENGTH}
                 autoFocus
               />
               <View style={styles.descriptionActions}>

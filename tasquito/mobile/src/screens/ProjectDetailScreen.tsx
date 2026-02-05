@@ -353,6 +353,7 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
             onSubmitEditing={handleNameSubmit}
             onBlur={handleNameSubmit}
             returnKeyType="done"
+            maxLength={LIMITS.MAX_PROJECT_NAME_LENGTH}
             selectTextOnFocus
           />
         ) : (

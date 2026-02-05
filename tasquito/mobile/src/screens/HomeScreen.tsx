@@ -107,7 +107,16 @@ export const HomeScreen = ({ navigation }: Props) => {
               project={item}
               onPress={() => navigation.navigate("ProjectDetail", { projectId: item.id })}
               onArchive={!item.isArchived ? () => archive(item.id) : undefined}
-              onDelete={item.isArchived ? () => remove(item.id) : undefined}
+              onDelete={
+                item.isArchived
+                  ? () => {
+                      Alert.alert("Delete Project", "This action cannot be undone. All tasks will be permanently deleted.", [
+                        { text: "Cancel", style: "cancel" },
+                        { text: "Delete", style: "destructive", onPress: () => remove(item.id) },
+                      ]);
+                    }
+                  : undefined
+              }
             />
           )}
           ListHeaderComponent={ListHeader}

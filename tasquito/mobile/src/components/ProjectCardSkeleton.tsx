@@ -30,8 +30,7 @@ const SkeletonCard = () => {
       style={[
         styles.card,
         {
-          backgroundColor: colors.backgroundSecondary,
-          borderColor: colors.border,
+          borderBottomColor: colors.divider,
           opacity,
         },
       ]}
@@ -54,11 +53,10 @@ export const ProjectListSkeleton = () => {
 
 const styles = StyleSheet.create({
   container: {
-    gap: 10,
+    gap: 0,
   },
   card: {
-    borderWidth: 1,
-    borderRadius: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     padding: 16,
     gap: 10,
   },

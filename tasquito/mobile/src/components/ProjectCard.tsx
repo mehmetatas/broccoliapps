@@ -59,18 +59,14 @@ export const ProjectCard = ({ project, onPress, onArchive, onDelete }: Props) =>
       style={[
         styles.card,
         {
-          backgroundColor: colors.backgroundSecondary,
-          borderColor: colors.border,
-          opacity: isArchived ? 0.75 : 1,
+          borderBottomColor: colors.divider,
         },
       ]}
       onPress={onPress}
       activeOpacity={0.7}
     >
       <View style={styles.content}>
-        <Text style={[styles.name, { color: colors.textPrimary }]} numberOfLines={1}>
-          {project.name}
-        </Text>
+        <Text style={[styles.name, { color: colors.textPrimary }]}>{project.name}</Text>
         <Text style={[styles.summary, { color: colors.textMuted }]}>{summaryText}</Text>
       </View>
     </TouchableOpacity>
@@ -100,18 +96,16 @@ export const ProjectCard = ({ project, onPress, onArchive, onDelete }: Props) =>
 
 const styles = StyleSheet.create({
   card: {
-    borderWidth: 1,
-    borderRadius: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     padding: 16,
-    marginBottom: 10,
+    marginBottom: 0,
   },
   swipeAction: {
     width: 80,
-    marginBottom: 10,
+    marginBottom: 0,
   },
   swipeButton: {
     flex: 1,
-    borderRadius: 12,
     marginLeft: 8,
     justifyContent: "center",
     alignItems: "center",
