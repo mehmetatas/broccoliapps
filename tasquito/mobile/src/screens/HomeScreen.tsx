@@ -1,8 +1,9 @@
-import { useAuth, useTheme } from "@broccoliapps/mobile";
+import { useTheme } from "@broccoliapps/mobile";
 import type { ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
 import { useProjects } from "@broccoliapps/tasquito-shared/hooks";
 import { useFocusEffect } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Settings } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -14,31 +15,14 @@ import type { RootStackParamList } from "../navigation/types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
-const getProjectStatus = (project: ProjectSummaryDto): "pending" | "active" | "done" | "archived" => {
-  if (project.isArchived) {
-    return "archived";
-  }
-  if (project.totalTaskCount === 0) {
-    return "pending";
-  }
-  if (project.openTaskCount === 0) {
-    return "done";
-  }
-  return "active";
-};
-
 const emptyMessages: Record<ProjectFilter, string> = {
-  all: "No projects yet. Create one above to get started!",
-  active: "No active projects.",
-  pending: "No pending projects.",
-  done: "No completed projects.",
+  active: "No projects yet. Create one above to get started!",
   archived: "No archived projects.",
 };
 
 export const HomeScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
-  const { logout } = useAuth();
-  const [filter, setFilter] = useState<ProjectFilter>("all");
+  const [filter, setFilter] = useState<ProjectFilter>("active");
   const { projects, isLoading, error, limitError, clearLimitError, create, archive, remove, refresh } = useProjects();
 
   const [isManualRefresh, setIsManualRefresh] = useState(false);
@@ -62,11 +46,10 @@ export const HomeScreen = ({ navigation }: Props) => {
 
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
-      const status = getProjectStatus(project);
-      if (filter === "all") {
-        return status !== "archived";
+      if (filter === "active") {
+        return !project.isArchived;
       }
-      return status === filter;
+      return project.isArchived;
     });
   }, [projects, filter]);
 
@@ -74,8 +57,8 @@ export const HomeScreen = ({ navigation }: Props) => {
     <View style={styles.header}>
       <View style={styles.headerRow}>
         <Text style={[styles.title, { color: colors.textPrimary }]}>Projects</Text>
-        <TouchableOpacity onPress={() => logout()} activeOpacity={0.7}>
-          <Text style={[styles.signOutText, { color: colors.textMuted }]}>Sign Out</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("Settings")} activeOpacity={0.7} style={styles.settingsButton}>
+          <Settings size={24} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
 
@@ -172,9 +155,8 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontFamily: "Nunito-Bold",
   },
-  signOutText: {
-    fontSize: 14,
-    fontFamily: "Nunito-SemiBold",
+  settingsButton: {
+    padding: 4,
   },
   banner: {
     flexDirection: "row",

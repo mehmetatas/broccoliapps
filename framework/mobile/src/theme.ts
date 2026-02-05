@@ -1,9 +1,13 @@
 import { useColorScheme } from "react-native";
+import { useThemeContextOptional } from "./ThemeContext";
 import type { AppColors, LoginColors } from "./types";
 
-const lightColors: AppColors = {
+export type ThemePreference = "system" | "light" | "dark";
+
+export const lightColors: AppColors = {
   background: "#ffffff",
   backgroundSecondary: "#f5f5f5",
+  backgroundTertiary: "#ebebeb",
   textPrimary: "#000000",
   textSecondary: "#666666",
   textTertiary: "#999999",
@@ -26,9 +30,10 @@ const lightColors: AppColors = {
   activityIndicator: "#333333",
 };
 
-const darkColors: AppColors = {
+export const darkColors: AppColors = {
   background: "#171717",
   backgroundSecondary: "#262626",
+  backgroundTertiary: "#333333",
   textPrimary: "#f5f5f5",
   textSecondary: "#a3a3a3",
   textTertiary: "#737373",
@@ -60,8 +65,11 @@ export const useLoginTheme = (overrides?: Partial<LoginColors>) => {
 };
 
 export const useTheme = (overrides?: Partial<AppColors>) => {
+  const themeContext = useThemeContextOptional();
   const scheme = useColorScheme();
-  const isDark = scheme === "dark";
+
+  // Use ThemeContext if available, otherwise fall back to system scheme
+  const isDark = themeContext ? themeContext.isDark : scheme === "dark";
   const base = isDark ? darkColors : lightColors;
   const colors: AppColors = overrides ? { ...base, ...overrides } : base;
   return { colors, isDark };

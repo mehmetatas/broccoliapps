@@ -1,9 +1,16 @@
 export type { AuthExchangeResponse } from "@broccoliapps/shared";
 export { AuthProvider, useAuth } from "./AuthContext";
 export { AuthGate } from "./AuthGate";
+export type { BottomModalProps } from "./BottomModal";
+export { BottomModal } from "./BottomModal";
 export { clearClientCache, initializeMobileClient } from "./client";
 export { Login } from "./Login";
+export type { PillItem, PillsProps } from "./Pills";
+export { Pills } from "./Pills";
 export type { StoredTokens, TokenStorage } from "./storage";
 export { createTokenStorage } from "./storage";
-export { useTheme } from "./theme";
+export { ThemeProvider, useThemeContext } from "./ThemeContext";
+export { ThemeSettings } from "./ThemeSettings";
+export type { ThemePreference } from "./theme";
+export { darkColors, lightColors, useTheme } from "./theme";
 export type { AppColors, LoginColors, LoginProps } from "./types";

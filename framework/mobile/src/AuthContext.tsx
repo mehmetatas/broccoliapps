@@ -102,7 +102,7 @@ export const AuthProvider = ({ apiBaseUrl, storage, onInitClient, children }: Au
   // Handle deep links for email sign-in callback
   useEffect(() => {
     // On cold start, fetch may fail if the network stack isn't ready yet.
-    const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const delay = (ms: number) => new Promise<void>((r) => setTimeout(() => r(), ms));
     const invokeWithRetry = async (code: string, retries = 2) => {
       try {
         return await authExchange.invoke({ code }, { baseUrl: apiBaseUrl, skipAuth: true });

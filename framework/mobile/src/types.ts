@@ -23,6 +23,7 @@ export type LoginColors = {
 
 export type AppColors = LoginColors & {
   backgroundSecondary: string;
+  backgroundTertiary: string;
   textMuted: string;
   buttonSecondaryBg: string;
   danger: string;

@@ -6,9 +6,10 @@ if (import.meta.env.DEV) {
 }
 
 declare global {
-  type Window = {
+  // biome-ignore lint/style/useConsistentTypeDefinitions: extending global Window requires interface
+  interface Window {
     __PAGE_PROPS__: Record<string, unknown>;
-  };
+  }
 }
 
 const hydrateApp = () => {

@@ -8,13 +8,33 @@ export type JwtPayload = {
   // aud: string;
 } & Record<string, unknown>;
 
-const decodeBase64Url = (base64Url: string): string => {
-  const base64 = base64Url
-    .replace(/-/g, "+")
-    .replace(/_/g, "/")
-    .padEnd(base64Url.length + ((4 - (base64Url.length % 4)) % 4), "=");
-  const binary = atob(base64);
-  return new TextDecoder().decode(Uint8Array.from(binary, (c) => c.charCodeAt(0)));
+const BASE64_LOOKUP: Record<string, number> = {};
+"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".split("").forEach((char, i) => {
+  BASE64_LOOKUP[char] = i;
+});
+
+const decodeBase64Url = (input: string): string => {
+  const str = input.replace(/-/g, "+").replace(/_/g, "/");
+  const pad = str.length % 4;
+  const padded = pad ? str + "=".repeat(4 - pad) : str;
+
+  let output = "";
+  for (let i = 0; i < padded.length; i += 4) {
+    const a = BASE64_LOOKUP[padded[i]!]!;
+    const b = BASE64_LOOKUP[padded[i + 1]!]!;
+    const c = BASE64_LOOKUP[padded[i + 2]!];
+    const d = BASE64_LOOKUP[padded[i + 3]!];
+
+    output += String.fromCharCode((a << 2) | (b >> 4));
+    if (c !== undefined && padded[i + 2] !== "=") {
+      output += String.fromCharCode(((b & 15) << 4) | (c >> 2));
+    }
+    if (d !== undefined && padded[i + 3] !== "=") {
+      output += String.fromCharCode(((c! & 3) << 6) | d);
+    }
+  }
+
+  return output;
 };
 
 const decode = <T extends JwtPayload>(token: string): T => {

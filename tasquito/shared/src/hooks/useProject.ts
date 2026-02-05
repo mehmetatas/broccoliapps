@@ -636,15 +636,25 @@ export const useProject = (id: string) => {
   };
 
   // Sorted tasks: todo first, then done, each sorted by sortOrder (ASCII comparison)
+  // Also sort subtasks within each task by sortOrder
   const sortedTasks: TaskWithSubtasks[] = project
-    ? [...project.tasks].sort((a, b) => {
-        if (a.status !== b.status) {
-          return a.status === "todo" ? -1 : 1;
-        }
-        const aOrder = a.sortOrder ?? "";
-        const bOrder = b.sortOrder ?? "";
-        return aOrder < bOrder ? -1 : aOrder > bOrder ? 1 : 0;
-      })
+    ? [...project.tasks]
+        .sort((a, b) => {
+          if (a.status !== b.status) {
+            return a.status === "todo" ? -1 : 1;
+          }
+          const aOrder = a.sortOrder ?? "";
+          const bOrder = b.sortOrder ?? "";
+          return aOrder < bOrder ? -1 : aOrder > bOrder ? 1 : 0;
+        })
+        .map((task) => ({
+          ...task,
+          subtasks: [...task.subtasks].sort((a, b) => {
+            const aOrder = a.sortOrder ?? "";
+            const bOrder = b.sortOrder ?? "";
+            return aOrder < bOrder ? -1 : aOrder > bOrder ? 1 : 0;
+          }),
+        }))
     : [];
 
   return {

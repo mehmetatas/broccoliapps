@@ -25,6 +25,12 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const subtaskInputRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+
+  const adjustTextareaHeight = (textarea: HTMLTextAreaElement) => {
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  };
 
   const handleSubmit = (e?: Event) => {
     e?.preventDefault();
@@ -48,6 +54,10 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
     setDueDate(undefined);
     setSubtasks([]);
     setNewSubtaskTitle("");
+    // Reset textarea height
+    if (descriptionRef.current) {
+      descriptionRef.current.style.height = "auto";
+    }
   };
 
   const handleTitleKeyDown = (e: KeyboardEvent) => {
@@ -105,12 +115,16 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
           {/* Description */}
           <div>
             <textarea
+              ref={descriptionRef}
               placeholder="Task description"
               value={description}
               maxLength={LIMITS.MAX_TASK_DESCRIPTION_LENGTH}
-              onInput={(e) => setDescription((e.target as HTMLTextAreaElement).value)}
-              rows={3}
-              class="w-full px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 placeholder-neutral-400 dark:placeholder-neutral-500 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg resize-none outline-none focus:border-blue-300 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-300 dark:focus:ring-blue-500"
+              onInput={(e) => {
+                const textarea = e.target as HTMLTextAreaElement;
+                setDescription(textarea.value);
+                adjustTextareaHeight(textarea);
+              }}
+              class="w-full px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 placeholder-neutral-400 dark:placeholder-neutral-500 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg resize-none outline-none focus:border-blue-300 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-300 dark:focus:ring-blue-500 min-h-[80px]"
             />
             {description.length >= LIMITS.MAX_TASK_DESCRIPTION_LENGTH && <p class="mt-1 text-xs text-neutral-400">Character limit reached</p>}
           </div>

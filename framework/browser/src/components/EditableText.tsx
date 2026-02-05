@@ -34,8 +34,14 @@ export const EditableText = ({
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
       inputRef.current.select();
+      // Auto-grow textarea on edit start
+      if (multiline && inputRef.current instanceof HTMLTextAreaElement) {
+        const textarea = inputRef.current;
+        textarea.style.height = "auto";
+        textarea.style.height = `${textarea.scrollHeight}px`;
+      }
     }
-  }, [isEditing]);
+  }, [isEditing, multiline]);
 
   const handleSave = () => {
     const trimmed = editValue.trim();
@@ -79,7 +85,12 @@ export const EditableText = ({
           <textarea
             ref={inputRef as RefObject<HTMLTextAreaElement>}
             value={editValue}
-            onInput={(e) => setEditValue((e.target as HTMLTextAreaElement).value)}
+            onInput={(e) => {
+              const textarea = e.target as HTMLTextAreaElement;
+              setEditValue(textarea.value);
+              textarea.style.height = "auto";
+              textarea.style.height = `${textarea.scrollHeight}px`;
+            }}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
             maxLength={maxLength}
@@ -119,7 +130,16 @@ export const EditableText = ({
         ${textClassName}
       `.trim()}
     >
-      {value || placeholder}
+      {value
+        ? value
+            .split("\n")
+            .filter((s) => s.trim() !== "")
+            .map((line, index) => (
+              <span class="mb-2 last:mb-0 inline-block" key={index}>
+                {line.trim()}
+              </span>
+            ))
+        : placeholder}
     </span>
   );
 };

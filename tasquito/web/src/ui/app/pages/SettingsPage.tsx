@@ -26,10 +26,10 @@ export const SettingsPage = () => {
 
       {/* Settings sections */}
       <div class="space-y-6">
-        {/* Appearance section */}
+        {/* Theme section */}
         <div class="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 overflow-hidden">
           <div class="px-5 py-4 border-b border-neutral-100 dark:border-neutral-700">
-            <h2 class="text-sm font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wide">Appearance</h2>
+            <h2 class="text-sm font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wide">Theme</h2>
           </div>
           <div class="p-5">
             <ThemeSettings value={theme} onChange={setTheme} />

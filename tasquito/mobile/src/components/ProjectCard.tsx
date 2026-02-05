@@ -4,7 +4,6 @@ import { Archive, Trash2 } from "lucide-react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import ReanimatedSwipeable, { type SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 import Animated, { interpolate, type SharedValue, useAnimatedStyle } from "react-native-reanimated";
-import { ProjectStatusIndicator } from "./ProjectStatusIndicator";
 
 type Props = {
   project: ProjectSummaryDto;
@@ -69,12 +68,9 @@ export const ProjectCard = ({ project, onPress, onArchive, onDelete }: Props) =>
       activeOpacity={0.7}
     >
       <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={[styles.name, { color: colors.textPrimary }]} numberOfLines={1}>
-            {project.name}
-          </Text>
-          <ProjectStatusIndicator openTaskCount={project.openTaskCount} totalTaskCount={project.totalTaskCount} isArchived={isArchived} />
-        </View>
+        <Text style={[styles.name, { color: colors.textPrimary }]} numberOfLines={1}>
+          {project.name}
+        </Text>
         <Text style={[styles.summary, { color: colors.textMuted }]}>{summaryText}</Text>
       </View>
     </TouchableOpacity>
@@ -129,16 +125,9 @@ const styles = StyleSheet.create({
   content: {
     gap: 6,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
   name: {
     fontSize: 17,
     fontFamily: "Nunito-SemiBold",
-    flex: 1,
-    marginRight: 12,
   },
   summary: {
     fontSize: 14,

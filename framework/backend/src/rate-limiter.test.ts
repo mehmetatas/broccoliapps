@@ -21,10 +21,12 @@ describe("Rate Limiter Integration Tests", () => {
         period: "1m" as const,
       };
       const context = { userId: `${TEST_PREFIX}-user1` };
+      const fixedTime = Date.now();
+      const now = () => fixedTime;
 
       // Should allow 5 requests
       for (let i = 0; i < 5; i++) {
-        await expect(rateLimiter.enforce(rule, context)).resolves.toBeUndefined();
+        await expect(rateLimiter.enforce(rule, context, now)).resolves.toBeUndefined();
       }
     });
 
@@ -37,14 +39,16 @@ describe("Rate Limiter Integration Tests", () => {
         period: "1m" as const,
       };
       const context = { userId: `${TEST_PREFIX}-user2` };
+      const fixedTime = Date.now();
+      const now = () => fixedTime;
 
       // First 3 should succeed
       for (let i = 0; i < 3; i++) {
-        await expect(rateLimiter.enforce(rule, context)).resolves.toBeUndefined();
+        await expect(rateLimiter.enforce(rule, context, now)).resolves.toBeUndefined();
       }
 
       // 4th should fail
-      await expect(rateLimiter.enforce(rule, context)).rejects.toThrow("Rate limit exceeded");
+      await expect(rateLimiter.enforce(rule, context, now)).rejects.toThrow("Rate limit exceeded");
     });
 
     it("should continue throwing after limit exceeded", async () => {
@@ -56,15 +60,17 @@ describe("Rate Limiter Integration Tests", () => {
         period: "1m" as const,
       };
       const context = { userId: `${TEST_PREFIX}-user3` };
+      const fixedTime = Date.now();
+      const now = () => fixedTime;
 
       // Use up the limit
-      await rateLimiter.enforce(rule, context);
-      await rateLimiter.enforce(rule, context);
+      await rateLimiter.enforce(rule, context, now);
+      await rateLimiter.enforce(rule, context, now);
 
       // Multiple attempts after limit should all fail
-      await expect(rateLimiter.enforce(rule, context)).rejects.toThrow("Rate limit exceeded");
-      await expect(rateLimiter.enforce(rule, context)).rejects.toThrow("Rate limit exceeded");
-      await expect(rateLimiter.enforce(rule, context)).rejects.toThrow("Rate limit exceeded");
+      await expect(rateLimiter.enforce(rule, context, now)).rejects.toThrow("Rate limit exceeded");
+      await expect(rateLimiter.enforce(rule, context, now)).rejects.toThrow("Rate limit exceeded");
+      await expect(rateLimiter.enforce(rule, context, now)).rejects.toThrow("Rate limit exceeded");
     });
   });
 
@@ -77,27 +83,31 @@ describe("Rate Limiter Integration Tests", () => {
         limit: 2,
         period: "1m" as const,
       };
+      const fixedTime = Date.now();
+      const now = () => fixedTime;
 
       const user1 = { userId: `${TEST_PREFIX}-userA` };
       const user2 = { userId: `${TEST_PREFIX}-userB` };
 
       // User1 hits limit
-      await rateLimiter.enforce(rule, user1);
-      await rateLimiter.enforce(rule, user1);
-      await expect(rateLimiter.enforce(rule, user1)).rejects.toThrow("Rate limit exceeded");
+      await rateLimiter.enforce(rule, user1, now);
+      await rateLimiter.enforce(rule, user1, now);
+      await expect(rateLimiter.enforce(rule, user1, now)).rejects.toThrow("Rate limit exceeded");
 
       // User2 should still have quota
-      await expect(rateLimiter.enforce(rule, user2)).resolves.toBeUndefined();
-      await expect(rateLimiter.enforce(rule, user2)).resolves.toBeUndefined();
+      await expect(rateLimiter.enforce(rule, user2, now)).resolves.toBeUndefined();
+      await expect(rateLimiter.enforce(rule, user2, now)).resolves.toBeUndefined();
 
       // Now user2 should also be limited
-      await expect(rateLimiter.enforce(rule, user2)).rejects.toThrow("Rate limit exceeded");
+      await expect(rateLimiter.enforce(rule, user2, now)).rejects.toThrow("Rate limit exceeded");
     });
 
     it("should track limits separately for different actions", async () => {
       const action1 = `${TEST_PREFIX}-actionX`;
       const action2 = `${TEST_PREFIX}-actionY`;
       const context = { userId: `${TEST_PREFIX}-user5` };
+      const fixedTime = Date.now();
+      const now = () => fixedTime;
 
       const rule1 = {
         action: action1,
@@ -114,13 +124,13 @@ describe("Rate Limiter Integration Tests", () => {
       };
 
       // Hit limit on action1
-      await rateLimiter.enforce(rule1, context);
-      await rateLimiter.enforce(rule1, context);
-      await expect(rateLimiter.enforce(rule1, context)).rejects.toThrow("Rate limit exceeded");
+      await rateLimiter.enforce(rule1, context, now);
+      await rateLimiter.enforce(rule1, context, now);
+      await expect(rateLimiter.enforce(rule1, context, now)).rejects.toThrow("Rate limit exceeded");
 
       // action2 should still work
-      await expect(rateLimiter.enforce(rule2, context)).resolves.toBeUndefined();
-      await expect(rateLimiter.enforce(rule2, context)).resolves.toBeUndefined();
+      await expect(rateLimiter.enforce(rule2, context, now)).resolves.toBeUndefined();
+      await expect(rateLimiter.enforce(rule2, context, now)).resolves.toBeUndefined();
     });
   });
 
@@ -133,16 +143,18 @@ describe("Rate Limiter Integration Tests", () => {
         limit: 2,
         period: "1m" as const,
       };
+      const fixedTime = Date.now();
+      const now = () => fixedTime;
 
       // Same user, same IP - should share limit
       const context1 = { userId: `${TEST_PREFIX}-user6`, ip: "192.168.1.1" };
-      await rateLimiter.enforce(rule, context1);
-      await rateLimiter.enforce(rule, context1);
-      await expect(rateLimiter.enforce(rule, context1)).rejects.toThrow("Rate limit exceeded");
+      await rateLimiter.enforce(rule, context1, now);
+      await rateLimiter.enforce(rule, context1, now);
+      await expect(rateLimiter.enforce(rule, context1, now)).rejects.toThrow("Rate limit exceeded");
 
       // Same user, different IP - separate limit
       const context2 = { userId: `${TEST_PREFIX}-user6`, ip: "192.168.1.2" };
-      await expect(rateLimiter.enforce(rule, context2)).resolves.toBeUndefined();
+      await expect(rateLimiter.enforce(rule, context2, now)).resolves.toBeUndefined();
     });
   });
 
@@ -232,16 +244,18 @@ describe("Rate Limiter Integration Tests", () => {
         period: "1m" as const,
       };
       const context = { userId: `${TEST_PREFIX}-user-high` };
+      const fixedTime = Date.now();
+      const now = () => fixedTime;
 
       // Make 5 requests - all should succeed
-      await rateLimiter.enforce(rule, context);
-      await rateLimiter.enforce(rule, context);
-      await rateLimiter.enforce(rule, context);
-      await rateLimiter.enforce(rule, context);
-      await rateLimiter.enforce(rule, context);
+      await rateLimiter.enforce(rule, context, now);
+      await rateLimiter.enforce(rule, context, now);
+      await rateLimiter.enforce(rule, context, now);
+      await rateLimiter.enforce(rule, context, now);
+      await rateLimiter.enforce(rule, context, now);
 
       // 6th should fail
-      await expect(rateLimiter.enforce(rule, context)).rejects.toThrow("Rate limit exceeded");
+      await expect(rateLimiter.enforce(rule, context, now)).rejects.toThrow("Rate limit exceeded");
     });
 
     it("should handle special characters in context values", async () => {
@@ -252,10 +266,12 @@ describe("Rate Limiter Integration Tests", () => {
         period: "1m" as const,
       };
       const context = { email: `${TEST_PREFIX}+test@example.com` };
+      const fixedTime = Date.now();
+      const now = () => fixedTime;
 
-      await expect(rateLimiter.enforce(rule, context)).resolves.toBeUndefined();
-      await expect(rateLimiter.enforce(rule, context)).resolves.toBeUndefined();
-      await expect(rateLimiter.enforce(rule, context)).rejects.toThrow("Rate limit exceeded");
+      await expect(rateLimiter.enforce(rule, context, now)).resolves.toBeUndefined();
+      await expect(rateLimiter.enforce(rule, context, now)).resolves.toBeUndefined();
+      await expect(rateLimiter.enforce(rule, context, now)).rejects.toThrow("Rate limit exceeded");
     });
   });
 

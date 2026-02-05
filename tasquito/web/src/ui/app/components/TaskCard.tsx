@@ -241,6 +241,26 @@ export const TaskCard = ({
             </span>
           )}
         </div>
+        {/* Delete button - in edit mode for non-done tasks, on hover for done tasks */}
+        {!disabled && (isEditMode || isDone) && (
+          <button
+            type="button"
+            onClick={onDelete}
+            class={`p-1 text-neutral-400 dark:text-neutral-500 hover:text-red-500 dark:hover:text-red-400 ${isDone && !isEditMode ? "transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100" : ""}`}
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
+        {/* Edit toggle - hidden when disabled or done, hover-only on desktop when not in edit mode */}
+        {!disabled && !isDone && (
+          <button
+            type="button"
+            onClick={() => setIsEditMode(!isEditMode)}
+            class={`p-1 rounded transition-opacity ${isEditMode ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"}`}
+          >
+            <Pencil size={16} />
+          </button>
+        )}
         {/* Date badge - only show if has date or in edit mode */}
         {(task.dueDate || isEditMode) && (
           <div class="relative">
@@ -268,31 +288,11 @@ export const TaskCard = ({
             />
           </div>
         )}
-        {/* Delete button - in edit mode for non-done tasks, on hover for done tasks */}
-        {!disabled && (isEditMode || isDone) && (
-          <button
-            type="button"
-            onClick={onDelete}
-            class={`p-1 text-neutral-400 dark:text-neutral-500 hover:text-red-500 dark:hover:text-red-400 ${isDone && !isEditMode ? "transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100" : ""}`}
-          >
-            <Trash2 size={18} />
-          </button>
-        )}
-        {/* Edit toggle - hidden when disabled or done, hover-only on desktop when not in edit mode */}
-        {!disabled && !isDone && (
-          <button
-            type="button"
-            onClick={() => setIsEditMode(!isEditMode)}
-            class={`p-1 rounded transition-opacity ${isEditMode ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"}`}
-          >
-            <Pencil size={16} />
-          </button>
-        )}
       </div>
 
       {/* Description - view mode: only show if exists, edit mode: always show */}
       {(isEditMode || task.description) && (
-        <div class="mt-1">
+        <div class="mt-1 pl-7.5">
           <EditableText
             value={task.description ?? ""}
             onSave={onUpdateDescription}
@@ -300,18 +300,18 @@ export const TaskCard = ({
             disabled={disabled}
             multiline
             maxLength={LIMITS.MAX_TASK_DESCRIPTION_LENGTH}
-            textClassName="text-base text-neutral-500 dark:text-neutral-400 line-clamp-2"
+            textClassName="text-base text-neutral-500 dark:text-neutral-400"
           />
         </div>
       )}
 
       {/* Subtasks - Todo */}
       {(todoSubtasks.length > 0 || pendingSubtaskCount > 0) && (
-        <div ref={subtasksContainerRef} class="mt-2 space-y-0.5">
+        <div ref={subtasksContainerRef} class="mt-2 space-y-0.5 pl-8">
           {todoSubtasks.map((subtask) => (
             <div
               key={subtask.id}
-              class={`group/subtask flex items-center gap-2 pl-4 py-0.5 rounded transition-[color,background-color,border-color,box-shadow,opacity] duration-150 ${onSubtaskReorder && !disabled && !isDone ? "cursor-grab active:cursor-grabbing" : ""}`}
+              class={`group/subtask flex items-center gap-2 py-0.5 rounded transition-[color,background-color,border-color,box-shadow,opacity] duration-150 ${onSubtaskReorder && !disabled && !isDone ? "cursor-grab active:cursor-grabbing" : ""}`}
               data-drag-id={subtask.id}
             >
               <Checkbox
@@ -364,9 +364,9 @@ export const TaskCard = ({
             <span>Done ({doneSubtasks.length})</span>
           </button>
           {showDoneSubtasks && (
-            <div ref={doneSubtasksRef} class="mt-1 space-y-0.5">
+            <div ref={doneSubtasksRef} class="mt-1 space-y-0.5 pl-8">
               {doneSubtasks.map((subtask) => (
-                <div key={subtask.id} class="group/subtask flex items-center gap-2 pl-4 py-0.5 rounded">
+                <div key={subtask.id} class="group/subtask flex items-center gap-2 py-0.5 rounded">
                   <Checkbox
                     checked={true}
                     onChange={(checked) => handleSubtaskToggleStatus(subtask.id, checked)}

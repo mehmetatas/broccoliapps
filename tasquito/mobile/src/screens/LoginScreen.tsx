@@ -1,4 +1,5 @@
 import { type AuthExchangeResponse, Login, useAuth, useTheme } from "@broccoliapps/mobile";
+import { setUserFromAuth } from "@broccoliapps/tasquito-shared/client";
 import { StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -7,6 +8,7 @@ export const LoginScreen = () => {
   const { colors, isDark } = useTheme();
 
   const onLoginSuccess = async (result: AuthExchangeResponse) => {
+    setUserFromAuth(result.user);
     await login({
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,

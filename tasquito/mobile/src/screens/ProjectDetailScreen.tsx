@@ -4,23 +4,80 @@ import { LIMITS } from "@broccoliapps/tasquito-shared";
 import { useProject } from "@broccoliapps/tasquito-shared/hooks";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Archive, ArchiveRestore, Trash2 } from "lucide-react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Alert, Animated, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import DraggableFlatList, { type RenderItemParams } from "react-native-draggable-flatlist";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TaskCard } from "../components/TaskCard";
 import { TaskCardSkeleton, TaskListSkeleton } from "../components/TaskCardSkeleton";
-import { TaskForm } from "../components/TaskForm";
+import { type TaskFormData as ModalFormData, TaskDetailModal } from "../components/TaskDetailModal";
+import { type TaskFormData as QuickFormData, TaskForm } from "../components/TaskForm";
 import type { RootStackParamList } from "../navigation/types";
 
 type TaskWithSubtasks = TaskDto & { subtasks: TaskDto[] };
 
 type Props = NativeStackScreenProps<RootStackParamList, "ProjectDetail">;
 
+type AnimatedCellProps = {
+  exiting: boolean;
+  onExitDone: () => void;
+  children: ReactElement;
+};
+
+const AnimatedCell = ({ exiting, onExitDone, children }: AnimatedCellProps) => {
+  const progress = useRef(new Animated.Value(1)).current;
+  const measuredHeight = useRef(0);
+  const [collapsing, setCollapsing] = useState(false);
+
+  useEffect(() => {
+    if (exiting && !collapsing) {
+      setCollapsing(true);
+      Animated.timing(progress, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: false,
+      }).start(({ finished }) => {
+        if (finished) {
+          onExitDone();
+        }
+      });
+    } else if (!exiting && collapsing) {
+      // Reset when no longer exiting (task reappears after status change)
+      setCollapsing(false);
+      progress.setValue(1);
+    }
+  }, [exiting, collapsing, progress, onExitDone]);
+
+  return (
+    <Animated.View
+      onLayout={(e) => {
+        if (!collapsing) {
+          measuredHeight.current = e.nativeEvent.layout.height;
+        }
+      }}
+      style={
+        collapsing
+          ? {
+              height: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, measuredHeight.current],
+              }),
+              opacity: progress,
+              overflow: "hidden" as const,
+            }
+          : undefined
+      }
+    >
+      {children}
+    </Animated.View>
+  );
+};
+
 export const ProjectDetailScreen = ({ navigation, route }: Props) => {
   const { projectId } = route.params;
   const { colors } = useTheme();
-  const [showDone, setShowDone] = useState(false);
+  const [exitingTaskId, setExitingTaskId] = useState<string | null>(null);
+  const pendingToggle = useRef<{ taskId: string; newStatus: "todo" | "done" } | null>(null);
 
   const {
     project,
@@ -32,6 +89,14 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
     pendingTaskCount,
     createTask,
     updateTaskStatus,
+    updateTaskTitle,
+    updateTaskDescription,
+    updateTaskDueDate,
+    updateSubtaskStatus,
+    updateSubtaskTitle,
+    removeSubtask,
+    createSubtask,
+    reorderSubtask,
     removeTask,
     updateName,
     reorderTask,
@@ -45,6 +110,99 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState("");
   const nameInputRef = useRef<TextInput>(null);
+
+  // Modal state
+  const [modalVisible, setModalVisible] = useState(false);
+  const [createInitialTitle, setCreateInitialTitle] = useState("");
+
+  const handleOpenCreate = useCallback((title: string) => {
+    setCreateInitialTitle(title);
+    setModalVisible(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setModalVisible(false);
+    setCreateInitialTitle("");
+  }, []);
+
+  const handleModalSubmit = useCallback(
+    (data: ModalFormData) => {
+      createTask(data);
+    },
+    [createTask],
+  );
+
+  const handleToggleSubtaskOnCard = useCallback(
+    (taskId: string, subtaskId: string) => {
+      const task = tasks.find((t) => t.id === taskId);
+      if (!task) {
+        return;
+      }
+      const subtask = task.subtasks.find((st) => st.id === subtaskId);
+      if (!subtask) {
+        return;
+      }
+      const newStatus = subtask.status === "todo" ? "done" : "todo";
+      updateSubtaskStatus(taskId, subtaskId, newStatus);
+    },
+    [tasks, updateSubtaskStatus],
+  );
+
+  const handleReorderSubtaskOnCard = useCallback(
+    (taskId: string, subtaskId: string, afterId: string | null, beforeId: string | null) => {
+      reorderSubtask(taskId, subtaskId, afterId, beforeId);
+    },
+    [reorderSubtask],
+  );
+
+  const handleUpdateSubtaskTitleOnCard = useCallback(
+    (taskId: string, subtaskId: string, title: string) => {
+      return updateSubtaskTitle(taskId, subtaskId, title);
+    },
+    [updateSubtaskTitle],
+  );
+
+  const handleUpdateTaskTitleOnCard = useCallback(
+    (taskId: string, title: string) => {
+      return updateTaskTitle(taskId, title);
+    },
+    [updateTaskTitle],
+  );
+
+  const handleDeleteSubtaskOnCard = useCallback(
+    (taskId: string, subtaskId: string) => {
+      removeSubtask(taskId, subtaskId);
+    },
+    [removeSubtask],
+  );
+
+  const handleDueDateChangeOnCard = useCallback(
+    (taskId: string, date: string | undefined) => {
+      updateTaskDueDate(taskId, date);
+    },
+    [updateTaskDueDate],
+  );
+
+  const handleCreateSubtaskOnCard = useCallback(
+    (taskId: string, title: string) => {
+      createSubtask(taskId, title);
+    },
+    [createSubtask],
+  );
+
+  const handleUpdateDescriptionOnCard = useCallback(
+    (taskId: string, description: string) => {
+      return updateTaskDescription(taskId, description);
+    },
+    [updateTaskDescription],
+  );
+
+  const handleCreateTask = useCallback(
+    (data: QuickFormData) => {
+      createTask(data);
+    },
+    [createTask],
+  );
 
   const handleNamePress = () => {
     if (isArchived) {
@@ -64,7 +222,6 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
   };
 
   const todoTasks = useMemo(() => tasks.filter((t) => t.status === "todo"), [tasks]);
-
   const doneTasks = useMemo(() => tasks.filter((t) => t.status === "done"), [tasks]);
 
   const daysUntilDeletion = useMemo(() => {
@@ -77,11 +234,24 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
 
   const handleToggleStatus = useCallback(
     (task: TaskWithSubtasks) => {
+      if (pendingToggle.current) {
+        updateTaskStatus(pendingToggle.current.taskId, pendingToggle.current.newStatus);
+        pendingToggle.current = null;
+      }
       const newStatus = task.status === "todo" ? "done" : "todo";
-      updateTaskStatus(task.id, newStatus);
+      pendingToggle.current = { taskId: task.id, newStatus };
+      setExitingTaskId(task.id);
     },
     [updateTaskStatus],
   );
+
+  const handleExitComplete = useCallback(() => {
+    if (pendingToggle.current) {
+      updateTaskStatus(pendingToggle.current.taskId, pendingToggle.current.newStatus);
+      pendingToggle.current = null;
+    }
+    setExitingTaskId(null);
+  }, [updateTaskStatus]);
 
   const handleDragEnd = useCallback(
     ({ data, from, to }: { data: TaskWithSubtasks[]; from: number; to: number }) => {
@@ -98,16 +268,40 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
 
   const renderDraggableItem = useCallback(
     ({ item, drag, isActive }: RenderItemParams<TaskWithSubtasks>) => (
-      <TaskCard
-        task={item}
-        isArchived={isArchived}
-        drag={isArchived ? undefined : drag}
-        isActive={isActive}
-        onToggleStatus={() => handleToggleStatus(item)}
-        onDelete={() => removeTask(item.id)}
-      />
+      <AnimatedCell exiting={exitingTaskId === item.id} onExitDone={handleExitComplete}>
+        <TaskCard
+          task={item}
+          isArchived={isArchived}
+          drag={isArchived ? undefined : drag}
+          isActive={isActive}
+          onToggleStatus={() => handleToggleStatus(item)}
+          onDelete={() => removeTask(item.id)}
+          onToggleSubtask={(subtaskId) => handleToggleSubtaskOnCard(item.id, subtaskId)}
+          onReorderSubtask={(subtaskId, afterId, beforeId) => handleReorderSubtaskOnCard(item.id, subtaskId, afterId, beforeId)}
+          onUpdateSubtaskTitle={(subtaskId, title) => handleUpdateSubtaskTitleOnCard(item.id, subtaskId, title)}
+          onUpdateTaskTitle={(title) => handleUpdateTaskTitleOnCard(item.id, title)}
+          onDeleteSubtask={(subtaskId) => handleDeleteSubtaskOnCard(item.id, subtaskId)}
+          onDueDateChange={(date) => handleDueDateChangeOnCard(item.id, date)}
+          onCreateSubtask={(title) => handleCreateSubtaskOnCard(item.id, title)}
+          onUpdateDescription={(description) => handleUpdateDescriptionOnCard(item.id, description)}
+        />
+      </AnimatedCell>
     ),
-    [isArchived, handleToggleStatus, removeTask],
+    [
+      isArchived,
+      handleToggleStatus,
+      removeTask,
+      exitingTaskId,
+      handleExitComplete,
+      handleToggleSubtaskOnCard,
+      handleReorderSubtaskOnCard,
+      handleUpdateSubtaskTitleOnCard,
+      handleUpdateTaskTitleOnCard,
+      handleDeleteSubtaskOnCard,
+      handleDueDateChangeOnCard,
+      handleCreateSubtaskOnCard,
+      handleUpdateDescriptionOnCard,
+    ],
   );
 
   const handleArchivePress = () => {
@@ -202,7 +396,7 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
       )}
 
       {/* Task form */}
-      {!isArchived && <TaskForm onSubmit={createTask} />}
+      {!isArchived && <TaskForm onSubmit={handleCreateTask} onOpenModal={handleOpenCreate} />}
     </View>
   );
 
@@ -217,33 +411,26 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
         </View>
       )}
 
-      {/* Done section toggle */}
-      {doneTasks.length > 0 && (
-        <View style={styles.doneSection}>
-          <TouchableOpacity style={styles.doneSectionToggle} onPress={() => setShowDone((prev) => !prev)} activeOpacity={0.7}>
-            <Text style={[styles.doneSectionChevron, { color: colors.textMuted }]}>{showDone ? "\u25BE" : "\u25B8"}</Text>
-            <Text style={[styles.doneSectionLabel, { color: colors.textMuted }]}>Done ({doneTasks.length})</Text>
-            <View style={[styles.doneSectionDivider, { backgroundColor: colors.divider }]} />
-          </TouchableOpacity>
-
-          {showDone &&
-            doneTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                isArchived={isArchived}
-                onToggleStatus={() => handleToggleStatus(task)}
-                onDelete={() => removeTask(task.id)}
-              />
-            ))}
-        </View>
-      )}
+      {/* Done tasks */}
+      {doneTasks.map((task) => (
+        <AnimatedCell key={task.id} exiting={exitingTaskId === task.id} onExitDone={handleExitComplete}>
+          <TaskCard
+            task={task}
+            isArchived={isArchived}
+            onToggleStatus={() => handleToggleStatus(task)}
+            onDelete={() => removeTask(task.id)}
+            onToggleSubtask={(subtaskId) => handleToggleSubtaskOnCard(task.id, subtaskId)}
+            onUpdateSubtaskTitle={(subtaskId, title) => handleUpdateSubtaskTitleOnCard(task.id, subtaskId, title)}
+            onUpdateTaskTitle={(title) => handleUpdateTaskTitleOnCard(task.id, title)}
+          />
+        </AnimatedCell>
+      ))}
 
       {/* Empty state */}
       {!isLoading && tasks.length === 0 && pendingTaskCount === 0 && (
         <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No tasks yet</Text>
-          <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>Create your first task to get started.</Text>
+          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>{isArchived ? "No tasks" : "No tasks yet"}</Text>
+          {!isArchived && <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>Create your first task to get started.</Text>}
         </View>
       )}
 
@@ -266,22 +453,29 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
   const ListEmpty = isLoading ? <TaskListSkeleton /> : null;
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={["top"]}>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <DraggableFlatList<TaskWithSubtasks>
-          data={todoTasks}
-          keyExtractor={(item) => item.id}
-          renderItem={renderDraggableItem}
-          onDragEnd={handleDragEnd}
-          ListHeaderComponent={ListHeader}
-          ListEmptyComponent={ListEmpty}
-          ListFooterComponent={ListFooter}
-          contentContainerStyle={styles.list}
-          refreshControl={<RefreshControl refreshing={isLoading && project !== null} onRefresh={refresh} tintColor={colors.activityIndicator} />}
-          keyboardShouldPersistTaps="handled"
-        />
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+    <>
+      <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={["top"]}>
+        <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+          <DraggableFlatList<TaskWithSubtasks>
+            data={todoTasks}
+            extraData={tasks}
+            keyExtractor={(item) => item.id}
+            renderItem={renderDraggableItem}
+            onDragEnd={handleDragEnd}
+            ListHeaderComponent={ListHeader}
+            ListEmptyComponent={ListEmpty}
+            ListFooterComponent={ListFooter}
+            containerStyle={styles.flex}
+            contentContainerStyle={styles.list}
+            refreshControl={<RefreshControl refreshing={isLoading && project !== null} onRefresh={refresh} tintColor={colors.activityIndicator} />}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          />
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+
+      <TaskDetailModal visible={modalVisible} onClose={handleCloseModal} onSubmit={handleModalSubmit} initialTitle={createInitialTitle} />
+    </>
   );
 };
 
@@ -389,28 +583,6 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 14,
     fontFamily: "Nunito-Regular",
-  },
-  doneSection: {
-    marginTop: 8,
-  },
-  doneSectionToggle: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    gap: 8,
-  },
-  doneSectionChevron: {
-    fontSize: 14,
-    width: 16,
-  },
-  doneSectionLabel: {
-    fontSize: 14,
-    fontFamily: "Nunito-SemiBold",
-  },
-  doneSectionDivider: {
-    flex: 1,
-    height: 1,
-    marginLeft: 8,
   },
   emptyContainer: {
     alignItems: "center",
