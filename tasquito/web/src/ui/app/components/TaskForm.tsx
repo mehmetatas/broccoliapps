@@ -116,7 +116,7 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
           <div>
             <textarea
               ref={noteRef}
-              placeholder="Task note"
+              placeholder="Add a note"
               value={note}
               maxLength={LIMITS.MAX_TASK_NOTE_LENGTH}
               onInput={(e) => {
