@@ -58,7 +58,8 @@
       "!**/coverage/**",
       "!**/expense-tracker/**",
       "!**/ema-pulse/**",
-      "!**/vendor/**"
+      "!**/vendor/**",
+      "!**/Pods/**"
     ]
   }
 }
