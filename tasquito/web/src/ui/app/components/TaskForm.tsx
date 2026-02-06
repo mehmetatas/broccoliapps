@@ -5,7 +5,7 @@ import { useRef, useState } from "preact/hooks";
 
 type TaskFormData = {
   title: string;
-  description?: string;
+  note?: string;
   dueDate?: string;
   subtasks?: string[];
 };
@@ -17,7 +17,7 @@ type TaskFormProps = {
 
 export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: TaskFormProps) => {
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [note, setNote] = useState("");
   const [dueDate, setDueDate] = useState<string | undefined>();
   const [subtasks, setSubtasks] = useState<string[]>([]);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
@@ -25,7 +25,7 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const subtaskInputRef = useRef<HTMLInputElement>(null);
-  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const noteRef = useRef<HTMLTextAreaElement>(null);
 
   const adjustTextareaHeight = (textarea: HTMLTextAreaElement) => {
     textarea.style.height = "auto";
@@ -41,7 +41,7 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
     // Submit (fire-and-forget, skeleton shows immediately)
     onSubmit({
       title: title.trim(),
-      description: description.trim() || undefined,
+      note: note.trim() || undefined,
       dueDate,
       subtasks: subtasks.length > 0 ? subtasks : undefined,
     });
@@ -50,13 +50,13 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
     titleInputRef.current?.focus();
     // Reset form (keep expanded state)
     setTitle("");
-    setDescription("");
+    setNote("");
     setDueDate(undefined);
     setSubtasks([]);
     setNewSubtaskTitle("");
     // Reset textarea height
-    if (descriptionRef.current) {
-      descriptionRef.current.style.height = "auto";
+    if (noteRef.current) {
+      noteRef.current.style.height = "auto";
     }
   };
 
@@ -112,21 +112,21 @@ export const TaskForm = ({ onSubmit, placeholder = "What needs to be done?" }: T
       {/* Expanded section: Description, Due Date, Subtasks, Create Button */}
       {isExpanded && (
         <div class="mt-4 space-y-4">
-          {/* Description */}
+          {/* Note */}
           <div>
             <textarea
-              ref={descriptionRef}
-              placeholder="Task description"
-              value={description}
-              maxLength={LIMITS.MAX_TASK_DESCRIPTION_LENGTH}
+              ref={noteRef}
+              placeholder="Task note"
+              value={note}
+              maxLength={LIMITS.MAX_TASK_NOTE_LENGTH}
               onInput={(e) => {
                 const textarea = e.target as HTMLTextAreaElement;
-                setDescription(textarea.value);
+                setNote(textarea.value);
                 adjustTextareaHeight(textarea);
               }}
               class="w-full px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 placeholder-neutral-400 dark:placeholder-neutral-500 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-600 rounded-lg resize-none outline-none focus:border-blue-300 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-300 dark:focus:ring-blue-500 min-h-[80px]"
             />
-            {description.length >= LIMITS.MAX_TASK_DESCRIPTION_LENGTH && <p class="mt-1 text-xs text-neutral-400">Character limit reached</p>}
+            {note.length >= LIMITS.MAX_TASK_NOTE_LENGTH && <p class="mt-1 text-xs text-neutral-400">Character limit reached</p>}
           </div>
 
           {/* Due Date */}

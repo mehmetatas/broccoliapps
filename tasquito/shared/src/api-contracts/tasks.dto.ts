@@ -16,7 +16,7 @@ const projectCountsSchema = v.optional(
 export const postTaskRequest = {
   projectId: v.string(),
   title: v.pipe(v.string(), v.minLength(1), v.maxLength(LIMITS.MAX_TASK_TITLE_LENGTH)),
-  description: v.optional(v.pipe(v.string(), v.maxLength(LIMITS.MAX_TASK_DESCRIPTION_LENGTH))),
+  note: v.optional(v.pipe(v.string(), v.maxLength(LIMITS.MAX_TASK_NOTE_LENGTH))),
   dueDate: v.optional(v.string()),
   status: v.optional(taskStatusSchema),
   subtasks: v.optional(v.array(v.pipe(v.string(), v.minLength(1), v.maxLength(LIMITS.MAX_SUBTASK_TITLE_LENGTH)))),
@@ -79,7 +79,7 @@ export const patchTaskRequest = {
   projectId: v.string(),
   id: v.string(),
   title: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(LIMITS.MAX_TASK_TITLE_LENGTH))),
-  description: v.optional(v.pipe(v.string(), v.maxLength(LIMITS.MAX_TASK_DESCRIPTION_LENGTH))),
+  note: v.optional(v.pipe(v.string(), v.maxLength(LIMITS.MAX_TASK_NOTE_LENGTH))),
   dueDate: v.optional(v.nullable(v.string())), // null to clear
   status: v.optional(taskStatusSchema),
   sortOrder: v.optional(v.string()),

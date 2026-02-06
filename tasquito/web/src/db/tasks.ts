@@ -8,7 +8,7 @@ export type Task = {
   userId: string; // For authorization
   parentId?: string; // If set, this is a subtask
   title: string;
-  description?: string; // Only for parent tasks
+  note?: string; // Only for parent tasks
   dueDate?: string; // YYYY-MM-DD format, only for parent tasks
   status: TaskStatus;
   sortOrder?: string; // Fractional index for ordering (optional for backward compatibility)

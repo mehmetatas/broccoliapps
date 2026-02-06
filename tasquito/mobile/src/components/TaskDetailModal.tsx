@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type TaskFormData = {
   title: string;
-  description?: string;
+  note?: string;
   dueDate?: string;
   subtasks?: string[];
 };
@@ -34,15 +34,15 @@ export const TaskDetailModal = ({ visible, onClose, onSubmit, initialTitle }: Pr
   const insets = useSafeAreaInsets();
 
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [note, setNote] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [subtasks, setSubtasks] = useState<SubtaskItem[]>([]);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempPickerDate, setTempPickerDate] = useState("");
-  const [descriptionKey, setDescriptionKey] = useState(0);
+  const [noteKey, setNoteKey] = useState(0);
 
-  const descriptionInputRef = useRef<TextInput>(null);
+  const noteInputRef = useRef<TextInput>(null);
   const subtaskInputRef = useRef<TextInput>(null);
   const listRef = useRef<FlatList<SubtaskItem>>(null);
   const idCounter = useRef(0);
@@ -51,12 +51,12 @@ export const TaskDetailModal = ({ visible, onClose, onSubmit, initialTitle }: Pr
   useEffect(() => {
     if (visible) {
       setTitle(initialTitle ?? "");
-      setDescription("");
+      setNote("");
       setDueDate("");
       setSubtasks([]);
       setNewSubtaskTitle("");
       setShowDatePicker(false);
-      setDescriptionKey((prev) => prev + 1);
+      setNoteKey((prev) => prev + 1);
     }
   }, [visible, initialTitle]);
 
@@ -70,7 +70,7 @@ export const TaskDetailModal = ({ visible, onClose, onSubmit, initialTitle }: Pr
 
     onSubmit({
       title: trimmedTitle,
-      description: description.trim() || undefined,
+      note: note.trim() || undefined,
       dueDate: dueDate.trim() || undefined,
       subtasks: subtasks.length > 0 ? subtasks.map((s) => s.title) : undefined,
     });
@@ -157,32 +157,8 @@ export const TaskDetailModal = ({ visible, onClose, onSubmit, initialTitle }: Pr
           value={title}
           onChangeText={setTitle}
           maxLength={LIMITS.MAX_TASK_TITLE_LENGTH}
-          returnKeyType="next"
-          onSubmitEditing={() => descriptionInputRef.current?.focus()}
         />
         {title.length >= LIMITS.MAX_TASK_TITLE_LENGTH && <Text style={[styles.limitText, { color: colors.textTertiary }]}>Character limit reached</Text>}
-      </View>
-
-      {/* Description */}
-      <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textMuted }]}>DESCRIPTION</Text>
-        {/* key forces remount to reset internal height state when modal reopens with different content */}
-        <TextInput
-          key={descriptionKey}
-          ref={descriptionInputRef}
-          style={[styles.modalInput, styles.textArea, { backgroundColor: colors.inputBackground, color: colors.inputText, borderColor: colors.border }]}
-          placeholder="Task description"
-          placeholderTextColor={colors.inputPlaceholder}
-          value={description}
-          onChangeText={setDescription}
-          maxLength={LIMITS.MAX_TASK_DESCRIPTION_LENGTH}
-          multiline
-          textAlignVertical="top"
-          scrollEnabled={false}
-        />
-        {description.length >= LIMITS.MAX_TASK_DESCRIPTION_LENGTH && (
-          <Text style={[styles.limitText, { color: colors.textTertiary }]}>Character limit reached</Text>
-        )}
       </View>
 
       {/* Due Date */}
@@ -308,6 +284,26 @@ export const TaskDetailModal = ({ visible, onClose, onSubmit, initialTitle }: Pr
           )}
         </View>
       )}
+
+      {/* Note */}
+      <View style={[styles.field, styles.noteField]}>
+        <Text style={[styles.label, { color: colors.textMuted }]}>NOTE</Text>
+        {/* key forces remount to reset internal height state when modal reopens with different content */}
+        <TextInput
+          key={noteKey}
+          ref={noteInputRef}
+          style={[styles.modalInput, styles.textArea, { backgroundColor: colors.inputBackground, color: colors.inputText, borderColor: colors.border }]}
+          placeholder="Task note"
+          placeholderTextColor={colors.inputPlaceholder}
+          value={note}
+          onChangeText={setNote}
+          maxLength={LIMITS.MAX_TASK_NOTE_LENGTH}
+          multiline
+          textAlignVertical="top"
+          scrollEnabled={false}
+        />
+        {note.length >= LIMITS.MAX_TASK_NOTE_LENGTH && <Text style={[styles.limitText, { color: colors.textTertiary }]}>Character limit reached</Text>}
+      </View>
     </View>
   );
 
@@ -461,5 +457,8 @@ const styles = StyleSheet.create({
   },
   subtaskFooter: {
     paddingTop: 8,
+  },
+  noteField: {
+    marginTop: 20,
   },
 });

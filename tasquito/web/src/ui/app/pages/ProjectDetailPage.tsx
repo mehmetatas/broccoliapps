@@ -30,7 +30,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
     createTask,
     updateTaskStatus,
     updateTaskTitle,
-    updateTaskDescription,
+    updateTaskNote,
     updateTaskDueDate,
     removeTask,
     reorderTask,
@@ -203,7 +203,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
       pendingSubtaskCount={pendingSubtaskCounts.get(task.id) ?? 0}
       onToggleStatus={(status) => updateTaskStatus(task.id, status)}
       onUpdateTitle={(title) => updateTaskTitle(task.id, title)}
-      onUpdateDescription={(desc) => updateTaskDescription(task.id, desc)}
+      onUpdateNote={(note) => updateTaskNote(task.id, note)}
       onUpdateDueDate={(date) => updateTaskDueDate(task.id, date)}
       onDelete={() => handleTaskDelete(task)}
       onSubtaskToggleStatus={(subtaskId, status) => updateSubtaskStatus(task.id, subtaskId, status)}

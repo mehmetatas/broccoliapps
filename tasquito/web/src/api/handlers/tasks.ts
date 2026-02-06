@@ -73,7 +73,7 @@ api.register(postTask, async (req, res, ctx) => {
     projectId: req.projectId,
     id: taskId,
     title: req.title,
-    description: req.description,
+    note: req.note,
     dueDate: req.dueDate,
     status,
     sortOrder,
@@ -211,7 +211,7 @@ api.register(patchTask, async (req, res, ctx) => {
   const updatedTask = {
     ...task,
     ...(req.title !== undefined && { title: req.title }),
-    ...(req.description !== undefined && { description: req.description }),
+    ...(req.note !== undefined && { note: req.note }),
     ...(req.dueDate !== undefined && { dueDate: req.dueDate ?? undefined }),
     ...(req.status !== undefined && { status: req.status }),
     ...(req.sortOrder !== undefined && { sortOrder: req.sortOrder }),

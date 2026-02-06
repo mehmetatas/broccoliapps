@@ -90,7 +90,7 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
     createTask,
     updateTaskStatus,
     updateTaskTitle,
-    updateTaskDescription,
+    updateTaskNote,
     updateTaskDueDate,
     updateSubtaskStatus,
     updateSubtaskTitle,
@@ -190,11 +190,11 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
     [createSubtask],
   );
 
-  const handleUpdateDescriptionOnCard = useCallback(
-    (taskId: string, description: string) => {
-      return updateTaskDescription(taskId, description);
+  const handleUpdateNoteOnCard = useCallback(
+    (taskId: string, note: string) => {
+      return updateTaskNote(taskId, note);
     },
-    [updateTaskDescription],
+    [updateTaskNote],
   );
 
   const handleCreateTask = useCallback(
@@ -283,7 +283,7 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
           onDeleteSubtask={(subtaskId) => handleDeleteSubtaskOnCard(item.id, subtaskId)}
           onDueDateChange={(date) => handleDueDateChangeOnCard(item.id, date)}
           onCreateSubtask={(title) => handleCreateSubtaskOnCard(item.id, title)}
-          onUpdateDescription={(description) => handleUpdateDescriptionOnCard(item.id, description)}
+          onUpdateNote={(note) => handleUpdateNoteOnCard(item.id, note)}
         />
       </AnimatedCell>
     ),
@@ -300,7 +300,7 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
       handleDeleteSubtaskOnCard,
       handleDueDateChangeOnCard,
       handleCreateSubtaskOnCard,
-      handleUpdateDescriptionOnCard,
+      handleUpdateNoteOnCard,
     ],
   );
 

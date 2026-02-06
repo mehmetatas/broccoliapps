@@ -35,7 +35,7 @@ type Props = {
   onDeleteSubtask?: (subtaskId: string) => void;
   onDueDateChange?: (date: string | undefined) => void;
   onCreateSubtask?: (title: string) => void;
-  onUpdateDescription?: (description: string) => Promise<void>;
+  onUpdateNote?: (note: string) => Promise<void>;
 };
 
 const SwipeDeleteAction = ({
@@ -117,7 +117,7 @@ export const TaskCard = ({
   onDeleteSubtask,
   onDueDateChange,
   onCreateSubtask,
-  onUpdateDescription,
+  onUpdateNote,
 }: Props) => {
   const { colors } = useTheme();
   const isDone = task.status === "done";
@@ -142,11 +142,11 @@ export const TaskCard = ({
   const newSubtaskInputRef = useRef<TextInput>(null);
   const prevSubtaskCountRef = useRef(subtaskCount);
 
-  // Description editing state
-  const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const [editingDescription, setEditingDescription] = useState("");
-  const [_isSavingDescription, setIsSavingDescription] = useState(false);
-  const descriptionInputRef = useRef<TextInput>(null);
+  // Note editing state
+  const [isEditingNote, setIsEditingNote] = useState(false);
+  const [editingNote, setEditingNote] = useState("");
+  const [_isSavingNote, setIsSavingNote] = useState(false);
+  const noteInputRef = useRef<TextInput>(null);
 
   // Date picker state
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -155,14 +155,14 @@ export const TaskCard = ({
   // Can edit due date only when: not archived, task not done, and handler is provided
   const canEditDueDate = !isArchived && !isDone && !!onDueDateChange;
 
-  // Can edit description only when: not archived, task not done, and handler is provided
-  const canEditDescription = !isArchived && !isDone && !!onUpdateDescription;
+  // Can edit note only when: not archived, task not done, and handler is provided
+  const canEditNote = !isArchived && !isDone && !!onUpdateNote;
 
   // Can add subtask only when: not archived, task not done, handler is provided, and below limit
   const canAddSubtask = !isArchived && !isDone && !!onCreateSubtask && subtaskCount < LIMITS.MAX_SUBTASKS_PER_TASK;
 
-  // Show "more" menu when task can have date/description/subtask added
-  const canShowMoreMenu = (!task.dueDate && canEditDueDate) || (!task.description && canEditDescription) || canAddSubtask;
+  // Show "more" menu when task can have date/note/subtask added
+  const canShowMoreMenu = (!task.dueDate && canEditDueDate) || (!task.note && canEditNote) || canAddSubtask;
 
   // Clear pending subtask when a new subtask is added to the list
   useEffect(() => {
@@ -172,36 +172,36 @@ export const TaskCard = ({
     prevSubtaskCountRef.current = subtaskCount;
   }, [subtaskCount, pendingSubtaskTitle]);
 
-  const handleDescriptionPress = useCallback(() => {
-    if (!canEditDescription) {
+  const handleNotePress = useCallback(() => {
+    if (!canEditNote) {
       return;
     }
-    setIsEditingDescription(true);
-    setEditingDescription(task.description ?? "");
-    setTimeout(() => descriptionInputRef.current?.focus(), 50);
-  }, [canEditDescription, task.description]);
+    setIsEditingNote(true);
+    setEditingNote(task.note ?? "");
+    setTimeout(() => noteInputRef.current?.focus(), 50);
+  }, [canEditNote, task.note]);
 
-  const handleDescriptionSubmit = useCallback(async () => {
-    if (!isEditingDescription) {
+  const handleNoteSubmit = useCallback(async () => {
+    if (!isEditingNote) {
       return;
     }
-    const trimmed = editingDescription.trim();
-    setIsEditingDescription(false);
-    setEditingDescription("");
+    const trimmed = editingNote.trim();
+    setIsEditingNote(false);
+    setEditingNote("");
 
-    if (trimmed !== (task.description ?? "")) {
-      setIsSavingDescription(true);
+    if (trimmed !== (task.note ?? "")) {
+      setIsSavingNote(true);
       try {
-        await onUpdateDescription?.(trimmed);
+        await onUpdateNote?.(trimmed);
       } finally {
-        setIsSavingDescription(false);
+        setIsSavingNote(false);
       }
     }
-  }, [isEditingDescription, editingDescription, task.description, onUpdateDescription]);
+  }, [isEditingNote, editingNote, task.note, onUpdateNote]);
 
-  const handleDescriptionDiscard = useCallback(() => {
-    setIsEditingDescription(false);
-    setEditingDescription("");
+  const handleNoteDiscard = useCallback(() => {
+    setIsEditingNote(false);
+    setEditingNote("");
   }, []);
 
   const handleDueDatePress = useCallback(() => {
@@ -279,13 +279,13 @@ export const TaskCard = ({
     if (!task.dueDate && canEditDueDate) {
       options.push({ text: "Add Due Date", onPress: () => handleDueDatePress() });
     }
-    if (!task.description && canEditDescription) {
-      options.push({ text: "Add Description", onPress: () => handleDescriptionPress() });
+    if (!task.note && canEditNote) {
+      options.push({ text: "Add Note", onPress: () => handleNotePress() });
     }
     options.push({ text: "Cancel", style: "cancel" });
 
     Alert.alert("", "", options);
-  }, [task.dueDate, task.description, canAddSubtask, canEditDueDate, canEditDescription, handleAddSubtaskPress, handleDueDatePress, handleDescriptionPress]);
+  }, [task.dueDate, task.note, canAddSubtask, canEditDueDate, canEditNote, handleAddSubtaskPress, handleDueDatePress, handleNotePress]);
 
   // Split subtasks: todo (draggable) and done (static, below)
   const todoSubtasks = useMemo(() => [...task.subtasks].filter((s) => s.status === "todo").sort(sortBySortOrder), [task.subtasks]);
@@ -721,36 +721,36 @@ export const TaskCard = ({
             {doneSubtasks.length > 0 && <View style={styles.doneSubtasksContainer}>{doneSubtasks.map((subtask) => renderDoneSubtaskItem(subtask))}</View>}
           </View>
         )}
-        {/* Description */}
-        {(task.description || isEditingDescription) &&
-          (isEditingDescription ? (
-            <View style={styles.descriptionEditContainer}>
+        {/* Note */}
+        {(task.note || isEditingNote) &&
+          (isEditingNote ? (
+            <View style={styles.noteEditContainer}>
               <TextInput
-                ref={descriptionInputRef}
-                style={[styles.descriptionInput, { color: colors.textMuted }]}
-                value={editingDescription}
-                onChangeText={setEditingDescription}
-                placeholder="Add description"
+                ref={noteInputRef}
+                style={[styles.noteInput, { color: colors.textMuted }]}
+                value={editingNote}
+                onChangeText={setEditingNote}
+                placeholder="Add note"
                 placeholderTextColor={colors.textMuted}
                 multiline
                 textAlignVertical="top"
                 scrollEnabled={false}
-                maxLength={LIMITS.MAX_TASK_DESCRIPTION_LENGTH}
+                maxLength={LIMITS.MAX_TASK_NOTE_LENGTH}
                 autoFocus
               />
-              <View style={styles.descriptionActions}>
-                <TouchableOpacity onPress={handleDescriptionDiscard} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <View style={styles.noteActions}>
+                <TouchableOpacity onPress={handleNoteDiscard} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                   <X size={18} color={colors.textMuted} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handleDescriptionSubmit} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <TouchableOpacity onPress={handleNoteSubmit} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                   <Check size={18} color={colors.accent} />
                 </TouchableOpacity>
               </View>
             </View>
           ) : (
-            <TouchableOpacity onPress={handleDescriptionPress} activeOpacity={canEditDescription ? 0.7 : 1}>
-              <Text style={[styles.description, { color: colors.textMuted }]} numberOfLines={3}>
-                {task.description}
+            <TouchableOpacity onPress={handleNotePress} activeOpacity={canEditNote ? 0.7 : 1}>
+              <Text style={[styles.note, { color: colors.textMuted }]} numberOfLines={3}>
+                {task.note}
               </Text>
             </TouchableOpacity>
           ))}
@@ -884,22 +884,22 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito-SemiBold",
     color: "#ffffff",
   },
-  description: {
+  note: {
     fontSize: 15,
     fontFamily: "Nunito-Regular",
     lineHeight: 20,
   },
-  descriptionEditContainer: {
+  noteEditContainer: {
     gap: 8,
   },
-  descriptionInput: {
+  noteInput: {
     fontSize: 15,
     fontFamily: "Nunito-Regular",
     lineHeight: 20,
     padding: 0,
     margin: 0,
   },
-  descriptionActions: {
+  noteActions: {
     flexDirection: "row",
     justifyContent: "flex-end",
     gap: 16,

@@ -72,7 +72,7 @@ export const getTask = async (projectId: string, id: string): Promise<{ task: Ta
 export const postTask = async (data: {
   projectId: string;
   title: string;
-  description?: string;
+  note?: string;
   dueDate?: string;
   status?: "todo" | "done";
   subtasks?: string[];

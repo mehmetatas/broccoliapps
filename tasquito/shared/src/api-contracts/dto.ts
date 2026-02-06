@@ -14,7 +14,7 @@ export const taskDto = {
   projectId: v.string(),
   parentId: v.optional(v.string()),
   title: v.string(),
-  description: v.optional(v.string()),
+  note: v.optional(v.string()),
   dueDate: v.optional(v.string()),
   status: taskStatusSchema,
   sortOrder: v.string(),

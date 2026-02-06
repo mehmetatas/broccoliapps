@@ -13,7 +13,7 @@ type TaskCardProps = {
   task: TaskWithSubtasks;
   onToggleStatus: (status: TaskStatus) => Promise<void> | void;
   onUpdateTitle: (title: string) => void;
-  onUpdateDescription: (description: string) => void;
+  onUpdateNote: (note: string) => void;
   onUpdateDueDate: (dueDate: string | undefined) => void;
   onDelete: () => void;
   onSubtaskToggleStatus: (subtaskId: string, status: TaskStatus) => Promise<void> | void;
@@ -40,7 +40,7 @@ export const TaskCard = ({
   task,
   onToggleStatus,
   onUpdateTitle,
-  onUpdateDescription,
+  onUpdateNote,
   onUpdateDueDate,
   onDelete,
   onSubtaskToggleStatus,
@@ -290,16 +290,16 @@ export const TaskCard = ({
         )}
       </div>
 
-      {/* Description - view mode: only show if exists, edit mode: always show */}
-      {(isEditMode || task.description) && (
+      {/* Note - view mode: only show if exists, edit mode: always show */}
+      {(isEditMode || task.note) && (
         <div class="mt-1 pl-7.5">
           <EditableText
-            value={task.description ?? ""}
-            onSave={onUpdateDescription}
-            placeholder={isEditMode ? "Add description..." : undefined}
+            value={task.note ?? ""}
+            onSave={onUpdateNote}
+            placeholder={isEditMode ? "Add note..." : undefined}
             disabled={disabled}
             multiline
-            maxLength={LIMITS.MAX_TASK_DESCRIPTION_LENGTH}
+            maxLength={LIMITS.MAX_TASK_NOTE_LENGTH}
             textClassName="text-base text-neutral-500 dark:text-neutral-400"
           />
         </div>

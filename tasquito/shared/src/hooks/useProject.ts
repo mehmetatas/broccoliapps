@@ -9,7 +9,7 @@ type TaskCreateQueueItem = {
   type: "create";
   projectId: string;
   title: string;
-  description?: string;
+  note?: string;
   dueDate?: string;
   subtasks?: string[];
 };
@@ -143,7 +143,7 @@ export const useProject = (id: string) => {
       postTask({
         projectId: item.projectId,
         title: item.title,
-        description: item.description,
+        note: item.note,
         dueDate: item.dueDate,
         subtasks: item.subtasks,
       })
@@ -209,7 +209,7 @@ export const useProject = (id: string) => {
   };
 
   // Task actions
-  const createTask = (data: { title: string; description?: string; dueDate?: string; subtasks?: string[] }) => {
+  const createTask = (data: { title: string; note?: string; dueDate?: string; subtasks?: string[] }) => {
     if (!project) {
       return;
     }
@@ -220,7 +220,7 @@ export const useProject = (id: string) => {
       type: "create",
       projectId: project.id,
       title: data.title,
-      description: data.description,
+      note: data.note,
       dueDate: data.dueDate,
       subtasks: data.subtasks,
     });
@@ -277,18 +277,18 @@ export const useProject = (id: string) => {
     });
   };
 
-  const updateTaskDescription = async (taskId: string, description: string) => {
+  const updateTaskNote = async (taskId: string, note: string) => {
     if (!project) {
       return;
     }
-    await patchTask({ projectId: project.id, id: taskId, description });
+    await patchTask({ projectId: project.id, id: taskId, note });
     setProject((prev) => {
       if (!prev) {
         return null;
       }
       return {
         ...prev,
-        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, description } : t)),
+        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, note } : t)),
       };
     });
   };
@@ -675,7 +675,7 @@ export const useProject = (id: string) => {
     createTask,
     updateTaskStatus,
     updateTaskTitle,
-    updateTaskDescription,
+    updateTaskNote,
     updateTaskDueDate,
     removeTask,
     reorderTask,

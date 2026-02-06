@@ -6,7 +6,7 @@ import { Keyboard, StyleSheet, TextInput, TouchableOpacity, View } from "react-n
 
 export type TaskFormData = {
   title: string;
-  description?: string;
+  note?: string;
   dueDate?: string;
   subtasks?: string[];
 };
