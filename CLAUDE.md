@@ -125,8 +125,14 @@ npm run deploy:tasquito:web
 - **Valibot schemas:** `*.dto.ts` (`projects.dto.ts`, `auth.dto.ts`)
 - **API contracts:** Separate `*.ts` (endpoints) and `*.dto.ts` (schemas) in `api-contracts/`
 
+## Rules
+
+- **NEVER run install/deploy commands** for mobile apps (e.g. `android:install:release`, `react-native run-android`, `react-native run-ios`). These overwrite the version currently on the device. Only the user installs apps on devices.
+- **NEVER run deploy commands** for web apps (e.g. `deploy:nwm`, `deploy:tasquito`). These overwrite the version currently in production. Only the user deploys web app/backend to AWS.
+- **NEVER execute AWS CLI write commands** You may run aws cli read commands using `--profile appi --region us-west-2` when you need to check AWS resources.
+
 ## Environment
 
 - **Node.js:** >=22
 - **Package manager:** npm (workspaces)
-- **AWS profile:** `appi` for deployments
+- **AWS profile:** `appi` for AWS Commands

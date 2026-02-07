@@ -1,20 +1,11 @@
 import { random } from "@broccoliapps/shared";
 import { generateKeyBetween } from "fractional-indexing";
 import { projects } from "./projects";
-import { tasks } from "./tasks";
+import { Task, tasks } from "./tasks";
 
 export const initializeNewUser = async (userId: string): Promise<void> => {
   const now = Date.now();
   const projectId = random.id();
-
-  // Create active tutorial project
-  await projects.put({
-    userId,
-    id: projectId,
-    name: "Learn to use Tasquito",
-    createdAt: now,
-    updatedAt: now,
-  });
 
   // Create tasks with subtasks using generateKeyBetween for sortOrder
   const templateTasks = [
@@ -40,12 +31,14 @@ export const initializeNewUser = async (userId: string): Promise<void> => {
     },
   ];
 
+  const taskList: Task[] = [];
+
   let prevTaskOrder: string | null = null;
   for (const template of templateTasks) {
     const taskId = random.id();
     const taskOrder = generateKeyBetween(prevTaskOrder, null);
 
-    await tasks.put({
+    taskList.push({
       userId,
       projectId,
       id: taskId,
@@ -59,7 +52,7 @@ export const initializeNewUser = async (userId: string): Promise<void> => {
     let prevSubtaskOrder: string | null = null;
     for (const subtaskTitle of template.subtasks) {
       const subtaskOrder = generateKeyBetween(prevSubtaskOrder, null);
-      await tasks.put({
+      taskList.push({
         userId,
         projectId,
         id: random.id(),
@@ -74,4 +67,17 @@ export const initializeNewUser = async (userId: string): Promise<void> => {
     }
     prevTaskOrder = taskOrder;
   }
+
+  await Promise.all([
+    projects.put({
+      userId,
+      id: projectId,
+      name: "Learn to use Tasquito",
+      openTaskCount: 4,
+      totalTaskCount: 4,
+      createdAt: now,
+      updatedAt: now,
+    }),
+    tasks.batchPut(taskList),
+  ]);
 };

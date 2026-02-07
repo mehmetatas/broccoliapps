@@ -3,7 +3,7 @@ import type { TaskDto } from "@broccoliapps/tasquito-shared";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
 import { useProject } from "@broccoliapps/tasquito-shared/hooks";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Archive, ArchiveRestore, Trash2 } from "lucide-react-native";
+import { Archive, ArchiveRestore, ChevronLeft, Trash2 } from "lucide-react-native";
 import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Animated, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import DraggableFlatList, { type RenderItemParams } from "react-native-draggable-flatlist";
@@ -342,7 +342,7 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
       {/* Header bar */}
       <View style={styles.headerBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Text style={[styles.backButton, { color: colors.accent }]}>{"\u2190"}</Text>
+          <ChevronLeft size={28} color={colors.textPrimary} />
         </TouchableOpacity>
         {isEditingName ? (
           <TextInput
@@ -455,7 +455,7 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
 
   return (
     <>
-      <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={["top"]}>
+      <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={Platform.OS === "android" ? ["top", "bottom"] : ["top"]}>
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <DraggableFlatList<TaskWithSubtasks>
             data={todoTasks}
@@ -500,10 +500,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-  },
-  backButton: {
-    fontSize: 24,
-    fontWeight: "600",
   },
   projectNameButton: {
     flex: 1,

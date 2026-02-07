@@ -1,9 +1,9 @@
-import { useTheme } from "@broccoliapps/mobile";
+import { BottomModal, useTheme } from "@broccoliapps/mobile";
 import { LIMITS, type TaskDto } from "@broccoliapps/tasquito-shared";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Check, Circle, CircleCheck, Loader2, MoreHorizontal, Trash2, X } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Keyboard, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Keyboard, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import DraggableFlatList, { type RenderItemParams } from "react-native-draggable-flatlist";
 import ReanimatedSwipeable, { type SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
@@ -152,6 +152,10 @@ export const TaskCard = ({
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempDate, setTempDate] = useState<string | undefined>(undefined);
 
+  // Bottom modal menu state
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showDueDateMenu, setShowDueDateMenu] = useState(false);
+
   // Can edit due date only when: not archived, task not done, and handler is provided
   const canEditDueDate = !isArchived && !isDone && !!onDueDateChange;
 
@@ -209,24 +213,20 @@ export const TaskCard = ({
       return;
     }
     if (Platform.OS === "android") {
-      // On Android, show an alert with options since native picker doesn't support clearing
-      Alert.alert("Due Date", undefined, [
-        { text: "Cancel", style: "cancel" },
-        { text: "Remove Date", style: "destructive", onPress: () => onDueDateChange?.(undefined) },
-        {
-          text: "Change Date",
-          onPress: () => {
-            setTempDate(task.dueDate ?? undefined);
-            setShowDatePicker(true);
-          },
-        },
-      ]);
+      if (task.dueDate) {
+        // Existing date: show options to change or remove
+        setShowDueDateMenu(true);
+      } else {
+        // No existing date: open picker directly
+        setTempDate(undefined);
+        setShowDatePicker(true);
+      }
     } else {
       // Initialize to task's due date, or today if none (fallback)
       setTempDate(task.dueDate ?? new Date().toISOString().split("T")[0]);
       setShowDatePicker(true);
     }
-  }, [canEditDueDate, task.dueDate, onDueDateChange]);
+  }, [canEditDueDate, task.dueDate]);
 
   const handleDateChange = useCallback(
     (date: Date | undefined) => {
@@ -272,20 +272,8 @@ export const TaskCard = ({
   }, [canAddSubtask, isAddingSubtask]);
 
   const handleMoreMenuPress = useCallback(() => {
-    const options: { text: string; onPress?: () => void; style?: "cancel" | "destructive" | "default" }[] = [];
-    if (canAddSubtask) {
-      options.push({ text: "Add Subtask", onPress: () => handleAddSubtaskPress() });
-    }
-    if (!task.dueDate && canEditDueDate) {
-      options.push({ text: "Add Due Date", onPress: () => handleDueDatePress() });
-    }
-    if (!task.note && canEditNote) {
-      options.push({ text: "Add Note", onPress: () => handleNotePress() });
-    }
-    options.push({ text: "Cancel", style: "cancel" });
-
-    Alert.alert("", "", options);
-  }, [task.dueDate, task.note, canAddSubtask, canEditDueDate, canEditNote, handleAddSubtaskPress, handleDueDatePress, handleNotePress]);
+    setShowMoreMenu(true);
+  }, []);
 
   // Split subtasks: todo (draggable) and done (static, below)
   const todoSubtasks = useMemo(() => [...task.subtasks].filter((s) => s.status === "todo").sort(sortBySortOrder), [task.subtasks]);
@@ -403,9 +391,12 @@ export const TaskCard = ({
           ]}
         >
           {isSaving ? (
-            <SpinningLoader size={18} color={colors.textMuted} />
+            <View style={styles.subtaskIcon}>
+              <SpinningLoader size={18} color={colors.textMuted} />
+            </View>
           ) : (
             <TouchableOpacity
+              style={styles.subtaskIcon}
               onPress={(e) => {
                 e.stopPropagation();
                 onToggleSubtask?.(subtask.id);
@@ -452,9 +443,7 @@ export const TaskCard = ({
               delayLongPress={150}
               activeOpacity={canEditSubtaskTitle ? 0.7 : 1}
             >
-              <Text style={[styles.subtaskPreviewText, { color: colors.textSecondary }]} numberOfLines={1}>
-                {subtask.title}
-              </Text>
+              <Text style={[styles.subtaskPreviewText, { color: colors.textSecondary }]}>{subtask.title}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -512,9 +501,12 @@ export const TaskCard = ({
       const subtaskContent = (
         <View style={styles.subtaskPreviewRow}>
           {isSaving ? (
-            <SpinningLoader size={18} color={colors.textMuted} />
+            <View style={styles.subtaskIcon}>
+              <SpinningLoader size={18} color={colors.textMuted} />
+            </View>
           ) : (
             <TouchableOpacity
+              style={styles.subtaskIcon}
               onPress={(e) => {
                 e.stopPropagation();
                 onToggleSubtask?.(subtask.id);
@@ -539,9 +531,7 @@ export const TaskCard = ({
             />
           ) : (
             <TouchableOpacity style={styles.subtaskTextTouchable} onPress={() => handleSubtaskTitlePress(subtask)} activeOpacity={1}>
-              <Text style={[styles.subtaskPreviewText, { color: colors.textMuted }, styles.subtaskPreviewTextDone]} numberOfLines={1}>
-                {subtask.title}
-              </Text>
+              <Text style={[styles.subtaskPreviewText, { color: colors.textMuted }, styles.subtaskPreviewTextDone]}>{subtask.title}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -810,11 +800,84 @@ export const TaskCard = ({
     </>
   );
 
+  const moreMenuModal = (
+    <BottomModal visible={showMoreMenu} onClose={() => setShowMoreMenu(false)}>
+      <View style={styles.menuContainer}>
+        {canAddSubtask && (
+          <TouchableOpacity
+            style={[styles.menuItem, { borderBottomColor: colors.divider }]}
+            onPress={() => {
+              setShowMoreMenu(false);
+              handleAddSubtaskPress();
+            }}
+            activeOpacity={0.6}
+          >
+            <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Add Subtask</Text>
+          </TouchableOpacity>
+        )}
+        {!task.dueDate && canEditDueDate && (
+          <TouchableOpacity
+            style={[styles.menuItem, { borderBottomColor: colors.divider }]}
+            onPress={() => {
+              setShowMoreMenu(false);
+              handleDueDatePress();
+            }}
+            activeOpacity={0.6}
+          >
+            <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Add Due Date</Text>
+          </TouchableOpacity>
+        )}
+        {!task.note && canEditNote && (
+          <TouchableOpacity
+            style={[styles.menuItem, { borderBottomColor: colors.divider }]}
+            onPress={() => {
+              setShowMoreMenu(false);
+              handleNotePress();
+            }}
+            activeOpacity={0.6}
+          >
+            <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Add Note</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </BottomModal>
+  );
+
+  const dueDateMenuModal = (
+    <BottomModal visible={showDueDateMenu} onClose={() => setShowDueDateMenu(false)}>
+      <View style={styles.menuContainer}>
+        <TouchableOpacity
+          style={[styles.menuItem, { borderBottomColor: colors.divider }]}
+          onPress={() => {
+            setShowDueDateMenu(false);
+            setTempDate(task.dueDate ?? undefined);
+            setShowDatePicker(true);
+          }}
+          activeOpacity={0.6}
+        >
+          <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Change Date</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.menuItem, { borderBottomColor: colors.divider }]}
+          onPress={() => {
+            setShowDueDateMenu(false);
+            onDueDateChange?.(undefined);
+          }}
+          activeOpacity={0.6}
+        >
+          <Text style={[styles.menuItemText, styles.menuItemTextDestructive]}>Remove Date</Text>
+        </TouchableOpacity>
+      </View>
+    </BottomModal>
+  );
+
   if (isArchived) {
     return (
       <>
         {cardContent}
         {datePickerModal}
+        {moreMenuModal}
+        {dueDateMenuModal}
       </>
     );
   }
@@ -831,6 +894,8 @@ export const TaskCard = ({
         {cardContent}
       </ReanimatedSwipeable>
       {datePickerModal}
+      {moreMenuModal}
+      {dueDateMenuModal}
     </>
   );
 };
@@ -863,7 +928,7 @@ const styles = StyleSheet.create({
   },
   titleRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: 8,
   },
   titleWithDate: {
@@ -913,9 +978,12 @@ const styles = StyleSheet.create({
   },
   subtaskPreviewRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: 8,
     paddingVertical: 4,
+  },
+  subtaskIcon: {
+    marginTop: 2,
   },
   subtaskPreviewText: {
     fontSize: 14,
@@ -1015,5 +1083,20 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito-Regular",
     padding: 0,
     margin: 0,
+  },
+  menuContainer: {
+    paddingBottom: 16,
+  },
+  menuItem: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  menuItemText: {
+    fontSize: 17,
+    fontFamily: "Nunito-Regular",
+  },
+  menuItemTextDestructive: {
+    color: "#e53e3e",
   },
 });
