@@ -57,7 +57,7 @@ export const ProjectForm = ({ onSubmit }: Props) => {
       >
         <TextInput
           style={[styles.input, { color: colors.inputText }]}
-          placeholder="New project name"
+          placeholder="New project"
           placeholderTextColor={colors.inputPlaceholder}
           value={name}
           onChangeText={(text) => {

@@ -10,8 +10,7 @@ import DraggableFlatList, { type RenderItemParams } from "react-native-draggable
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TaskCard } from "../components/TaskCard";
 import { TaskCardSkeleton, TaskListSkeleton } from "../components/TaskCardSkeleton";
-import { type TaskFormData as ModalFormData, TaskDetailModal } from "../components/TaskDetailModal";
-import { type TaskFormData as QuickFormData, TaskForm } from "../components/TaskForm";
+import { TaskForm, type TaskFormData } from "../components/TaskForm";
 import type { RootStackParamList } from "../navigation/types";
 
 type TaskWithSubtasks = TaskDto & { subtasks: TaskDto[] };
@@ -111,27 +110,6 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
   const [editedName, setEditedName] = useState("");
   const nameInputRef = useRef<TextInput>(null);
 
-  // Modal state
-  const [modalVisible, setModalVisible] = useState(false);
-  const [createInitialTitle, setCreateInitialTitle] = useState("");
-
-  const handleOpenCreate = useCallback((title: string) => {
-    setCreateInitialTitle(title);
-    setModalVisible(true);
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setModalVisible(false);
-    setCreateInitialTitle("");
-  }, []);
-
-  const handleModalSubmit = useCallback(
-    (data: ModalFormData) => {
-      createTask(data);
-    },
-    [createTask],
-  );
-
   const handleToggleSubtaskOnCard = useCallback(
     (taskId: string, subtaskId: string) => {
       const task = tasks.find((t) => t.id === taskId);
@@ -198,7 +176,7 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
   );
 
   const handleCreateTask = useCallback(
-    (data: QuickFormData) => {
+    (data: TaskFormData) => {
       createTask(data);
     },
     [createTask],
@@ -349,22 +327,26 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
             ref={nameInputRef}
             style={[styles.projectName, styles.projectNameInput, { color: colors.textPrimary }]}
             value={editedName}
-            onChangeText={setEditedName}
-            onSubmitEditing={handleNameSubmit}
+            onChangeText={(text) => setEditedName(text.replace(/\n/g, " "))}
+            onKeyPress={(e) => {
+              if (e.nativeEvent.key === "Enter") {
+                e.preventDefault?.();
+                handleNameSubmit();
+              }
+            }}
             onBlur={handleNameSubmit}
-            returnKeyType="done"
+            multiline
+            submitBehavior="blurAndSubmit"
             maxLength={LIMITS.MAX_PROJECT_NAME_LENGTH}
             selectTextOnFocus
           />
         ) : (
           <TouchableOpacity style={styles.projectNameButton} onPress={handleNamePress} activeOpacity={isArchived ? 1 : 0.7}>
-            <Text style={[styles.projectName, { color: colors.textPrimary }]} numberOfLines={1}>
-              {project?.name ?? ""}
-            </Text>
+            <Text style={[styles.projectName, { color: colors.textPrimary }]}>{project?.name ?? ""}</Text>
           </TouchableOpacity>
         )}
         {!isArchived && (
-          <TouchableOpacity onPress={handleArchivePress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <TouchableOpacity onPress={handleArchivePress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={{ marginTop: 1 }}>
             <Archive size={22} color={colors.textMuted} />
           </TouchableOpacity>
         )}
@@ -397,7 +379,7 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
       )}
 
       {/* Task form */}
-      {!isArchived && <TaskForm onSubmit={handleCreateTask} onOpenModal={handleOpenCreate} />}
+      {!isArchived && <TaskForm onSubmit={handleCreateTask} />}
     </View>
   );
 
@@ -474,8 +456,6 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
           />
         </KeyboardAvoidingView>
       </SafeAreaView>
-
-      <TaskDetailModal visible={modalVisible} onClose={handleCloseModal} onSubmit={handleModalSubmit} initialTitle={createInitialTitle} />
     </>
   );
 };
@@ -498,7 +478,7 @@ const styles = StyleSheet.create({
   },
   headerBar: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: 12,
   },
   projectNameButton: {

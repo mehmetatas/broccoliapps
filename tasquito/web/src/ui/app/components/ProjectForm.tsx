@@ -36,7 +36,7 @@ export const ProjectForm = ({ onSubmit }: ProjectFormProps) => {
       <div class="flex-1">
         <Input
           type="text"
-          placeholder="New project name"
+          placeholder="New project"
           value={name}
           maxLength={LIMITS.MAX_PROJECT_NAME_LENGTH}
           onInput={(e) => {

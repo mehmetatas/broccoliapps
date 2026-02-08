@@ -421,10 +421,16 @@ export const TaskCard = ({
               ref={editingTitleRef}
               style={[styles.subtaskPreviewText, styles.subtaskTextInput, { color: colors.textSecondary }]}
               value={editingTitle}
-              onChangeText={setEditingTitle}
-              onSubmitEditing={handleSubtaskTitleSubmit}
+              onChangeText={(text) => setEditingTitle(text.replace(/\n/g, " "))}
+              onKeyPress={(e) => {
+                if (e.nativeEvent.key === "Enter") {
+                  e.preventDefault?.();
+                  handleSubtaskTitleSubmit();
+                }
+              }}
               onBlur={handleSubtaskTitleSubmit}
-              returnKeyType="done"
+              multiline
+              submitBehavior="blurAndSubmit"
               maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
               autoFocus
             />
@@ -522,10 +528,16 @@ export const TaskCard = ({
               ref={editingTitleRef}
               style={[styles.subtaskPreviewText, styles.subtaskTextInput, { color: colors.textSecondary }]}
               value={editingTitle}
-              onChangeText={setEditingTitle}
-              onSubmitEditing={handleSubtaskTitleSubmit}
+              onChangeText={(text) => setEditingTitle(text.replace(/\n/g, " "))}
+              onKeyPress={(e) => {
+                if (e.nativeEvent.key === "Enter") {
+                  e.preventDefault?.();
+                  handleSubtaskTitleSubmit();
+                }
+              }}
               onBlur={handleSubtaskTitleSubmit}
-              returnKeyType="done"
+              multiline
+              submitBehavior="blurAndSubmit"
               maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
               autoFocus
             />
@@ -620,18 +632,22 @@ export const TaskCard = ({
                 ref={taskTitleInputRef}
                 style={[styles.title, styles.titleInput, { color: colors.textPrimary }]}
                 value={editingTaskTitle}
-                onChangeText={setEditingTaskTitle}
-                onSubmitEditing={handleTaskTitleSubmit}
+                onChangeText={(text) => setEditingTaskTitle(text.replace(/\n/g, " "))}
+                onKeyPress={(e) => {
+                  if (e.nativeEvent.key === "Enter") {
+                    e.preventDefault?.();
+                    handleTaskTitleSubmit();
+                  }
+                }}
                 onBlur={handleTaskTitleSubmit}
-                returnKeyType="done"
+                multiline
+                submitBehavior="blurAndSubmit"
                 maxLength={LIMITS.MAX_TASK_TITLE_LENGTH}
                 autoFocus
               />
             ) : (
               <TouchableOpacity onPress={handleTaskTitlePress} activeOpacity={canEditTaskTitle ? 0.7 : 1} style={styles.titleTouchable}>
-                <Text style={[styles.title, { color: isDone ? colors.textMuted : colors.textPrimary }, isDone && styles.titleDone]} numberOfLines={2}>
-                  {task.title}
-                </Text>
+                <Text style={[styles.title, { color: isDone ? colors.textMuted : colors.textPrimary }, isDone && styles.titleDone]}>{task.title}</Text>
               </TouchableOpacity>
             )}
             {task.dueDate && (
@@ -739,9 +755,7 @@ export const TaskCard = ({
             </View>
           ) : (
             <TouchableOpacity onPress={handleNotePress} activeOpacity={canEditNote ? 0.7 : 1}>
-              <Text style={[styles.note, { color: colors.textMuted }]} numberOfLines={3}>
-                {task.note}
-              </Text>
+              <Text style={[styles.note, { color: colors.textMuted }]}>{task.note}</Text>
             </TouchableOpacity>
           ))}
       </View>
