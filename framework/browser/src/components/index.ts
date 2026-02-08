@@ -6,6 +6,7 @@ export { Checkbox } from "./Checkbox";
 export { DatePicker } from "./DatePicker";
 export { DeleteConfirmModal } from "./DeleteConfirmModal";
 export { DropdownButton } from "./DropdownButton";
+export { DropdownMenu } from "./DropdownMenu";
 export { EditableText } from "./EditableText";
 export { EmptyState } from "./EmptyState";
 export { FilterPills } from "./FilterPills";

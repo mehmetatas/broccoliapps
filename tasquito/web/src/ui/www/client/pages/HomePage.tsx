@@ -1,6 +1,6 @@
 import { AuthCard, BottomSheet, cache } from "@broccoliapps/browser";
+import { CACHE_KEYS } from "@broccoliapps/tasquito-shared";
 import { useEffect, useState } from "preact/hooks";
-import * as client from "../../../app/api";
 
 const ACCENT = {
   badge: "bg-emerald-100",
@@ -15,7 +15,7 @@ export const HomePage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const refreshToken = cache.get<string>(client.CACHE_KEYS.refreshToken);
+    const refreshToken = cache.get<string>(CACHE_KEYS.refreshToken);
     setIsAuthenticated(!!refreshToken);
   }, []);
 

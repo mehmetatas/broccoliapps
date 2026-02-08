@@ -1,12 +1,12 @@
 import { AuthCallback as AuthCallbackBase } from "@broccoliapps/browser";
+import { setUserFromAuth } from "@broccoliapps/tasquito-shared";
 import { route } from "preact-router";
-import * as client from "../api";
 
 export const AuthCallback = () => {
   return (
     <AuthCallbackBase
       onSuccess={(response) => {
-        client.setUserFromAuth(response.user);
+        setUserFromAuth(response.user);
         route("/app");
       }}
     />
