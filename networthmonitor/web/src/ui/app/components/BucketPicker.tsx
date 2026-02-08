@@ -1,7 +1,7 @@
 import type { BucketDto } from "@broccoliapps/nwm-shared";
 import { Check, Loader2, Plus } from "lucide-preact";
 import { useEffect, useState } from "preact/hooks";
-import { getBuckets, postBucket } from "../api";
+import * as client from "../api";
 import { AppLink } from "../SpaApp";
 
 type BucketPickerProps = {
@@ -32,7 +32,7 @@ export const BucketPicker = ({
     }
     const fetchBuckets = async () => {
       try {
-        const { buckets: result } = await getBuckets();
+        const { buckets: result } = await client.getBuckets();
         setBuckets(result);
       } catch (err) {
         console.error("Failed to load buckets:", err);
@@ -60,7 +60,7 @@ export const BucketPicker = ({
 
     setCreatingBucket(true);
     try {
-      const { bucket } = await postBucket({ name: newBucketName.trim() });
+      const { bucket } = await client.postBucket({ name: newBucketName.trim() });
       const newBuckets = [...buckets, bucket];
       setBuckets(newBuckets);
       onBucketsChange?.(newBuckets);

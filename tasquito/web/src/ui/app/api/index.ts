@@ -1,2 +1,2 @@
 export { signOut } from "@broccoliapps/browser";
-export * from "@broccoliapps/tasquito-shared/client";
+export * from "@broccoliapps/tasquito-shared";

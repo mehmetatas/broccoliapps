@@ -2,11 +2,11 @@ import { useClickOutside } from "@broccoliapps/browser";
 import type { AccountDto, UserDto } from "@broccoliapps/nwm-shared";
 import { Bell } from "lucide-preact";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import { getDashboard, getUser, getUserSync } from "../api";
+import * as client from "../api";
 import { hasMissedUpdate } from "../utils/dateUtils";
 
 export const Header = () => {
-  const [user, setUser] = useState<UserDto | undefined>(getUserSync());
+  const [user, setUser] = useState<UserDto | undefined>(client.getUserSync());
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [accountsNeedingUpdate, setAccountsNeedingUpdate] = useState<AccountDto[]>([]);
@@ -21,7 +21,8 @@ export const Header = () => {
   useEffect(() => {
     // Fetch user if not in cache
     if (!user) {
-      getUser()
+      client
+        .getUser()
         .then(setUser)
         .catch(() => {});
     }
@@ -31,7 +32,7 @@ export const Header = () => {
     if (!user) {
       return;
     }
-    getDashboard().then((data) => {
+    client.getDashboard().then((data) => {
       const needsUpdate = data.accounts.filter((account) => !account.archivedAt && hasMissedUpdate(account.nextUpdate));
       setAccountsNeedingUpdate(needsUpdate);
     });

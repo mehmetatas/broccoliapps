@@ -1,6 +1,6 @@
 import { preferences } from "@broccoliapps/browser";
 import { getCurrencySymbol } from "@broccoliapps/nwm-shared";
-import { getAggregatedRates } from "../api";
+import * as client from "../api";
 import { convertValue } from "../utils/currencyConversion";
 import { getCurrentMonth } from "../utils/dateUtils";
 
@@ -36,7 +36,7 @@ const sizeClasses = {
 export const MoneyDisplay = ({ amount, currency, convert = false, size = "md", showSign = false, toggler = false, onToggle }: MoneyDisplayProps) => {
   const classes = sizeClasses[size];
   const targetCurrency = (preferences.getAllSync()?.targetCurrency as string) || "USD";
-  const exchangeRates = getAggregatedRates();
+  const exchangeRates = client.getAggregatedRates();
 
   const canToggle = toggler && currency !== targetCurrency && exchangeRates;
   const shouldConvert = convert && currency !== targetCurrency && exchangeRates;

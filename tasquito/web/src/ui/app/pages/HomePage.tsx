@@ -1,6 +1,5 @@
 import { FilterPills, IconButton, Spinner } from "@broccoliapps/browser";
-import type { ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
-import { useProjects } from "@broccoliapps/tasquito-shared/hooks";
+import { type ProjectSummaryDto, useProjects } from "@broccoliapps/tasquito-shared";
 import { Archive, Check, Clock, Loader, RefreshCw, X } from "lucide-preact";
 import { useMemo, useState } from "preact/hooks";
 import { ProjectForm, ProjectList } from "../components";

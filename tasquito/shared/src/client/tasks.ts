@@ -1,12 +1,4 @@
-import {
-  deleteTask as deleteTaskApi,
-  getTask as getTaskApi,
-  getTasks as getTasksApi,
-  patchTask as patchTaskApi,
-  postSubtask as postSubtaskApi,
-  postTask as postTaskApi,
-  type TaskDto,
-} from "../api-contracts";
+import { deleteTaskApi, getTaskApi, getTasksApi, patchTaskApi, postSubtaskApi, postTaskApi, type TaskDto } from "../api";
 import { CACHE_KEYS, getCacheExpiry } from "./cache";
 import { getCache } from "./init";
 import { setProjectCountsInCache } from "./projects";

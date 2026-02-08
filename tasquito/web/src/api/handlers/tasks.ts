@@ -1,6 +1,6 @@
 import { HttpError } from "@broccoliapps/backend";
 import { random } from "@broccoliapps/shared";
-import { deleteTask, getTask, getTasks, LIMIT_MESSAGES, LIMITS, patchTask, postSubtask, postTask } from "@broccoliapps/tasquito-shared";
+import { deleteTaskApi, getTaskApi, getTasksApi, LIMIT_MESSAGES, LIMITS, patchTaskApi, postSubtaskApi, postTaskApi } from "@broccoliapps/tasquito-shared";
 import { generateKeyBetween } from "fractional-indexing";
 import { projects } from "../../db/projects";
 import { type Task, tasks } from "../../db/tasks";
@@ -38,7 +38,7 @@ const updateProjectCounts = async (
 };
 
 // POST /projects/:projectId/tasks - create task
-api.register(postTask, async (req, res, ctx) => {
+api.register(postTaskApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const taskId = random.id();
   const now = Date.now();
@@ -122,7 +122,7 @@ api.register(postTask, async (req, res, ctx) => {
 });
 
 // POST /projects/:projectId/tasks/:taskId/subtasks - create subtask
-api.register(postSubtask, async (req, res, ctx) => {
+api.register(postSubtaskApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
 
   // Verify parent task exists
@@ -181,14 +181,14 @@ api.register(postSubtask, async (req, res, ctx) => {
 });
 
 // GET /projects/:projectId/tasks - list all tasks in project
-api.register(getTasks, async (req, res, ctx) => {
+api.register(getTasksApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const result = await tasks.query({ userId, projectId: req.projectId }).all();
   return res.ok({ tasks: result.map(ensureSortOrder) });
 });
 
 // GET /projects/:projectId/tasks/:id - get single task
-api.register(getTask, async (req, res, ctx) => {
+api.register(getTaskApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const task = await tasks.get({ userId, projectId: req.projectId }, { id: req.id });
 
@@ -200,7 +200,7 @@ api.register(getTask, async (req, res, ctx) => {
 });
 
 // PATCH /projects/:projectId/tasks/:id - update task
-api.register(patchTask, async (req, res, ctx) => {
+api.register(patchTaskApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const task = await tasks.get({ userId, projectId: req.projectId }, { id: req.id });
 
@@ -232,7 +232,7 @@ api.register(patchTask, async (req, res, ctx) => {
 });
 
 // DELETE /projects/:projectId/tasks/:id - delete task (cascades to subtasks)
-api.register(deleteTask, async (req, res, ctx) => {
+api.register(deleteTaskApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const task = await tasks.get({ userId, projectId: req.projectId }, { id: req.id });
 

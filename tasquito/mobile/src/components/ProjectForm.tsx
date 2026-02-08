@@ -1,15 +1,13 @@
-import { useTheme } from "@broccoliapps/mobile";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
-import { Check, X } from "lucide-react-native";
 import { useState } from "react";
-import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Keyboard } from "react-native";
+import { InlineForm } from "./InlineForm";
 
 type Props = {
   onSubmit: (name: string) => Promise<unknown>;
 };
 
 export const ProjectForm = ({ onSubmit }: Props) => {
-  const { colors } = useTheme();
   const [name, setName] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,75 +43,24 @@ export const ProjectForm = ({ onSubmit }: Props) => {
   };
 
   return (
-    <View>
-      <View
-        style={[
-          styles.inputContainer,
-          {
-            backgroundColor: colors.inputBackground,
-            borderColor: error ? colors.error : colors.border,
-          },
-        ]}
-      >
-        <TextInput
-          style={[styles.input, { color: colors.inputText }]}
-          placeholder="New project"
-          placeholderTextColor={colors.inputPlaceholder}
-          value={name}
-          onChangeText={(text) => {
-            setName(text);
-            if (error) {
-              setError(null);
-            }
-          }}
-          maxLength={LIMITS.MAX_PROJECT_NAME_LENGTH}
-          editable={!isSubmitting}
-          returnKeyType="done"
-          onSubmitEditing={handleSubmit}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-        />
-        {isFocused && (
-          <View style={styles.inputActions}>
-            <TouchableOpacity onPress={handleCancel} hitSlop={8} activeOpacity={0.6}>
-              <X size={18} color={colors.textMuted} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleSubmit} hitSlop={8} activeOpacity={0.6} disabled={!canSubmit}>
-              <Check size={18} color={canSubmit ? colors.accent : colors.textMuted} />
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-      {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
-    </View>
+    <InlineForm
+      placeholder="New project"
+      maxLength={LIMITS.MAX_PROJECT_NAME_LENGTH}
+      value={name}
+      onChangeText={(text) => {
+        setName(text);
+        if (error) {
+          setError(null);
+        }
+      }}
+      onSubmit={handleSubmit}
+      onCancel={handleCancel}
+      canSubmit={canSubmit}
+      disabled={isSubmitting}
+      error={error}
+      isFocused={isFocused}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+    />
   );
 };
-
-const styles = StyleSheet.create({
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: 44,
-    borderWidth: 1,
-    borderRadius: 8,
-  },
-  input: {
-    flex: 1,
-    height: 44,
-    paddingLeft: 14,
-    paddingRight: 8,
-    fontSize: 16,
-    fontFamily: "Nunito-Regular",
-  },
-  inputActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingRight: 12,
-  },
-  error: {
-    fontSize: 13,
-    fontFamily: "Nunito-Regular",
-    marginTop: 6,
-  },
-});

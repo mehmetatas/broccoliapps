@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { getExchangeRates } from "../api";
+import * as client from "../api";
 import type { ExchangeRateMap } from "../utils/currencyConversion";
 
 type UseExchangeRatesResult = {
@@ -43,7 +43,7 @@ export const useExchangeRates = (currencies: string[], targetCurrency: string, e
 
       try {
         const ratePromises = currenciesToFetch.map(async (currency) => {
-          const response = await getExchangeRates(currency, targetCurrency, earliestMonth);
+          const response = await client.getExchangeRates(currency, targetCurrency, earliestMonth);
           // Response is { rates: Record<month, rate> }
           return { currency, rateMap: response.rates };
         });

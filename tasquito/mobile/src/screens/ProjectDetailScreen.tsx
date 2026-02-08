@@ -1,80 +1,40 @@
-import { useTheme } from "@broccoliapps/mobile";
+import { Modal, Toast, useModal, useTheme } from "@broccoliapps/mobile";
 import type { TaskDto } from "@broccoliapps/tasquito-shared";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
-import { useProject } from "@broccoliapps/tasquito-shared/hooks";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Archive, ArchiveRestore, ChevronLeft, Trash2 } from "lucide-react-native";
-import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Animated, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import DraggableFlatList, { type RenderItemParams } from "react-native-draggable-flatlist";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AnimatedCell } from "../components/AnimatedCell";
 import { TaskCard } from "../components/TaskCard";
 import { TaskCardSkeleton, TaskListSkeleton } from "../components/TaskCardSkeleton";
 import { TaskForm, type TaskFormData } from "../components/TaskForm";
+import { ProjectProvider, useProjectContext } from "../context/ProjectContext";
 import type { RootStackParamList } from "../navigation/types";
 
 type TaskWithSubtasks = TaskDto & { subtasks: TaskDto[] };
 
 type Props = NativeStackScreenProps<RootStackParamList, "ProjectDetail">;
 
-type AnimatedCellProps = {
-  exiting: boolean;
-  onExitDone: () => void;
-  children: ReactElement;
-};
-
-const AnimatedCell = ({ exiting, onExitDone, children }: AnimatedCellProps) => {
-  const progress = useRef(new Animated.Value(1)).current;
-  const measuredHeight = useRef(0);
-  const [collapsing, setCollapsing] = useState(false);
-
-  useEffect(() => {
-    if (exiting && !collapsing) {
-      setCollapsing(true);
-      Animated.timing(progress, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: false,
-      }).start(({ finished }) => {
-        if (finished) {
-          onExitDone();
-        }
-      });
-    } else if (!exiting && collapsing) {
-      // Reset when no longer exiting (task reappears after status change)
-      setCollapsing(false);
-      progress.setValue(1);
-    }
-  }, [exiting, collapsing, progress, onExitDone]);
-
+export const ProjectDetailScreen = ({ navigation, route }: Props) => {
+  const { projectId } = route.params;
   return (
-    <Animated.View
-      onLayout={(e) => {
-        if (!collapsing) {
-          measuredHeight.current = e.nativeEvent.layout.height;
-        }
-      }}
-      style={
-        collapsing
-          ? {
-              height: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, measuredHeight.current],
-              }),
-              opacity: progress,
-              overflow: "hidden" as const,
-            }
-          : undefined
-      }
-    >
-      {children}
-    </Animated.View>
+    <ProjectProvider projectId={projectId}>
+      <ProjectDetailContent navigation={navigation} />
+    </ProjectProvider>
   );
 };
 
-export const ProjectDetailScreen = ({ navigation, route }: Props) => {
-  const { projectId } = route.params;
+type ContentProps = {
+  navigation: Props["navigation"];
+};
+
+const ProjectDetailContent = ({ navigation }: ContentProps) => {
   const { colors } = useTheme();
+  const archiveModal = useModal();
+  const deleteModal = useModal();
   const [exitingTaskId, setExitingTaskId] = useState<string | null>(null);
   const pendingToggle = useRef<{ taskId: string; newStatus: "todo" | "done" } | null>(null);
 
@@ -88,92 +48,18 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
     pendingTaskCount,
     createTask,
     updateTaskStatus,
-    updateTaskTitle,
-    updateTaskNote,
-    updateTaskDueDate,
-    updateSubtaskStatus,
-    updateSubtaskTitle,
-    removeSubtask,
-    createSubtask,
-    reorderSubtask,
-    removeTask,
     updateName,
     reorderTask,
     archive,
     unarchive,
     remove,
     refresh,
-  } = useProject(projectId);
+  } = useProjectContext();
 
   const isArchived = project?.isArchived ?? false;
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState("");
   const nameInputRef = useRef<TextInput>(null);
-
-  const handleToggleSubtaskOnCard = useCallback(
-    (taskId: string, subtaskId: string) => {
-      const task = tasks.find((t) => t.id === taskId);
-      if (!task) {
-        return;
-      }
-      const subtask = task.subtasks.find((st) => st.id === subtaskId);
-      if (!subtask) {
-        return;
-      }
-      const newStatus = subtask.status === "todo" ? "done" : "todo";
-      updateSubtaskStatus(taskId, subtaskId, newStatus);
-    },
-    [tasks, updateSubtaskStatus],
-  );
-
-  const handleReorderSubtaskOnCard = useCallback(
-    (taskId: string, subtaskId: string, afterId: string | null, beforeId: string | null) => {
-      reorderSubtask(taskId, subtaskId, afterId, beforeId);
-    },
-    [reorderSubtask],
-  );
-
-  const handleUpdateSubtaskTitleOnCard = useCallback(
-    (taskId: string, subtaskId: string, title: string) => {
-      return updateSubtaskTitle(taskId, subtaskId, title);
-    },
-    [updateSubtaskTitle],
-  );
-
-  const handleUpdateTaskTitleOnCard = useCallback(
-    (taskId: string, title: string) => {
-      return updateTaskTitle(taskId, title);
-    },
-    [updateTaskTitle],
-  );
-
-  const handleDeleteSubtaskOnCard = useCallback(
-    (taskId: string, subtaskId: string) => {
-      removeSubtask(taskId, subtaskId);
-    },
-    [removeSubtask],
-  );
-
-  const handleDueDateChangeOnCard = useCallback(
-    (taskId: string, date: string | undefined) => {
-      updateTaskDueDate(taskId, date);
-    },
-    [updateTaskDueDate],
-  );
-
-  const handleCreateSubtaskOnCard = useCallback(
-    (taskId: string, title: string) => {
-      createSubtask(taskId, title);
-    },
-    [createSubtask],
-  );
-
-  const handleUpdateNoteOnCard = useCallback(
-    (taskId: string, note: string) => {
-      return updateTaskNote(taskId, note);
-    },
-    [updateTaskNote],
-  );
 
   const handleCreateTask = useCallback(
     (data: TaskFormData) => {
@@ -253,47 +139,14 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
           drag={isArchived ? undefined : drag}
           isActive={isActive}
           onToggleStatus={() => handleToggleStatus(item)}
-          onDelete={() => removeTask(item.id)}
-          onToggleSubtask={(subtaskId) => handleToggleSubtaskOnCard(item.id, subtaskId)}
-          onReorderSubtask={(subtaskId, afterId, beforeId) => handleReorderSubtaskOnCard(item.id, subtaskId, afterId, beforeId)}
-          onUpdateSubtaskTitle={(subtaskId, title) => handleUpdateSubtaskTitleOnCard(item.id, subtaskId, title)}
-          onUpdateTaskTitle={(title) => handleUpdateTaskTitleOnCard(item.id, title)}
-          onDeleteSubtask={(subtaskId) => handleDeleteSubtaskOnCard(item.id, subtaskId)}
-          onDueDateChange={(date) => handleDueDateChangeOnCard(item.id, date)}
-          onCreateSubtask={(title) => handleCreateSubtaskOnCard(item.id, title)}
-          onUpdateNote={(note) => handleUpdateNoteOnCard(item.id, note)}
         />
       </AnimatedCell>
     ),
-    [
-      isArchived,
-      handleToggleStatus,
-      removeTask,
-      exitingTaskId,
-      handleExitComplete,
-      handleToggleSubtaskOnCard,
-      handleReorderSubtaskOnCard,
-      handleUpdateSubtaskTitleOnCard,
-      handleUpdateTaskTitleOnCard,
-      handleDeleteSubtaskOnCard,
-      handleDueDateChangeOnCard,
-      handleCreateSubtaskOnCard,
-      handleUpdateNoteOnCard,
-    ],
+    [isArchived, handleToggleStatus, exitingTaskId, handleExitComplete],
   );
 
   const handleArchivePress = () => {
-    Alert.alert("Archive Project", `"${project?.name}" will be automatically deleted after ${LIMITS.ARCHIVE_TTL_DAYS} days.`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Archive",
-        onPress: () => {
-          archive()
-            .then(() => navigation.goBack())
-            .catch(() => {});
-        },
-      },
-    ]);
+    archiveModal.open();
   };
 
   const handleUnarchivePress = () => {
@@ -301,18 +154,7 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
   };
 
   const handleDeletePress = () => {
-    Alert.alert("Delete Project", "This action cannot be undone. All tasks will be permanently deleted.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: () => {
-          remove()
-            .then(() => navigation.goBack())
-            .catch(() => {});
-        },
-      },
-    ]);
+    deleteModal.open();
   };
 
   const ListHeader = (
@@ -346,7 +188,7 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
           </TouchableOpacity>
         )}
         {!isArchived && (
-          <TouchableOpacity onPress={handleArchivePress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={{ marginTop: 1 }}>
+          <TouchableOpacity onPress={handleArchivePress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={styles.archiveButton}>
             <Archive size={22} color={colors.textMuted} />
           </TouchableOpacity>
         )}
@@ -354,22 +196,14 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
 
       {/* Archived banner */}
       {isArchived && (
-        <View style={styles.archivedBanner}>
-          <Text style={styles.archivedBannerText}>
-            Archived — will be deleted {daysUntilDeletion < 1 ? "soon" : `in ${daysUntilDeletion} day${daysUntilDeletion !== 1 ? "s" : ""}`}
-          </Text>
-        </View>
+        <Toast
+          variant="warning"
+          message={`Archived — will be deleted ${daysUntilDeletion < 1 ? "soon" : `in ${daysUntilDeletion} day${daysUntilDeletion !== 1 ? "s" : ""}`}`}
+        />
       )}
 
       {/* Limit error banner */}
-      {limitError && (
-        <View style={styles.limitBanner}>
-          <Text style={styles.limitBannerText}>{limitError}</Text>
-          <TouchableOpacity onPress={clearLimitError}>
-            <Text style={styles.limitDismiss}>{"\u2715"}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      {limitError && <Toast variant="warning" message={limitError} onDismiss={clearLimitError} />}
 
       {/* General error */}
       {error && (
@@ -397,15 +231,7 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
       {/* Done tasks */}
       {doneTasks.map((task) => (
         <AnimatedCell key={task.id} exiting={exitingTaskId === task.id} onExitDone={handleExitComplete}>
-          <TaskCard
-            task={task}
-            isArchived={isArchived}
-            onToggleStatus={() => handleToggleStatus(task)}
-            onDelete={() => removeTask(task.id)}
-            onToggleSubtask={(subtaskId) => handleToggleSubtaskOnCard(task.id, subtaskId)}
-            onUpdateSubtaskTitle={(subtaskId, title) => handleUpdateSubtaskTitleOnCard(task.id, subtaskId, title)}
-            onUpdateTaskTitle={(title) => handleUpdateTaskTitleOnCard(task.id, title)}
-          />
+          <TaskCard task={task} isArchived={isArchived} onToggleStatus={() => handleToggleStatus(task)} />
         </AnimatedCell>
       ))}
 
@@ -456,6 +282,38 @@ export const ProjectDetailScreen = ({ navigation, route }: Props) => {
           />
         </KeyboardAvoidingView>
       </SafeAreaView>
+      <Modal
+        visible={archiveModal.isOpen}
+        onClose={archiveModal.close}
+        title="Archive Project"
+        confirmText="Archive"
+        confirmVariant="warning"
+        onConfirm={() => {
+          archiveModal.close();
+          archive()
+            .then(() => navigation.goBack())
+            .catch(() => {});
+        }}
+      >
+        <Text style={[styles.modalMessage, { color: colors.textPrimary }]}>
+          "{project?.name}" will be automatically deleted after {LIMITS.ARCHIVE_TTL_DAYS} days.
+        </Text>
+      </Modal>
+      <Modal
+        visible={deleteModal.isOpen}
+        onClose={deleteModal.close}
+        title="Delete Project"
+        confirmText="Delete"
+        confirmVariant="danger"
+        onConfirm={() => {
+          deleteModal.close();
+          remove()
+            .then(() => navigation.goBack())
+            .catch(() => {});
+        }}
+      >
+        <Text style={[styles.modalMessage, { color: colors.textPrimary }]}>This action cannot be undone. All tasks will be permanently deleted.</Text>
+      </Modal>
     </>
   );
 };
@@ -480,6 +338,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
+  },
+  archiveButton: {
+    marginTop: 1,
   },
   projectNameButton: {
     flex: 1,
@@ -519,40 +380,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Nunito-SemiBold",
   },
-  archivedBanner: {
-    backgroundColor: "#fef3c7",
-    borderWidth: 1,
-    borderColor: "#fbbf24",
-    borderRadius: 8,
-    padding: 12,
-  },
-  archivedBannerText: {
-    color: "#92400e",
-    fontSize: 14,
-    fontFamily: "Nunito-Regular",
-  },
-  limitBanner: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: "#fef3c7",
-    borderWidth: 1,
-    borderColor: "#fbbf24",
-    borderRadius: 8,
-    padding: 12,
-    gap: 10,
-  },
-  limitBannerText: {
-    flex: 1,
-    color: "#92400e",
-    fontSize: 14,
-    fontFamily: "Nunito-Regular",
-  },
-  limitDismiss: {
-    color: "#b45309",
-    fontSize: 18,
-    fontWeight: "600",
-    lineHeight: 20,
-  },
   errorContainer: {
     alignItems: "center",
     paddingVertical: 8,
@@ -574,5 +401,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "Nunito-Regular",
     textAlign: "center",
+  },
+  modalMessage: {
+    fontSize: 15,
+    fontFamily: "Nunito-Regular",
+    lineHeight: 22,
   },
 });

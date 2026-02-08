@@ -1,11 +1,10 @@
-import { useTheme } from "@broccoliapps/mobile";
-import type { ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
-import { useProjects } from "@broccoliapps/tasquito-shared/hooks";
+import { Modal, Toast, useModal, useTheme } from "@broccoliapps/mobile";
+import { type ProjectSummaryDto, useProjects } from "@broccoliapps/tasquito-shared";
 import { useFocusEffect } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Settings } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, FlatList, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FilterPills, type ProjectFilter } from "../components/FilterPills";
 import { ProjectCard } from "../components/ProjectCard";
@@ -22,6 +21,7 @@ const emptyMessages: Record<ProjectFilter, string> = {
 
 export const HomeScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
+  const deleteModal = useModal<string>();
   const [filter, setFilter] = useState<ProjectFilter>("active");
   const { projects, isLoading, error, limitError, clearLimitError, create, archive, remove, refresh } = useProjects();
 
@@ -69,14 +69,7 @@ export const HomeScreen = ({ navigation }: Props) => {
         }}
       />
 
-      {limitError && (
-        <View style={[styles.banner, { backgroundColor: "#fef3c7", borderColor: "#fbbf24" }]}>
-          <Text style={[styles.bannerText, { color: "#92400e" }]}>{limitError}</Text>
-          <TouchableOpacity onPress={clearLimitError}>
-            <Text style={[styles.dismissText, { color: "#b45309" }]}>✕</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      {limitError && <Toast variant="warning" message={limitError} onDismiss={clearLimitError} />}
 
       {error && (
         <View style={styles.errorContainer}>
@@ -107,16 +100,7 @@ export const HomeScreen = ({ navigation }: Props) => {
               project={item}
               onPress={() => navigation.navigate("ProjectDetail", { projectId: item.id })}
               onArchive={!item.isArchived ? () => archive(item.id) : undefined}
-              onDelete={
-                item.isArchived
-                  ? () => {
-                      Alert.alert("Delete Project", "This action cannot be undone. All tasks will be permanently deleted.", [
-                        { text: "Cancel", style: "cancel" },
-                        { text: "Delete", style: "destructive", onPress: () => remove(item.id) },
-                      ]);
-                    }
-                  : undefined
-              }
+              onDelete={item.isArchived ? () => deleteModal.open(item.id) : undefined}
             />
           )}
           ListHeaderComponent={ListHeader}
@@ -135,6 +119,19 @@ export const HomeScreen = ({ navigation }: Props) => {
           keyboardShouldPersistTaps="handled"
         />
       </KeyboardAvoidingView>
+      <Modal
+        visible={deleteModal.isOpen}
+        onClose={deleteModal.close}
+        title="Delete Project"
+        confirmText="Delete"
+        confirmVariant="danger"
+        onConfirm={() => {
+          remove(deleteModal.data!);
+          deleteModal.close();
+        }}
+      >
+        <Text style={[styles.modalMessage, { color: colors.textPrimary }]}>This action cannot be undone. All tasks will be permanently deleted.</Text>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -167,24 +164,6 @@ const styles = StyleSheet.create({
   settingsButton: {
     padding: 4,
   },
-  banner: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    gap: 10,
-  },
-  bannerText: {
-    flex: 1,
-    fontSize: 14,
-    fontFamily: "Nunito-Regular",
-  },
-  dismissText: {
-    fontSize: 18,
-    fontWeight: "600",
-    lineHeight: 20,
-  },
   errorContainer: {
     alignItems: "center",
     paddingVertical: 8,
@@ -201,5 +180,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "Nunito-Regular",
     textAlign: "center",
+  },
+  modalMessage: {
+    fontSize: 15,
+    fontFamily: "Nunito-Regular",
+    lineHeight: 22,
   },
 });

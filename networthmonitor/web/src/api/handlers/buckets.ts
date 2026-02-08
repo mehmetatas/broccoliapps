@@ -1,12 +1,12 @@
 import { HttpError } from "@broccoliapps/backend";
-import { deleteBucket, getBucketAccounts, getBuckets, patchBucket, postBucket, putBucketAccounts } from "@broccoliapps/nwm-shared";
+import { deleteBucketApi, getBucketAccountsApi, getBucketsApi, patchBucketApi, postBucketApi, putBucketAccountsApi } from "@broccoliapps/nwm-shared";
 import { random } from "@broccoliapps/shared";
 import { accounts } from "../../db/accounts";
 import { buckets } from "../../db/buckets";
 import { api } from "../lambda";
 
 // GET /buckets/:id/accounts - get accounts in a bucket (register most specific routes first)
-api.register(getBucketAccounts, async (req, res, ctx) => {
+api.register(getBucketAccountsApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const bucket = await buckets.get({ userId }, { id: req.id });
 
@@ -28,7 +28,7 @@ api.register(getBucketAccounts, async (req, res, ctx) => {
 });
 
 // PUT /buckets/:id/accounts - set accounts for a bucket
-api.register(putBucketAccounts, async (req, res, ctx) => {
+api.register(putBucketAccountsApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const bucket = await buckets.get({ userId }, { id: req.id });
 
@@ -75,14 +75,14 @@ api.register(putBucketAccounts, async (req, res, ctx) => {
 });
 
 // GET /buckets - list all buckets
-api.register(getBuckets, async (_, res, ctx) => {
+api.register(getBucketsApi, async (_, res, ctx) => {
   const { userId } = await ctx.getUser();
   const result = await buckets.query({ userId }).all();
   return res.ok({ buckets: result });
 });
 
 // POST /buckets - create bucket
-api.register(postBucket, async (req, res, ctx) => {
+api.register(postBucketApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const bucketId = random.id();
 
@@ -97,7 +97,7 @@ api.register(postBucket, async (req, res, ctx) => {
 });
 
 // PATCH /buckets/:id - update bucket
-api.register(patchBucket, async (req, res, ctx) => {
+api.register(patchBucketApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const bucket = await buckets.get({ userId }, { id: req.id });
 
@@ -114,7 +114,7 @@ api.register(patchBucket, async (req, res, ctx) => {
 });
 
 // DELETE /buckets/:id - delete bucket and update all associated accounts
-api.register(deleteBucket, async (req, res, ctx) => {
+api.register(deleteBucketApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const bucket = await buckets.get({ userId }, { id: req.id });
 

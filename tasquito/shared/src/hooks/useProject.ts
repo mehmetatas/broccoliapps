@@ -1,7 +1,7 @@
 import { generateKeyBetween } from "fractional-indexing";
 import { useEffect, useRef, useState } from "react";
-import type { ProjectWithTasksDto, TaskDto, TaskStatus } from "../api-contracts";
-import { archiveProject, deleteProject, deleteTask, getProject, patchProject, patchTask, postSubtask, postTask, unarchiveProject } from "../client";
+import type { ProjectWithTasksDto, TaskDto, TaskStatus } from "../api";
+import * as client from "../client";
 
 type TaskWithSubtasks = TaskDto & { subtasks: TaskDto[] };
 
@@ -77,7 +77,7 @@ export const useProject = (id: string) => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await getProject(id);
+      const data = await client.getProject(id);
       setProject(data.project);
     } catch (err) {
       console.error(err);
@@ -96,7 +96,7 @@ export const useProject = (id: string) => {
     if (!project) {
       return;
     }
-    await patchProject({ id: project.id, name });
+    await client.patchProject({ id: project.id, name });
     setProject((prev) => (prev ? { ...prev, name } : null));
   };
 
@@ -104,14 +104,14 @@ export const useProject = (id: string) => {
     if (!project) {
       return;
     }
-    await deleteProject(project.id);
+    await client.deleteProject(project.id);
   };
 
   const archive = async () => {
     if (!project) {
       return;
     }
-    await archiveProject(project.id);
+    await client.archiveProject(project.id);
   };
 
   const unarchive = async () => {
@@ -119,7 +119,7 @@ export const useProject = (id: string) => {
       return;
     }
     try {
-      await unarchiveProject(project.id);
+      await client.unarchiveProject(project.id);
       await load();
     } catch (err: unknown) {
       const error = err as { status?: number; message?: string };
@@ -140,13 +140,14 @@ export const useProject = (id: string) => {
     const item = taskQueueRef.current.shift()!;
 
     if (item.type === "create") {
-      postTask({
-        projectId: item.projectId,
-        title: item.title,
-        note: item.note,
-        dueDate: item.dueDate,
-        subtasks: item.subtasks,
-      })
+      client
+        .postTask({
+          projectId: item.projectId,
+          title: item.title,
+          note: item.note,
+          dueDate: item.dueDate,
+          subtasks: item.subtasks,
+        })
         .then((result) => {
           setProject((prev) => {
             if (!prev) {
@@ -170,7 +171,8 @@ export const useProject = (id: string) => {
           processTaskQueue();
         });
     } else if (item.type === "status") {
-      patchTask({ projectId: item.projectId, id: item.taskId, status: item.status })
+      client
+        .patchTask({ projectId: item.projectId, id: item.taskId, status: item.status })
         .catch((err) => {
           console.error("Failed to update task status, reverting", err);
           setProject((prev) => {
@@ -188,7 +190,8 @@ export const useProject = (id: string) => {
           processTaskQueue();
         });
     } else if (item.type === "delete") {
-      deleteTask(item.projectId, item.taskId)
+      client
+        .deleteTask(item.projectId, item.taskId)
         .catch((err) => {
           console.error("Failed to delete task, restoring", err);
           setProject((prev) => {
@@ -265,7 +268,7 @@ export const useProject = (id: string) => {
     if (!project) {
       return;
     }
-    await patchTask({ projectId: project.id, id: taskId, title });
+    await client.patchTask({ projectId: project.id, id: taskId, title });
     setProject((prev) => {
       if (!prev) {
         return null;
@@ -281,7 +284,7 @@ export const useProject = (id: string) => {
     if (!project) {
       return;
     }
-    await patchTask({ projectId: project.id, id: taskId, note });
+    await client.patchTask({ projectId: project.id, id: taskId, note });
     setProject((prev) => {
       if (!prev) {
         return null;
@@ -297,7 +300,7 @@ export const useProject = (id: string) => {
     if (!project) {
       return;
     }
-    await patchTask({ projectId: project.id, id: taskId, dueDate: dueDate ?? null });
+    await client.patchTask({ projectId: project.id, id: taskId, dueDate: dueDate ?? null });
     setProject((prev) => {
       if (!prev) {
         return null;
@@ -383,7 +386,7 @@ export const useProject = (id: string) => {
     if (!project) {
       return;
     }
-    await patchTask({ projectId: project.id, id: subtaskId, title });
+    await client.patchTask({ projectId: project.id, id: subtaskId, title });
     setProject((prev) => {
       if (!prev) {
         return null;
@@ -446,7 +449,8 @@ export const useProject = (id: string) => {
     const item = queue.shift()!;
 
     if (item.type === "create") {
-      postSubtask(item.projectId, item.taskId, item.title)
+      client
+        .postSubtask(item.projectId, item.taskId, item.title)
         .then((result) => {
           setProject((prev) => {
             if (!prev) {
@@ -479,7 +483,8 @@ export const useProject = (id: string) => {
           processSubtaskQueue(taskId);
         });
     } else if (item.type === "status") {
-      patchTask({ projectId: item.projectId, id: item.subtaskId, status: item.status })
+      client
+        .patchTask({ projectId: item.projectId, id: item.subtaskId, status: item.status })
         .catch((err) => {
           console.error("Failed to update subtask status, reverting", err);
           setProject((prev) => {
@@ -504,7 +509,8 @@ export const useProject = (id: string) => {
           processSubtaskQueue(taskId);
         });
     } else if (item.type === "delete") {
-      deleteTask(item.projectId, item.subtaskId)
+      client
+        .deleteTask(item.projectId, item.subtaskId)
         .catch((err) => {
           console.error("Failed to delete subtask, restoring", err);
           setProject((prev) => {
@@ -579,7 +585,7 @@ export const useProject = (id: string) => {
     });
 
     try {
-      await patchTask({ projectId: project.id, id: taskId, sortOrder: newSortOrder });
+      await client.patchTask({ projectId: project.id, id: taskId, sortOrder: newSortOrder });
     } catch (err) {
       console.error(err);
       load();
@@ -629,7 +635,7 @@ export const useProject = (id: string) => {
     });
 
     try {
-      await patchTask({ projectId: project.id, id: subtaskId, sortOrder: newSortOrder });
+      await client.patchTask({ projectId: project.id, id: subtaskId, sortOrder: newSortOrder });
     } catch {
       load();
     }

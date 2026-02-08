@@ -1,15 +1,15 @@
 import {
-  archiveProject as archiveProjectApi,
-  deleteProject as deleteProjectApi,
-  getProject as getProjectApi,
-  getProjects as getProjectsApi,
+  archiveProjectApi,
+  deleteProjectApi,
+  getProjectApi,
+  getProjectsApi,
   type ProjectDto,
   type ProjectSummaryDto,
   type ProjectWithTasksDto,
-  patchProject as patchProjectApi,
-  postProject as postProjectApi,
-  unarchiveProject as unarchiveProjectApi,
-} from "../api-contracts";
+  patchProjectApi,
+  postProjectApi,
+  unarchiveProjectApi,
+} from "../api";
 import { CACHE_KEYS, getCacheExpiry } from "./cache";
 import { getCache } from "./init";
 

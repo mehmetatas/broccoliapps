@@ -1,6 +1,6 @@
 import type { AccountDto, BucketDto } from "@broccoliapps/nwm-shared";
 import { useEffect, useState } from "preact/hooks";
-import { getDashboard } from "../api";
+import * as client from "../api";
 
 type DashboardData = {
   accounts: AccountDto[];
@@ -24,7 +24,7 @@ export const useDashboard = (): DashboardData => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { accounts: accountList, buckets: bucketList } = await getDashboard();
+        const { accounts: accountList, buckets: bucketList } = await client.getDashboard();
         setAccounts(accountList);
         setBuckets(bucketList);
 

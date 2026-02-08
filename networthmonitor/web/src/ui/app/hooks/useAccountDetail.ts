@@ -2,7 +2,7 @@ import { useModal } from "@broccoliapps/browser";
 import type { AccountDto, BucketDto } from "@broccoliapps/nwm-shared";
 import { useEffect, useState } from "preact/hooks";
 import { route } from "preact-router";
-import { deleteAccount, deleteHistoryItem, getAccountDetail, patchAccount, postHistoryItem, putAccountBuckets } from "../api";
+import * as client from "../api";
 
 export const useAccountDetail = (id: string | undefined) => {
   const [account, setAccount] = useState<AccountDto | null>(null);
@@ -50,7 +50,7 @@ export const useAccountDetail = (id: string | undefined) => {
     setSavingMonths((prev) => ({ ...prev, [month]: true }));
 
     try {
-      await postHistoryItem({ id: account.id, month, value });
+      await client.postHistoryItem({ id: account.id, month, value });
       setOriginalHistory((prev) => ({ ...prev, [month]: value }));
       showSaveSuccess(month);
     } catch (err) {
@@ -68,7 +68,7 @@ export const useAccountDetail = (id: string | undefined) => {
     setSavingMonths((prev) => ({ ...prev, [month]: true }));
 
     try {
-      await deleteHistoryItem({ id: account.id, month });
+      await client.deleteHistoryItem({ id: account.id, month });
       setOriginalHistory((prev) => {
         const newHistory = { ...prev };
         delete newHistory[month];
@@ -88,7 +88,7 @@ export const useAccountDetail = (id: string | undefined) => {
 
     const fetchData = async () => {
       try {
-        const result = await getAccountDetail(id);
+        const result = await client.getAccountDetail(id);
         setAccount(result.account);
         setAccountBucketIds(new Set(result.accountBuckets.map((b) => b.id)));
         setAllBuckets(result.allBuckets);
@@ -151,7 +151,7 @@ export const useAccountDetail = (id: string | undefined) => {
 
     setRemoving(true);
     try {
-      const { account: updated } = await patchAccount({ id: account.id, archivedAt: Date.now() });
+      const { account: updated } = await client.patchAccount({ id: account.id, archivedAt: Date.now() });
       setAccount(updated);
       removeModal.close();
     } catch (err) {
@@ -168,7 +168,7 @@ export const useAccountDetail = (id: string | undefined) => {
 
     setUnarchiving(true);
     try {
-      const { account: updated } = await patchAccount({ id: account.id, archivedAt: null });
+      const { account: updated } = await client.patchAccount({ id: account.id, archivedAt: null });
       setAccount(updated);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to unarchive");
@@ -184,7 +184,7 @@ export const useAccountDetail = (id: string | undefined) => {
 
     setRemoving(true);
     try {
-      await deleteAccount({ id: account.id });
+      await client.deleteAccount({ id: account.id });
       route("/app");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete");
@@ -200,7 +200,7 @@ export const useAccountDetail = (id: string | undefined) => {
 
     setDeleting(true);
     try {
-      await deleteAccount({ id: account.id });
+      await client.deleteAccount({ id: account.id });
       route("/app/archived");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete");
@@ -229,7 +229,7 @@ export const useAccountDetail = (id: string | undefined) => {
 
     setSavingName(true);
     try {
-      const { account: updated } = await patchAccount({ id: account.id, name: editedName.trim() });
+      const { account: updated } = await client.patchAccount({ id: account.id, name: editedName.trim() });
       setAccount(updated);
       setEditingName(false);
       setEditedName("");
@@ -249,7 +249,7 @@ export const useAccountDetail = (id: string | undefined) => {
     setAccountBucketIds(newBucketIds);
 
     try {
-      await putAccountBuckets({ id: account.id, bucketIds: Array.from(newBucketIds) });
+      await client.putAccountBuckets({ id: account.id, bucketIds: Array.from(newBucketIds) });
     } catch (err) {
       setAccountBucketIds(previousBucketIds);
       setError(err instanceof Error ? err.message : "Failed to update buckets");

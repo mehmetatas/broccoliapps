@@ -107,7 +107,7 @@ npm run deploy:tasquito:web
 
 ## Patterns
 
-**Contract-based API system:** API endpoints are defined as contracts in `app-shared/src/api-contracts/`. Each contract has a `.dto.ts` file with Valibot schemas and a corresponding `.ts` file with endpoint definitions. Types are derived via `v.InferOutput<>`.
+**Contract-based API system:** API endpoints are defined as contracts in `app-shared/src/api/`. Each contract has a `.dto.ts` file with Valibot schemas and a corresponding `.ts` file with endpoint definitions. Types are derived via `v.InferOutput<>`.
 
 **App-shared packages:** Each app has a `shared/` package that exports API contracts, a typed client, and React hooks. These are consumed by both web and mobile.
 
@@ -123,7 +123,7 @@ npm run deploy:tasquito:web
 - **Utilities:** camelCase (`formatDate.ts`)
 - **Hooks:** `use*.ts` (`useProject.ts`, `useProjects.ts`)
 - **Valibot schemas:** `*.dto.ts` (`projects.dto.ts`, `auth.dto.ts`)
-- **API contracts:** Separate `*.ts` (endpoints) and `*.dto.ts` (schemas) in `api-contracts/`
+- **API contracts:** Separate `*.ts` (endpoints) and `*.dto.ts` (schemas) in `api/`
 
 ## Rules
 

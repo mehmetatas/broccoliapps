@@ -1,6 +1,6 @@
 import type { AccountDto } from "@broccoliapps/nwm-shared";
 import { useEffect, useMemo, useState } from "preact/hooks";
-import { getAccountHistory, getAccounts } from "../api";
+import * as client from "../api";
 import { getUniqueCurrencies } from "../utils/currencyConversion";
 import { useExchangeRates } from "./useExchangeRates";
 
@@ -14,12 +14,12 @@ export const useArchivedAccounts = (targetCurrency: string) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { accounts: accountList } = await getAccounts();
+        const { accounts: accountList } = await client.getAccounts();
         setAccounts(accountList);
 
         const archivedAccounts = accountList.filter((a) => a.archivedAt);
         const historyPromises = archivedAccounts.map((acc) =>
-          getAccountHistory(acc.id).then((result) => {
+          client.getAccountHistory(acc.id).then((result) => {
             const values = Object.values(result.history);
             return {
               accountId: acc.id,

@@ -1,29 +1,9 @@
-import { useTheme } from "@broccoliapps/mobile";
-import { useEffect, useRef } from "react";
+import { usePulseAnimation, useTheme } from "@broccoliapps/mobile";
 import { Animated, StyleSheet, View } from "react-native";
 
 const SkeletonCard = () => {
   const { colors } = useTheme();
-  const opacity = useRef(new Animated.Value(0.3)).current;
-
-  useEffect(() => {
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 0.3,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    animation.start();
-    return () => animation.stop();
-  }, [opacity]);
+  const opacity = usePulseAnimation();
 
   return (
     <Animated.View

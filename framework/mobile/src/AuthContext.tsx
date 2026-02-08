@@ -1,8 +1,18 @@
-import { authExchange, type CacheProvider, refreshToken as refreshTokenContract } from "@broccoliapps/shared";
+import {
+  type AppId,
+  type AuthUserDto,
+  authExchange,
+  type CacheProvider,
+  COMMON_CACHE_KEYS,
+  globalConfig,
+  type JwtPayload,
+  jwt,
+  refreshToken as refreshTokenContract,
+} from "@broccoliapps/shared";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Linking } from "react-native";
 import { clearClientCache, initializeMobileClient } from "./client";
-import { type StoredTokens, type TokenStorage } from "./storage";
+import { createTokenStorage, type StoredTokens, type TokenStorage } from "./storage";
 
 type AuthContextType = {
   isLoading: boolean;
@@ -18,14 +28,40 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Token buffer: refresh 5 minutes before expiry
 const TOKEN_BUFFER_MS = 5 * 60 * 1000;
 
-type AuthProviderProps = {
+type TokenPayload = JwtPayload & {
+  data: {
+    userId: string;
+    email: string;
+    name: string;
+    provider: string;
+  };
+};
+
+const getUserFromToken = (token: string): AuthUserDto | null => {
+  try {
+    const payload = jwt.decode<TokenPayload>(token);
+    if (!payload?.data) {
+      return null;
+    }
+    return {
+      id: payload.data.userId,
+      email: payload.data.email,
+      name: payload.data.name,
+      isNewUser: false,
+    };
+  } catch {
+    return null;
+  }
+};
+
+type AuthProviderBaseProps = {
   apiBaseUrl: string;
   storage: TokenStorage;
   onInitClient?: (cache: CacheProvider) => void;
   children: React.ReactNode;
 };
 
-export const AuthProvider = ({ apiBaseUrl, storage, onInitClient, children }: AuthProviderProps) => {
+const AuthProviderBase = ({ apiBaseUrl, storage, onInitClient, children }: AuthProviderBaseProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isExchangingToken, setIsExchangingToken] = useState(false);
   const [tokens, setTokens] = useState<StoredTokens | null>(null);
@@ -183,4 +219,50 @@ export const useAuth = (): AuthContextType => {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
+};
+
+// ============================================================================
+// App-level AuthProvider — accepts `app` prop to derive config automatically
+// ============================================================================
+
+type AuthProviderProps = {
+  app: AppId;
+  onInitClient?: (cache: CacheProvider) => void;
+  children: React.ReactNode;
+};
+
+export const AuthProvider = ({ app, onInitClient, children }: AuthProviderProps) => {
+  const baseStorage = useMemo(() => createTokenStorage(`com.broccoliapps.${app}`), [app]);
+  const cacheRef = useRef<CacheProvider | null>(null);
+
+  const storage = useMemo<TokenStorage>(
+    () => ({
+      ...baseStorage,
+      get: async (): Promise<StoredTokens | null> => {
+        const tokens = await baseStorage.get();
+        if (tokens?.accessToken && cacheRef.current) {
+          const user = getUserFromToken(tokens.accessToken);
+          if (user) {
+            cacheRef.current.set(COMMON_CACHE_KEYS.user, user);
+          }
+        }
+        return tokens;
+      },
+    }),
+    [baseStorage],
+  );
+
+  const onInitClientRef = useRef(onInitClient);
+  onInitClientRef.current = onInitClient;
+
+  const handleInitClient = useCallback((cache: CacheProvider) => {
+    cacheRef.current = cache;
+    onInitClientRef.current?.(cache);
+  }, []);
+
+  return (
+    <AuthProviderBase apiBaseUrl={globalConfig.apps[app].baseUrl} storage={storage} onInitClient={handleInitClient}>
+      {children}
+    </AuthProviderBase>
+  );
 };

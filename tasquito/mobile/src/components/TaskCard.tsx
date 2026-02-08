@@ -1,23 +1,13 @@
-import { BottomModal, useTheme } from "@broccoliapps/mobile";
+import { BottomModal, DatePickerModal, SpinningLoader, SwipeAction, useTheme } from "@broccoliapps/mobile";
 import { LIMITS, type TaskDto } from "@broccoliapps/tasquito-shared";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { Check, Circle, CircleCheck, Loader2, MoreHorizontal, Trash2, X } from "lucide-react-native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Keyboard, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import DraggableFlatList, { type RenderItemParams } from "react-native-draggable-flatlist";
-import ReanimatedSwipeable, { type SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
+import { Circle, CircleCheck, MoreHorizontal, Trash2 } from "lucide-react-native";
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
-import Animated, {
-  Easing,
-  interpolate,
-  type SharedValue,
-  SlideInDown,
-  SlideOutDown,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from "react-native-reanimated";
+import { useTask } from "../hooks/useTask";
+import { useTaskCardState } from "../hooks/useTaskCardState";
+import { SubtaskSection } from "./SubtaskSection";
+import { TaskNote } from "./TaskNote";
 
 type TaskWithSubtasks = TaskDto & { subtasks: TaskDto[] };
 
@@ -27,75 +17,6 @@ type Props = {
   drag?: () => void;
   isActive?: boolean;
   onToggleStatus: () => void;
-  onDelete: () => void;
-  onToggleSubtask?: (subtaskId: string) => void;
-  onReorderSubtask?: (subtaskId: string, afterId: string | null, beforeId: string | null) => void;
-  onUpdateSubtaskTitle?: (subtaskId: string, title: string) => Promise<void>;
-  onUpdateTaskTitle?: (title: string) => Promise<void>;
-  onDeleteSubtask?: (subtaskId: string) => void;
-  onDueDateChange?: (date: string | undefined) => void;
-  onCreateSubtask?: (title: string) => void;
-  onUpdateNote?: (note: string) => Promise<void>;
-};
-
-const SwipeDeleteAction = ({
-  translation,
-  onAction,
-  swipeableMethods,
-  showText = true,
-  iconSize = 20,
-  width = 80,
-}: {
-  translation: SharedValue<number>;
-  onAction: () => void;
-  swipeableMethods: SwipeableMethods;
-  showText?: boolean;
-  iconSize?: number;
-  width?: number;
-}) => {
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: interpolate(translation.value, [-width, 0], [0, width], "clamp") }],
-  }));
-
-  return (
-    <Animated.View style={[styles.swipeAction, { width }, animatedStyle]}>
-      <TouchableOpacity
-        style={styles.swipeButton}
-        onPress={() => {
-          swipeableMethods.close();
-          onAction();
-        }}
-        activeOpacity={0.7}
-      >
-        <Trash2 size={iconSize} color="#ffffff" />
-        {showText && <Text style={styles.swipeText}>Delete</Text>}
-      </TouchableOpacity>
-    </Animated.View>
-  );
-};
-
-const SpinningLoader = ({ size, color }: { size: number; color: string }) => {
-  const rotation = useSharedValue(0);
-
-  useEffect(() => {
-    rotation.value = withRepeat(withTiming(360, { duration: 1000, easing: Easing.linear }), -1, false);
-  }, [rotation]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
-  }));
-
-  return (
-    <Animated.View style={animatedStyle}>
-      <Loader2 size={size} color={color} />
-    </Animated.View>
-  );
-};
-
-const sortBySortOrder = (a: TaskDto, b: TaskDto) => {
-  const aOrder = a.sortOrder ?? "";
-  const bOrder = b.sortOrder ?? "";
-  return aOrder < bOrder ? -1 : aOrder > bOrder ? 1 : 0;
 };
 
 const formatDueDate = (dateStr: string): string => {
@@ -103,502 +24,19 @@ const formatDueDate = (dateStr: string): string => {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 
-export const TaskCard = ({
-  task,
-  isArchived,
-  drag,
-  isActive,
-  onToggleStatus,
-  onDelete,
-  onToggleSubtask,
-  onReorderSubtask,
-  onUpdateSubtaskTitle,
-  onUpdateTaskTitle,
-  onDeleteSubtask,
-  onDueDateChange,
-  onCreateSubtask,
-  onUpdateNote,
-}: Props) => {
+export const TaskCard = ({ task, isArchived, drag, isActive, onToggleStatus }: Props) => {
   const { colors } = useTheme();
-  const isDone = task.status === "done";
-  const subtaskCount = task.subtasks.length;
-
-  // Inline task title editing state
-  const [isEditingTaskTitle, setIsEditingTaskTitle] = useState(false);
-  const [editingTaskTitle, setEditingTaskTitle] = useState("");
-  const [isSavingTaskTitle, setIsSavingTaskTitle] = useState(false);
-  const taskTitleInputRef = useRef<TextInput>(null);
-
-  // Inline subtask editing state
-  const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState("");
-  const [savingSubtaskId, setSavingSubtaskId] = useState<string | null>(null);
-  const editingTitleRef = useRef<TextInput>(null);
-
-  // New subtask input state
-  const [isAddingSubtask, setIsAddingSubtask] = useState(false);
-  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
-  const [pendingSubtaskTitle, setPendingSubtaskTitle] = useState<string | null>(null);
-  const newSubtaskInputRef = useRef<TextInput>(null);
-  const prevSubtaskCountRef = useRef(subtaskCount);
-
-  // Note editing state
-  const [isEditingNote, setIsEditingNote] = useState(false);
-  const [editingNote, setEditingNote] = useState("");
-  const [_isSavingNote, setIsSavingNote] = useState(false);
-  const noteInputRef = useRef<TextInput>(null);
-
-  // Date picker state
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [tempDate, setTempDate] = useState<string | undefined>(undefined);
-
-  // Bottom modal menu state
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
-  const [showDueDateMenu, setShowDueDateMenu] = useState(false);
-
-  // Can edit due date only when: not archived, task not done, and handler is provided
-  const canEditDueDate = !isArchived && !isDone && !!onDueDateChange;
-
-  // Can edit note only when: not archived, task not done, and handler is provided
-  const canEditNote = !isArchived && !isDone && !!onUpdateNote;
-
-  // Can add subtask only when: not archived, task not done, handler is provided, and below limit
-  const canAddSubtask = !isArchived && !isDone && !!onCreateSubtask && subtaskCount < LIMITS.MAX_SUBTASKS_PER_TASK;
-
-  // Show "more" menu when task can have date/note/subtask added
-  const canShowMoreMenu = (!task.dueDate && canEditDueDate) || (!task.note && canEditNote) || canAddSubtask;
-
-  // Clear pending subtask when a new subtask is added to the list
-  useEffect(() => {
-    if (subtaskCount > prevSubtaskCountRef.current && pendingSubtaskTitle) {
-      setPendingSubtaskTitle(null);
-    }
-    prevSubtaskCountRef.current = subtaskCount;
-  }, [subtaskCount, pendingSubtaskTitle]);
-
-  const handleNotePress = useCallback(() => {
-    if (!canEditNote) {
-      return;
-    }
-    setIsEditingNote(true);
-    setEditingNote(task.note ?? "");
-    setTimeout(() => noteInputRef.current?.focus(), 50);
-  }, [canEditNote, task.note]);
-
-  const handleNoteSubmit = useCallback(async () => {
-    if (!isEditingNote) {
-      return;
-    }
-    const trimmed = editingNote.trim();
-    setIsEditingNote(false);
-    setEditingNote("");
-
-    if (trimmed !== (task.note ?? "")) {
-      setIsSavingNote(true);
-      try {
-        await onUpdateNote?.(trimmed);
-      } finally {
-        setIsSavingNote(false);
-      }
-    }
-  }, [isEditingNote, editingNote, task.note, onUpdateNote]);
-
-  const handleNoteDiscard = useCallback(() => {
-    setIsEditingNote(false);
-    setEditingNote("");
-  }, []);
-
-  const handleDueDatePress = useCallback(() => {
-    if (!canEditDueDate) {
-      return;
-    }
-    if (Platform.OS === "android") {
-      if (task.dueDate) {
-        // Existing date: show options to change or remove
-        setShowDueDateMenu(true);
-      } else {
-        // No existing date: open picker directly
-        setTempDate(undefined);
-        setShowDatePicker(true);
-      }
-    } else {
-      // Initialize to task's due date, or today if none (fallback)
-      setTempDate(task.dueDate ?? new Date().toISOString().split("T")[0]);
-      setShowDatePicker(true);
-    }
-  }, [canEditDueDate, task.dueDate]);
-
-  const handleDateChange = useCallback(
-    (date: Date | undefined) => {
-      if (date) {
-        const formatted = date.toISOString().split("T")[0];
-        setTempDate(formatted);
-        if (Platform.OS === "android") {
-          setShowDatePicker(false);
-          onDueDateChange?.(formatted);
-        }
-      }
-    },
-    [onDueDateChange],
-  );
-
-  const handleDatePickerDone = useCallback(() => {
-    setShowDatePicker(false);
-    // Always apply the date - use tempDate or fall back to picker's displayed value (today)
-    const selectedDate = tempDate ?? new Date().toISOString().split("T")[0];
-    onDueDateChange?.(selectedDate);
-  }, [tempDate, onDueDateChange]);
-
-  const handleClearDate = useCallback(() => {
-    setShowDatePicker(false);
-    onDueDateChange?.(undefined);
-  }, [onDueDateChange]);
-
-  const handleAddSubtaskPress = useCallback(() => {
-    if (!canAddSubtask) {
-      return;
-    }
-    if (isAddingSubtask) {
-      // Toggle off: dismiss keyboard and discard
-      Keyboard.dismiss();
-      setIsAddingSubtask(false);
-      setNewSubtaskTitle("");
-    } else {
-      // Toggle on: show input and focus
-      setIsAddingSubtask(true);
-      setNewSubtaskTitle("");
-      setTimeout(() => newSubtaskInputRef.current?.focus(), 50);
-    }
-  }, [canAddSubtask, isAddingSubtask]);
-
-  const handleMoreMenuPress = useCallback(() => {
-    setShowMoreMenu(true);
-  }, []);
-
-  // Split subtasks: todo (draggable) and done (static, below)
-  const todoSubtasks = useMemo(() => [...task.subtasks].filter((s) => s.status === "todo").sort(sortBySortOrder), [task.subtasks]);
-  const doneSubtasks = useMemo(() => [...task.subtasks].filter((s) => s.status === "done").sort(sortBySortOrder), [task.subtasks]);
-
-  // Drag is enabled for subtasks only when: not archived, task not done, and handler is provided
-  const canDragSubtasks = !isArchived && !isDone && !!onReorderSubtask;
-
-  // Swipe delete is enabled for subtasks only when: not archived, task not done, and handler is provided
-  const canSwipeDeleteSubtask = !isArchived && !isDone && !!onDeleteSubtask;
-
-  // Can edit task title only when: not archived, task not done, and handler is provided
-  const canEditTaskTitle = !isArchived && !isDone && !!onUpdateTaskTitle;
-
-  const handleAddSubtaskSubmit = useCallback(() => {
-    const trimmed = newSubtaskTitle.trim();
-    setNewSubtaskTitle("");
-
-    if (trimmed) {
-      setPendingSubtaskTitle(trimmed);
-      onCreateSubtask?.(trimmed);
-    }
-    // Keep input open and focused for quick multi-add
-  }, [newSubtaskTitle, onCreateSubtask]);
-
-  const handleAddSubtaskBlur = useCallback(() => {
-    setIsAddingSubtask(false);
-    setNewSubtaskTitle("");
-  }, []);
-
-  const handleTaskTitlePress = useCallback(() => {
-    if (!canEditTaskTitle) {
-      return;
-    }
-    setIsEditingTaskTitle(true);
-    setEditingTaskTitle(task.title);
-    setTimeout(() => taskTitleInputRef.current?.focus(), 50);
-  }, [canEditTaskTitle, task.title]);
-
-  const handleTaskTitleSubmit = useCallback(async () => {
-    if (!isEditingTaskTitle) {
-      return;
-    }
-    const trimmed = editingTaskTitle.trim();
-    setIsEditingTaskTitle(false);
-    setEditingTaskTitle("");
-
-    if (trimmed && trimmed !== task.title) {
-      setIsSavingTaskTitle(true);
-      try {
-        await onUpdateTaskTitle?.(trimmed);
-      } finally {
-        setIsSavingTaskTitle(false);
-      }
-    }
-  }, [isEditingTaskTitle, editingTaskTitle, task.title, onUpdateTaskTitle]);
-
-  const handleSubtaskDragEnd = useCallback(
-    ({ data, from, to }: { data: TaskDto[]; from: number; to: number }) => {
-      if (from === to) {
-        return;
-      }
-      const dragged = data[to];
-      const after = to > 0 ? data[to - 1] : null;
-      const before = to < data.length - 1 ? data[to + 1] : null;
-      onReorderSubtask?.(dragged.id, after?.id ?? null, before?.id ?? null);
-    },
-    [onReorderSubtask],
-  );
-
-  // Can edit subtask title only when: not archived, task not done, subtask not done, and handler is provided
-  const canEditSubtaskTitle = !isArchived && !isDone && !!onUpdateSubtaskTitle;
-
-  const handleSubtaskTitlePress = useCallback(
-    (subtask: TaskDto) => {
-      if (!canEditSubtaskTitle || subtask.status === "done") {
-        return;
-      }
-      setEditingSubtaskId(subtask.id);
-      setEditingTitle(subtask.title);
-      setTimeout(() => editingTitleRef.current?.focus(), 50);
-    },
-    [canEditSubtaskTitle],
-  );
-
-  const handleSubtaskTitleSubmit = useCallback(async () => {
-    if (!editingSubtaskId) {
-      return;
-    }
-    const trimmed = editingTitle.trim();
-    const subtaskIdToSave = editingSubtaskId;
-    setEditingSubtaskId(null);
-    setEditingTitle("");
-
-    if (trimmed && trimmed !== task.subtasks.find((s) => s.id === subtaskIdToSave)?.title) {
-      setSavingSubtaskId(subtaskIdToSave);
-      try {
-        await onUpdateSubtaskTitle?.(subtaskIdToSave, trimmed);
-      } finally {
-        setSavingSubtaskId(null);
-      }
-    }
-  }, [editingSubtaskId, editingTitle, task.subtasks, onUpdateSubtaskTitle]);
-
-  const renderSubtaskItem = useCallback(
-    ({ item: subtask, drag: subtaskDrag, isActive: isSubtaskActive }: RenderItemParams<TaskDto>) => {
-      const isEditing = editingSubtaskId === subtask.id;
-      const isSaving = savingSubtaskId === subtask.id;
-
-      const subtaskContent = (
-        <View
-          style={[
-            styles.subtaskPreviewRow,
-            isSubtaskActive && { backgroundColor: colors.backgroundTertiary, borderRadius: 6, marginHorizontal: -4, paddingHorizontal: 4 },
-          ]}
-        >
-          {isSaving ? (
-            <View style={styles.subtaskIcon}>
-              <SpinningLoader size={18} color={colors.textMuted} />
-            </View>
-          ) : (
-            <TouchableOpacity
-              style={styles.subtaskIcon}
-              onPress={(e) => {
-                e.stopPropagation();
-                onToggleSubtask?.(subtask.id);
-              }}
-              onLongPress={
-                canDragSubtasks
-                  ? () => {
-                      ReactNativeHapticFeedback.trigger("impactMedium");
-                      subtaskDrag();
-                    }
-                  : undefined
-              }
-              delayLongPress={150}
-              disabled={isArchived || isDone}
-              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-            >
-              <Circle size={18} color={colors.border} />
-            </TouchableOpacity>
-          )}
-          {isEditing ? (
-            <TextInput
-              ref={editingTitleRef}
-              style={[styles.subtaskPreviewText, styles.subtaskTextInput, { color: colors.textSecondary }]}
-              value={editingTitle}
-              onChangeText={(text) => setEditingTitle(text.replace(/\n/g, " "))}
-              onKeyPress={(e) => {
-                if (e.nativeEvent.key === "Enter") {
-                  e.preventDefault?.();
-                  handleSubtaskTitleSubmit();
-                }
-              }}
-              onBlur={handleSubtaskTitleSubmit}
-              multiline
-              submitBehavior="blurAndSubmit"
-              maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
-              autoFocus
-            />
-          ) : (
-            <TouchableOpacity
-              style={styles.subtaskTextTouchable}
-              onPress={() => handleSubtaskTitlePress(subtask)}
-              onLongPress={
-                canDragSubtasks
-                  ? () => {
-                      ReactNativeHapticFeedback.trigger("impactMedium");
-                      subtaskDrag();
-                    }
-                  : undefined
-              }
-              delayLongPress={150}
-              activeOpacity={canEditSubtaskTitle ? 0.7 : 1}
-            >
-              <Text style={[styles.subtaskPreviewText, { color: colors.textSecondary }]}>{subtask.title}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      );
-
-      // Wrap in swipeable when delete is enabled
-      if (canSwipeDeleteSubtask) {
-        return (
-          <ReanimatedSwipeable
-            renderRightActions={(_progress, translation, swipeableMethods) => (
-              <SwipeDeleteAction
-                translation={translation}
-                onAction={() => onDeleteSubtask?.(subtask.id)}
-                swipeableMethods={swipeableMethods}
-                showText={false}
-                iconSize={14}
-                width={40}
-              />
-            )}
-            overshootRight={false}
-            containerStyle={styles.subtaskSwipeableContainer}
-          >
-            {subtaskContent}
-          </ReanimatedSwipeable>
-        );
-      }
-
-      return subtaskContent;
-    },
-    [
-      colors.border,
-      colors.textMuted,
-      colors.textSecondary,
-      colors.backgroundTertiary,
-      isArchived,
-      isDone,
-      onToggleSubtask,
-      canDragSubtasks,
-      canEditSubtaskTitle,
-      canSwipeDeleteSubtask,
-      onDeleteSubtask,
-      editingSubtaskId,
-      editingTitle,
-      savingSubtaskId,
-      handleSubtaskTitlePress,
-      handleSubtaskTitleSubmit,
-    ],
-  );
-
-  const renderDoneSubtaskItem = useCallback(
-    (subtask: TaskDto) => {
-      const isEditing = editingSubtaskId === subtask.id;
-      const isSaving = savingSubtaskId === subtask.id;
-
-      const subtaskContent = (
-        <View style={styles.subtaskPreviewRow}>
-          {isSaving ? (
-            <View style={styles.subtaskIcon}>
-              <SpinningLoader size={18} color={colors.textMuted} />
-            </View>
-          ) : (
-            <TouchableOpacity
-              style={styles.subtaskIcon}
-              onPress={(e) => {
-                e.stopPropagation();
-                onToggleSubtask?.(subtask.id);
-              }}
-              disabled={isArchived || isDone}
-              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-            >
-              <CircleCheck size={18} color="#10b981" />
-            </TouchableOpacity>
-          )}
-          {isEditing ? (
-            <TextInput
-              ref={editingTitleRef}
-              style={[styles.subtaskPreviewText, styles.subtaskTextInput, { color: colors.textSecondary }]}
-              value={editingTitle}
-              onChangeText={(text) => setEditingTitle(text.replace(/\n/g, " "))}
-              onKeyPress={(e) => {
-                if (e.nativeEvent.key === "Enter") {
-                  e.preventDefault?.();
-                  handleSubtaskTitleSubmit();
-                }
-              }}
-              onBlur={handleSubtaskTitleSubmit}
-              multiline
-              submitBehavior="blurAndSubmit"
-              maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
-              autoFocus
-            />
-          ) : (
-            <TouchableOpacity style={styles.subtaskTextTouchable} onPress={() => handleSubtaskTitlePress(subtask)} activeOpacity={1}>
-              <Text style={[styles.subtaskPreviewText, { color: colors.textMuted }, styles.subtaskPreviewTextDone]}>{subtask.title}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      );
-
-      // Wrap in swipeable when delete is enabled
-      if (canSwipeDeleteSubtask) {
-        return (
-          <ReanimatedSwipeable
-            key={subtask.id}
-            renderRightActions={(_progress, translation, swipeableMethods) => (
-              <SwipeDeleteAction
-                translation={translation}
-                onAction={() => onDeleteSubtask?.(subtask.id)}
-                swipeableMethods={swipeableMethods}
-                showText={false}
-                iconSize={14}
-                width={40}
-              />
-            )}
-            overshootRight={false}
-            containerStyle={styles.subtaskSwipeableContainer}
-          >
-            {subtaskContent}
-          </ReanimatedSwipeable>
-        );
-      }
-
-      return <View key={subtask.id}>{subtaskContent}</View>;
-    },
-    [
-      colors.textMuted,
-      colors.textSecondary,
-      isArchived,
-      isDone,
-      onToggleSubtask,
-      canSwipeDeleteSubtask,
-      onDeleteSubtask,
-      editingSubtaskId,
-      editingTitle,
-      savingSubtaskId,
-      handleSubtaskTitlePress,
-      handleSubtaskTitleSubmit,
-    ],
-  );
+  const { remove, updateTitle, updateDueDate } = useTask(task.id);
+  const state = useTaskCardState({
+    task,
+    isArchived,
+    updateTitle,
+    updateDueDate,
+  });
 
   const cardContent = (
     <TouchableOpacity
-      style={[
-        styles.card,
-        {
-          borderBottomColor: colors.divider,
-        },
-        isActive && styles.cardActive,
-      ]}
+      style={[styles.card, { borderBottomColor: colors.divider }, isActive && styles.cardActive]}
       activeOpacity={1}
       onLongPress={() => {
         ReactNativeHapticFeedback.trigger("impactMedium");
@@ -606,7 +44,7 @@ export const TaskCard = ({
       }}
       delayLongPress={150}
     >
-      {isSavingTaskTitle ? (
+      {state.isSavingTaskTitle ? (
         <View style={styles.checkboxButton}>
           <SpinningLoader size={24} color={colors.textMuted} />
         </View>
@@ -620,34 +58,35 @@ export const TaskCard = ({
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           style={styles.checkboxButton}
         >
-          {isDone ? <CircleCheck size={24} color="#10b981" /> : <Circle size={24} color={colors.border} />}
+          {state.isDone ? <CircleCheck size={24} color="#10b981" /> : <Circle size={24} color={colors.border} />}
         </TouchableOpacity>
       )}
       <View style={styles.content}>
         <View style={styles.titleRow}>
-          {/* Title + Date inline */}
           <View style={styles.titleWithDate}>
-            {isEditingTaskTitle ? (
+            {state.isEditingTaskTitle ? (
               <TextInput
-                ref={taskTitleInputRef}
+                ref={state.taskTitleInputRef}
                 style={[styles.title, styles.titleInput, { color: colors.textPrimary }]}
-                value={editingTaskTitle}
-                onChangeText={(text) => setEditingTaskTitle(text.replace(/\n/g, " "))}
+                value={state.editingTaskTitle}
+                onChangeText={(text) => state.setEditingTaskTitle(text.replace(/\n/g, " "))}
                 onKeyPress={(e) => {
                   if (e.nativeEvent.key === "Enter") {
                     e.preventDefault?.();
-                    handleTaskTitleSubmit();
+                    state.handleTaskTitleSubmit();
                   }
                 }}
-                onBlur={handleTaskTitleSubmit}
+                onBlur={state.handleTaskTitleSubmit}
                 multiline
                 submitBehavior="blurAndSubmit"
                 maxLength={LIMITS.MAX_TASK_TITLE_LENGTH}
                 autoFocus
               />
             ) : (
-              <TouchableOpacity onPress={handleTaskTitlePress} activeOpacity={canEditTaskTitle ? 0.7 : 1} style={styles.titleTouchable}>
-                <Text style={[styles.title, { color: isDone ? colors.textMuted : colors.textPrimary }, isDone && styles.titleDone]}>{task.title}</Text>
+              <TouchableOpacity onPress={state.handleTaskTitlePress} activeOpacity={state.canEditTaskTitle ? 0.7 : 1} style={styles.titleTouchable}>
+                <Text style={[styles.title, { color: state.isDone ? colors.textMuted : colors.textPrimary }, state.isDone && styles.titleDone]}>
+                  {task.title}
+                </Text>
               </TouchableOpacity>
             )}
             {task.dueDate && (
@@ -655,22 +94,21 @@ export const TaskCard = ({
                 style={styles.dueDateBadge}
                 onPress={(e) => {
                   e.stopPropagation();
-                  handleDueDatePress();
+                  state.handleDueDatePress();
                 }}
-                activeOpacity={canEditDueDate ? 0.7 : 1}
-                disabled={!canEditDueDate}
+                activeOpacity={state.canEditDueDate ? 0.7 : 1}
+                disabled={!state.canEditDueDate}
               >
                 <Text style={styles.dueDateText}>{formatDueDate(task.dueDate)}</Text>
               </TouchableOpacity>
             )}
           </View>
 
-          {/* Top-right more menu */}
-          {canShowMoreMenu && (
+          {state.canShowMoreMenu && (
             <TouchableOpacity
               onPress={(e) => {
                 e.stopPropagation();
-                handleMoreMenuPress();
+                state.handleMoreMenuPress();
               }}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
@@ -678,178 +116,53 @@ export const TaskCard = ({
             </TouchableOpacity>
           )}
         </View>
-        {/* Subtasks section */}
-        {(subtaskCount > 0 || isAddingSubtask || pendingSubtaskTitle) && (
-          <View style={styles.subtasksSection}>
-            {/* Todo subtasks (draggable) */}
-            {todoSubtasks.length > 0 && (
-              <DraggableFlatList<TaskDto>
-                data={todoSubtasks}
-                extraData={todoSubtasks.map((s) => s.id).join(",")}
-                keyExtractor={(item) => item.id}
-                renderItem={renderSubtaskItem}
-                onDragEnd={handleSubtaskDragEnd}
-                scrollEnabled={false}
-              />
-            )}
-            {/* Pending subtask with spinner - at bottom of todo list */}
-            {pendingSubtaskTitle && (
-              <View style={styles.subtaskPreviewRow}>
-                <SpinningLoader size={18} color={colors.textMuted} />
-                <Text style={[styles.subtaskPreviewText, { color: colors.textSecondary }]} numberOfLines={1}>
-                  {pendingSubtaskTitle}
-                </Text>
-              </View>
-            )}
-            {/* Add subtask input - after todo, before done */}
-            {isAddingSubtask && canAddSubtask && (
-              <View style={styles.addSubtaskRow}>
-                <Circle size={18} color={colors.border} />
-                <TextInput
-                  ref={newSubtaskInputRef}
-                  style={[styles.addSubtaskInput, { color: colors.textSecondary }]}
-                  value={newSubtaskTitle}
-                  onChangeText={setNewSubtaskTitle}
-                  onSubmitEditing={handleAddSubtaskSubmit}
-                  placeholder="Add subtask"
-                  placeholderTextColor={colors.textMuted}
-                  returnKeyType="done"
-                  submitBehavior="submit"
-                  maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
-                  autoFocus
-                />
-                <TouchableOpacity onPress={handleAddSubtaskBlur} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <X size={16} color={colors.textMuted} />
-                </TouchableOpacity>
-              </View>
-            )}
-            {/* Done subtasks (static) */}
-            {doneSubtasks.length > 0 && <View style={styles.doneSubtasksContainer}>{doneSubtasks.map((subtask) => renderDoneSubtaskItem(subtask))}</View>}
-          </View>
-        )}
-        {/* Note */}
-        {(task.note || isEditingNote) &&
-          (isEditingNote ? (
-            <View style={styles.noteEditContainer}>
-              <TextInput
-                ref={noteInputRef}
-                style={[styles.noteInput, { color: colors.textMuted }]}
-                value={editingNote}
-                onChangeText={setEditingNote}
-                placeholder="Add note"
-                placeholderTextColor={colors.textMuted}
-                multiline
-                textAlignVertical="top"
-                scrollEnabled={false}
-                maxLength={LIMITS.MAX_TASK_NOTE_LENGTH}
-                autoFocus
-              />
-              <View style={styles.noteActions}>
-                <TouchableOpacity onPress={handleNoteDiscard} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <X size={18} color={colors.textMuted} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleNoteSubmit} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <Check size={18} color={colors.accent} />
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : (
-            <TouchableOpacity onPress={handleNotePress} activeOpacity={canEditNote ? 0.7 : 1}>
-              <Text style={[styles.note, { color: colors.textMuted }]}>{task.note}</Text>
-            </TouchableOpacity>
-          ))}
+
+        <SubtaskSection task={task} isArchived={isArchived} addRequested={state.subtaskAddRequested} onAddStarted={state.handleSubtaskAddStarted} />
+
+        <TaskNote
+          taskId={task.id}
+          note={task.note}
+          isArchived={isArchived}
+          isDone={state.isDone}
+          editRequested={state.noteEditRequested}
+          onEditStarted={state.handleNoteEditStarted}
+        />
       </View>
     </TouchableOpacity>
   );
 
   const datePickerModal = (
-    <>
-      {showDatePicker && Platform.OS === "android" && (
-        <DateTimePicker
-          value={tempDate ? new Date(tempDate) : new Date()}
-          mode="date"
-          onChange={(_event, selectedDate) => {
-            setShowDatePicker(false);
-            if (selectedDate) {
-              handleDateChange(selectedDate);
-            }
-          }}
-        />
-      )}
-      {showDatePicker && Platform.OS === "ios" && (
-        <Modal visible={true} transparent animationType="fade">
-          <View style={styles.datePickerModalOverlay}>
-            <Pressable style={styles.datePickerModalBackdrop} onPress={() => setShowDatePicker(false)} />
-            <Animated.View
-              style={[styles.datePickerModalContent, { backgroundColor: colors.background }]}
-              entering={SlideInDown.duration(300)}
-              exiting={SlideOutDown.duration(200)}
-            >
-              <View style={[styles.datePickerModalHeader, { borderBottomColor: colors.divider }]}>
-                <TouchableOpacity onPress={() => setShowDatePicker(false)} hitSlop={8}>
-                  <Text style={[styles.datePickerModalCancel, { color: colors.textMuted }]}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleClearDate} hitSlop={8}>
-                  <Text style={styles.datePickerModalClear}>Clear date</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleDatePickerDone} hitSlop={8}>
-                  <Text style={[styles.datePickerModalDone, { color: colors.accent }]}>Done</Text>
-                </TouchableOpacity>
-              </View>
-              <DateTimePicker
-                value={tempDate ? new Date(tempDate) : new Date()}
-                mode="date"
-                display="spinner"
-                onChange={(_event, selectedDate) => {
-                  if (selectedDate) {
-                    handleDateChange(selectedDate);
-                  }
-                }}
-                style={styles.datePickerSpinner}
-              />
-            </Animated.View>
-          </View>
-        </Modal>
-      )}
-    </>
+    <DatePickerModal
+      visible={state.showDatePicker}
+      initialDate={state.datePickerInitialDate}
+      onDateSelect={state.handleDateSelect}
+      onClearDate={state.handleClearDate}
+      onClose={state.handleDatePickerClose}
+    />
   );
 
   const moreMenuModal = (
-    <BottomModal visible={showMoreMenu} onClose={() => setShowMoreMenu(false)}>
+    <BottomModal visible={state.showMoreMenu} onClose={state.handleMoreMenuClose}>
       <View style={styles.menuContainer}>
-        {canAddSubtask && (
-          <TouchableOpacity
-            style={[styles.menuItem, { borderBottomColor: colors.divider }]}
-            onPress={() => {
-              setShowMoreMenu(false);
-              handleAddSubtaskPress();
-            }}
-            activeOpacity={0.6}
-          >
+        {state.canAddSubtask && (
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.divider }]} onPress={state.handleAddSubtaskFromMenu} activeOpacity={0.6}>
             <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Add Subtask</Text>
           </TouchableOpacity>
         )}
-        {!task.dueDate && canEditDueDate && (
+        {!task.dueDate && state.canEditDueDate && (
           <TouchableOpacity
             style={[styles.menuItem, { borderBottomColor: colors.divider }]}
             onPress={() => {
-              setShowMoreMenu(false);
-              handleDueDatePress();
+              state.handleMoreMenuClose();
+              state.handleDueDatePress();
             }}
             activeOpacity={0.6}
           >
             <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Add Due Date</Text>
           </TouchableOpacity>
         )}
-        {!task.note && canEditNote && (
-          <TouchableOpacity
-            style={[styles.menuItem, { borderBottomColor: colors.divider }]}
-            onPress={() => {
-              setShowMoreMenu(false);
-              handleNotePress();
-            }}
-            activeOpacity={0.6}
-          >
+        {!task.note && state.canEditNote && (
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.divider }]} onPress={state.handleAddNoteFromMenu} activeOpacity={0.6}>
             <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Add Note</Text>
           </TouchableOpacity>
         )}
@@ -858,27 +171,12 @@ export const TaskCard = ({
   );
 
   const dueDateMenuModal = (
-    <BottomModal visible={showDueDateMenu} onClose={() => setShowDueDateMenu(false)}>
+    <BottomModal visible={state.showDueDateMenu} onClose={state.handleDueDateMenuClose}>
       <View style={styles.menuContainer}>
-        <TouchableOpacity
-          style={[styles.menuItem, { borderBottomColor: colors.divider }]}
-          onPress={() => {
-            setShowDueDateMenu(false);
-            setTempDate(task.dueDate ?? undefined);
-            setShowDatePicker(true);
-          }}
-          activeOpacity={0.6}
-        >
+        <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.divider }]} onPress={state.handleDueDateMenuChange} activeOpacity={0.6}>
           <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Change Date</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.menuItem, { borderBottomColor: colors.divider }]}
-          onPress={() => {
-            setShowDueDateMenu(false);
-            onDueDateChange?.(undefined);
-          }}
-          activeOpacity={0.6}
-        >
+        <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.divider }]} onPress={state.handleDueDateMenuRemove} activeOpacity={0.6}>
           <Text style={[styles.menuItemText, styles.menuItemTextDestructive]}>Remove Date</Text>
         </TouchableOpacity>
       </View>
@@ -900,7 +198,7 @@ export const TaskCard = ({
     <>
       <ReanimatedSwipeable
         renderRightActions={(_progress, translation, swipeableMethods) => (
-          <SwipeDeleteAction translation={translation} onAction={onDelete} swipeableMethods={swipeableMethods} />
+          <SwipeAction translation={translation} icon={Trash2} label="Delete" bgColor="#e53e3e" onAction={remove} swipeableMethods={swipeableMethods} />
         )}
         overshootRight={false}
         containerStyle={styles.swipeableOverflow}
@@ -928,9 +226,6 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   swipeableOverflow: {
-    overflow: "visible",
-  },
-  subtaskSwipeableContainer: {
     overflow: "visible",
   },
   checkboxButton: {
@@ -963,58 +258,6 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito-SemiBold",
     color: "#ffffff",
   },
-  note: {
-    fontSize: 15,
-    fontFamily: "Nunito-Regular",
-    lineHeight: 20,
-  },
-  noteEditContainer: {
-    gap: 8,
-  },
-  noteInput: {
-    fontSize: 15,
-    fontFamily: "Nunito-Regular",
-    lineHeight: 20,
-    padding: 0,
-    margin: 0,
-  },
-  noteActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 16,
-  },
-  subtasksSection: {
-    gap: 4,
-    marginTop: 4,
-  },
-  doneSubtasksContainer: {
-    overflow: "hidden",
-  },
-  subtaskPreviewRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
-    paddingVertical: 4,
-  },
-  subtaskIcon: {
-    marginTop: 2,
-  },
-  subtaskPreviewText: {
-    fontSize: 14,
-    fontFamily: "Nunito-Regular",
-    flex: 1,
-  },
-  subtaskTextTouchable: {
-    flex: 1,
-  },
-  subtaskTextInput: {
-    flex: 1,
-    padding: 0,
-    margin: 0,
-  },
-  subtaskPreviewTextDone: {
-    textDecorationLine: "line-through",
-  },
   title: {
     fontSize: 18,
     fontFamily: "Nunito-SemiBold",
@@ -1030,73 +273,6 @@ const styles = StyleSheet.create({
   },
   titleDone: {
     textDecorationLine: "line-through",
-  },
-  swipeAction: {
-    width: 80,
-    marginBottom: 0,
-  },
-  swipeButton: {
-    flex: 1,
-    marginLeft: 8,
-    backgroundColor: "#e53e3e",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 4,
-  },
-  swipeText: {
-    color: "#ffffff",
-    fontSize: 14,
-    fontFamily: "Nunito-SemiBold",
-  },
-  datePickerModalOverlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  datePickerModalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
-  datePickerModalContent: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    paddingBottom: 20,
-  },
-  datePickerModalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  datePickerModalCancel: {
-    fontSize: 18,
-    fontFamily: "Nunito-Regular",
-  },
-  datePickerModalClear: {
-    fontSize: 18,
-    fontFamily: "Nunito-Regular",
-    color: "#e53e3e",
-  },
-  datePickerModalDone: {
-    fontSize: 18,
-    fontFamily: "Nunito-SemiBold",
-  },
-  datePickerSpinner: {
-    height: 200,
-  },
-  addSubtaskRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 4,
-  },
-  addSubtaskInput: {
-    flex: 1,
-    fontSize: 14,
-    fontFamily: "Nunito-Regular",
-    padding: 0,
-    margin: 0,
   },
   menuContainer: {
     paddingBottom: 16,

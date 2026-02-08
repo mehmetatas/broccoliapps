@@ -1,16 +1,16 @@
 import { HttpError } from "@broccoliapps/backend";
 import {
-  deleteAccount,
-  deleteHistoryItem,
-  getAccount,
-  getAccountBuckets,
-  getAccountDetail,
-  getAccountHistory,
-  getAccounts,
-  patchAccount,
-  postAccount,
-  postHistoryItem,
-  putAccountBuckets,
+  deleteAccountApi,
+  deleteHistoryItemApi,
+  getAccountApi,
+  getAccountBucketsApi,
+  getAccountDetailApi,
+  getAccountHistoryApi,
+  getAccountsApi,
+  patchAccountApi,
+  postAccountApi,
+  postHistoryItemApi,
+  putAccountBucketsApi,
 } from "@broccoliapps/nwm-shared";
 import { random } from "@broccoliapps/shared";
 import { accounts, historyItems } from "../../db/accounts";
@@ -19,7 +19,7 @@ import { api } from "../lambda";
 import { calculateNextUpdate } from "../utils/nextUpdateCalculator";
 
 // GET /accounts/:id/detail - get account with all related data (register most specific routes first)
-api.register(getAccountDetail, async (req, res, ctx) => {
+api.register(getAccountDetailApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const account = await accounts.get({ userId }, { id: req.id });
 
@@ -48,7 +48,7 @@ api.register(getAccountDetail, async (req, res, ctx) => {
 });
 
 // GET /accounts/:id/history - get history items (register most specific routes first)
-api.register(getAccountHistory, async (req, res, ctx) => {
+api.register(getAccountHistoryApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const account = await accounts.get({ userId }, { id: req.id });
 
@@ -68,7 +68,7 @@ api.register(getAccountHistory, async (req, res, ctx) => {
 });
 
 // POST /accounts/:id/history-item - add/update a single history item
-api.register(postHistoryItem, async (req, res, ctx) => {
+api.register(postHistoryItemApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const account = await accounts.get({ userId }, { id: req.id });
 
@@ -99,7 +99,7 @@ api.register(postHistoryItem, async (req, res, ctx) => {
 });
 
 // DELETE /accounts/:id/history-item/:month - delete a single history item
-api.register(deleteHistoryItem, async (req, res, ctx) => {
+api.register(deleteHistoryItemApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const account = await accounts.get({ userId }, { id: req.id });
 
@@ -125,7 +125,7 @@ api.register(deleteHistoryItem, async (req, res, ctx) => {
 });
 
 // GET /accounts/:id/buckets - get buckets for an account
-api.register(getAccountBuckets, async (req, res, ctx) => {
+api.register(getAccountBucketsApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const account = await accounts.get({ userId }, { id: req.id });
 
@@ -147,7 +147,7 @@ api.register(getAccountBuckets, async (req, res, ctx) => {
 });
 
 // PUT /accounts/:id/buckets - set buckets for an account
-api.register(putAccountBuckets, async (req, res, ctx) => {
+api.register(putAccountBucketsApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const account = await accounts.get({ userId }, { id: req.id });
 
@@ -194,7 +194,7 @@ api.register(putAccountBuckets, async (req, res, ctx) => {
 });
 
 // GET /accounts/:id - get single account
-api.register(getAccount, async (req, res, ctx) => {
+api.register(getAccountApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const account = await accounts.get({ userId }, { id: req.id });
 
@@ -206,7 +206,7 @@ api.register(getAccount, async (req, res, ctx) => {
 });
 
 // PATCH /accounts/:id - update account
-api.register(patchAccount, async (req, res, ctx) => {
+api.register(patchAccountApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const account = await accounts.get({ userId }, { id: req.id });
 
@@ -234,7 +234,7 @@ api.register(patchAccount, async (req, res, ctx) => {
 });
 
 // DELETE /accounts/:id - delete account and all history
-api.register(deleteAccount, async (req, res, ctx) => {
+api.register(deleteAccountApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const account = await accounts.get({ userId }, { id: req.id });
 
@@ -273,7 +273,7 @@ api.register(deleteAccount, async (req, res, ctx) => {
 });
 
 // POST /accounts - create account with history items
-api.register(postAccount, async (req, res, ctx) => {
+api.register(postAccountApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const accountId = random.id();
   const nextUpdate = calculateNextUpdate(req.history, req.updateFrequency);
@@ -302,7 +302,7 @@ api.register(postAccount, async (req, res, ctx) => {
 });
 
 // GET /accounts - list all accounts
-api.register(getAccounts, async (_, res, ctx) => {
+api.register(getAccountsApi, async (_, res, ctx) => {
   const { userId } = await ctx.getUser();
   const result = await accounts.query({ userId }).all();
   return res.ok({ accounts: result });

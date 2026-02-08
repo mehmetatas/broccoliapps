@@ -27,6 +27,7 @@ export type AppColors = LoginColors & {
   textMuted: string;
   buttonSecondaryBg: string;
   danger: string;
+  warning: string;
 };
 
 export type LoginProps = {

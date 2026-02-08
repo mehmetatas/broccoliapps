@@ -1,7 +1,7 @@
 import { useModal } from "@broccoliapps/browser";
 import type { AccountDto, BucketDto } from "@broccoliapps/nwm-shared";
 import { useEffect, useState } from "preact/hooks";
-import { deleteBucket, getAccounts, getBucketAccounts, getBuckets, patchBucket, postBucket, putBucketAccounts } from "../api";
+import * as client from "../api";
 
 export const useBuckets = () => {
   const [buckets, setBuckets] = useState<BucketDto[]>([]);
@@ -32,14 +32,14 @@ export const useBuckets = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [bucketsResult, accountsResult] = await Promise.all([getBuckets(), getAccounts()]);
+        const [bucketsResult, accountsResult] = await Promise.all([client.getBuckets(), client.getAccounts()]);
         setBuckets(bucketsResult.buckets);
         setAccounts(accountsResult.accounts);
 
         const accountsMap: Record<string, string[]> = {};
         await Promise.all(
           bucketsResult.buckets.map(async (bucket) => {
-            const bucketAccounts = await getBucketAccounts(bucket.id);
+            const bucketAccounts = await client.getBucketAccounts(bucket.id);
             accountsMap[bucket.id] = bucketAccounts.accounts.map((a) => a.id);
           }),
         );
@@ -60,7 +60,7 @@ export const useBuckets = () => {
 
     setCreatingBucket(true);
     try {
-      const { bucket } = await postBucket({ name: newBucketName.trim() });
+      const { bucket } = await client.postBucket({ name: newBucketName.trim() });
       setBuckets((prev) => [...prev, bucket]);
       setAccountsByBucket((prev) => ({ ...prev, [bucket.id]: [] }));
       setNewBucketName("");
@@ -88,7 +88,7 @@ export const useBuckets = () => {
 
     setSavingName(true);
     try {
-      const { bucket: updated } = await patchBucket({ id: bucketId, name: editedName.trim() });
+      const { bucket: updated } = await client.patchBucket({ id: bucketId, name: editedName.trim() });
       setBuckets((prev) => prev.map((b) => (b.id === bucketId ? updated : b)));
       setEditingBucketId(null);
       setEditedName("");
@@ -106,7 +106,7 @@ export const useBuckets = () => {
 
     setDeleting(true);
     try {
-      await deleteBucket({ id: deleteModal.data.id });
+      await client.deleteBucket({ id: deleteModal.data.id });
       setBuckets((prev) => prev.filter((b) => b.id !== deleteModal.data!.id));
       setAccountsByBucket((prev) => {
         const updated = { ...prev };
@@ -143,7 +143,7 @@ export const useBuckets = () => {
 
     setSavingAccounts((prev) => ({ ...prev, [bucketId]: true }));
     try {
-      await putBucketAccounts(bucketId, newAccountIds);
+      await client.putBucketAccounts(bucketId, newAccountIds);
     } catch (err) {
       setAccountsByBucket((prev) => ({ ...prev, [bucketId]: currentAccounts }));
       setError(err instanceof Error ? err.message : "Failed to update bucket");

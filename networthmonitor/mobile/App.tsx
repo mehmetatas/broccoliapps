@@ -1,10 +1,10 @@
-import { AuthGate, useTheme } from "@broccoliapps/mobile";
+import { AuthGate, AuthProvider, useTheme } from "@broccoliapps/mobile";
+import { initClient } from "@broccoliapps/nwm-shared";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { AuthProvider } from "./src/auth/AuthContext";
 import type { RootStackParamList } from "./src/navigation/types";
 import { DetailsScreen } from "./src/screens/DetailsScreen";
 import { HomeScreen } from "./src/screens/HomeScreen";
@@ -31,7 +31,7 @@ const App = () => {
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
-        <AuthProvider>
+        <AuthProvider app="networthmonitor" onInitClient={initClient}>
           <AppContent />
         </AuthProvider>
       </SafeAreaProvider>

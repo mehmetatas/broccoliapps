@@ -1,8 +1,7 @@
-import { useTheme } from "@broccoliapps/mobile";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
-import { Check, X } from "lucide-react-native";
 import { useRef, useState } from "react";
-import { Keyboard, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { Keyboard, TextInput } from "react-native";
+import { InlineForm } from "./InlineForm";
 
 export type TaskFormData = {
   title: string;
@@ -13,7 +12,6 @@ type Props = {
 };
 
 export const TaskForm = ({ onSubmit }: Props) => {
-  const { colors } = useTheme();
   const [title, setTitle] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
@@ -37,55 +35,19 @@ export const TaskForm = ({ onSubmit }: Props) => {
   };
 
   return (
-    <View style={[styles.inputContainer, { backgroundColor: colors.inputBackground, borderColor: colors.border }]}>
-      <TextInput
-        ref={inputRef}
-        style={[styles.input, { color: colors.inputText }]}
-        placeholder="New task"
-        placeholderTextColor={colors.inputPlaceholder}
-        value={title}
-        onChangeText={setTitle}
-        maxLength={LIMITS.MAX_TASK_TITLE_LENGTH}
-        returnKeyType="done"
-        onSubmitEditing={handleSubmit}
-        submitBehavior="blurAndSubmit"
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-      />
-      {isFocused && (
-        <View style={styles.inputActions}>
-          <TouchableOpacity onPress={handleCancel} hitSlop={8} activeOpacity={0.6}>
-            <X size={18} color={colors.textMuted} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleSubmit} hitSlop={8} activeOpacity={0.6} disabled={!canSubmit}>
-            <Check size={18} color={canSubmit ? colors.accent : colors.textMuted} />
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
+    <InlineForm
+      placeholder="New task"
+      maxLength={LIMITS.MAX_TASK_TITLE_LENGTH}
+      value={title}
+      onChangeText={setTitle}
+      onSubmit={handleSubmit}
+      onCancel={handleCancel}
+      canSubmit={canSubmit}
+      isFocused={isFocused}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+      inputRef={inputRef}
+      submitBehavior="blurAndSubmit"
+    />
   );
 };
-
-const styles = StyleSheet.create({
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: 44,
-    borderWidth: 1,
-    borderRadius: 8,
-  },
-  input: {
-    flex: 1,
-    height: 44,
-    paddingLeft: 14,
-    paddingRight: 8,
-    fontSize: 16,
-    fontFamily: "Nunito-Regular",
-  },
-  inputActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingRight: 12,
-  },
-});

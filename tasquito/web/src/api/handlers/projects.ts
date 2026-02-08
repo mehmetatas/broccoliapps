@@ -1,15 +1,15 @@
 import { HttpError, ttl } from "@broccoliapps/backend";
 import { random } from "@broccoliapps/shared";
 import {
-  archiveProject,
-  deleteProject,
-  getProject,
-  getProjects,
+  archiveProjectApi,
+  deleteProjectApi,
+  getProjectApi,
+  getProjectsApi,
   LIMIT_MESSAGES,
   LIMITS,
-  patchProject,
-  postProject,
-  unarchiveProject,
+  patchProjectApi,
+  postProjectApi,
+  unarchiveProjectApi,
 } from "@broccoliapps/tasquito-shared";
 import { generateKeyBetween } from "fractional-indexing";
 import { projects } from "../../db/projects";
@@ -23,7 +23,7 @@ const ensureSortOrder = (task: Task): Task & { sortOrder: string } => ({
 });
 
 // POST /projects - create project
-api.register(postProject, async (req, res, ctx) => {
+api.register(postProjectApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
 
   // Check active project limit
@@ -50,7 +50,7 @@ api.register(postProject, async (req, res, ctx) => {
 });
 
 // GET /projects - list all projects with open task counts
-api.register(getProjects, async (_req, res, ctx) => {
+api.register(getProjectsApi, async (_req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const projectList = await projects.query({ userId }).all();
 
@@ -70,7 +70,7 @@ api.register(getProjects, async (_req, res, ctx) => {
 });
 
 // GET /projects/:id - get single project with tasks
-api.register(getProject, async (req, res, ctx) => {
+api.register(getProjectApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const project = await projects.get({ userId }, { id: req.id });
 
@@ -158,7 +158,7 @@ api.register(getProject, async (req, res, ctx) => {
 });
 
 // PATCH /projects/:id - update project
-api.register(patchProject, async (req, res, ctx) => {
+api.register(patchProjectApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const project = await projects.get({ userId }, { id: req.id });
 
@@ -178,7 +178,7 @@ api.register(patchProject, async (req, res, ctx) => {
 });
 
 // DELETE /projects/:id - delete project (cascades to all tasks)
-api.register(deleteProject, async (req, res, ctx) => {
+api.register(deleteProjectApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const project = await projects.get({ userId }, { id: req.id });
 
@@ -197,7 +197,7 @@ api.register(deleteProject, async (req, res, ctx) => {
 });
 
 // POST /projects/:id/archive - archive project (sets TTL for auto-deletion)
-api.register(archiveProject, async (req, res, ctx) => {
+api.register(archiveProjectApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const project = await projects.get({ userId }, { id: req.id });
 
@@ -241,7 +241,7 @@ api.register(archiveProject, async (req, res, ctx) => {
 });
 
 // POST /projects/:id/unarchive - unarchive project (removes TTL)
-api.register(unarchiveProject, async (req, res, ctx) => {
+api.register(unarchiveProjectApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
   const project = await projects.get({ userId }, { id: req.id });
 

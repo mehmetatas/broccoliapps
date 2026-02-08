@@ -27,6 +27,7 @@ export const lightColors: AppColors = {
   buttonSecondaryBg: "#9E9E9E",
   error: "#ef4444",
   danger: "#D32F2F",
+  warning: "#f97316",
   activityIndicator: "#333333",
 };
 
@@ -53,6 +54,7 @@ export const darkColors: AppColors = {
   buttonSecondaryBg: "#525252",
   error: "#f87171",
   danger: "#ef4444",
+  warning: "#f97316",
   activityIndicator: "#f5f5f5",
 };
 

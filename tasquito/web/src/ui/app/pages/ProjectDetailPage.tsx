@@ -1,6 +1,5 @@
 import { ArchiveConfirmModal, DeleteConfirmModal, EditableText, EmptyState, IconButton, useDragAndDrop, useModal } from "@broccoliapps/browser";
-import { LIMITS, type TaskDto } from "@broccoliapps/tasquito-shared";
-import { useProject } from "@broccoliapps/tasquito-shared/hooks";
+import { LIMITS, type TaskDto, useProject } from "@broccoliapps/tasquito-shared";
 import autoAnimate, { type AnimationController } from "@formkit/auto-animate";
 import { Archive, ArchiveRestore, ArrowLeft, CheckSquare, ChevronDown, ChevronRight, Trash2, X } from "lucide-preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";

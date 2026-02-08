@@ -1,6 +1,6 @@
 // Client-side hydration entry point
 import { cache, initSpaApp } from "@broccoliapps/browser";
-import { initClient } from "@broccoliapps/nwm-shared/client";
+import { initClient } from "@broccoliapps/nwm-shared";
 import { App } from "./SpaApp";
 
 // Initialize shared client with browser cache provider

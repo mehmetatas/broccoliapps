@@ -1,5 +1,5 @@
 import { ThemeSettings, useAuth, useTheme } from "@broccoliapps/mobile";
-import { getUserSync } from "@broccoliapps/tasquito-shared/client";
+import * as client from "@broccoliapps/tasquito-shared";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ChevronLeft } from "lucide-react-native";
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -11,7 +11,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "Settings">;
 export const SettingsScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
   const { logout } = useAuth();
-  const user = getUserSync();
+  const user = client.getUserSync();
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={Platform.OS === "android" ? ["top", "bottom"] : ["top"]}>

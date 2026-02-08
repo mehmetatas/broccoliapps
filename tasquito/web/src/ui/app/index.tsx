@@ -1,6 +1,6 @@
 // Client-side entry point for SPA
 import { cache, initSpaApp } from "@broccoliapps/browser";
-import { initClient } from "@broccoliapps/tasquito-shared/client";
+import { initClient } from "@broccoliapps/tasquito-shared";
 import { App } from "./SpaApp";
 
 // Initialize shared client with browser cache provider

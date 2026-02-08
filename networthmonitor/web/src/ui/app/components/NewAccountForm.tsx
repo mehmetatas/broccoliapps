@@ -2,7 +2,7 @@ import { Button, Input, preferences } from "@broccoliapps/browser";
 import type { BucketDto, UpdateFrequency } from "@broccoliapps/nwm-shared";
 import { useState } from "preact/hooks";
 import { route } from "preact-router";
-import { getBuckets, postAccount, putAccountBuckets } from "../api";
+import * as client from "../api";
 import { getCurrentMonth, shouldShowMonth } from "../utils/dateUtils";
 import { BucketPicker } from "./BucketPicker";
 import { CurrencyPicker } from "./CurrencyPicker";
@@ -67,7 +67,8 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
     setHistory((prev) => ({ ...prev, [currentMonth]: currentValue }));
     // Preload buckets for step 3
     if (!preloadedBuckets) {
-      getBuckets()
+      client
+        .getBuckets()
         .then((r) => setPreloadedBuckets(r.buckets))
         .catch(console.error);
     }
@@ -90,7 +91,7 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
     const currentMonth = getCurrentMonth();
 
     try {
-      await postAccount({
+      await client.postAccount({
         name: name.trim(),
         type,
         currency,
@@ -145,7 +146,7 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
     }
 
     try {
-      const { account } = await postAccount({
+      const { account } = await client.postAccount({
         name: name.trim(),
         type,
         currency,
@@ -154,7 +155,7 @@ export const NewAccountForm = ({ onSuccess, onBack }: NewAccountFormProps) => {
       });
 
       if (selectedBucketIds.size > 0) {
-        await putAccountBuckets({
+        await client.putAccountBuckets({
           id: account.id,
           bucketIds: Array.from(selectedBucketIds),
         });

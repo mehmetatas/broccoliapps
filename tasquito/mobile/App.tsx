@@ -1,10 +1,10 @@
-import { AuthGate, ThemeProvider, useTheme } from "@broccoliapps/mobile";
+import { AuthGate, AuthProvider, ThemeProvider, useTheme } from "@broccoliapps/mobile";
+import { initClient } from "@broccoliapps/tasquito-shared";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { AuthProvider } from "./src/auth/AuthContext";
 import type { RootStackParamList } from "./src/navigation/types";
 import { HomeScreen } from "./src/screens/HomeScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
@@ -34,7 +34,7 @@ const App = () => {
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
         <ThemeProvider>
-          <AuthProvider>
+          <AuthProvider app="tasquito" onInitClient={initClient}>
             <AppContent />
           </AuthProvider>
         </ThemeProvider>

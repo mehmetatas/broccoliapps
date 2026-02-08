@@ -1,11 +1,11 @@
 import { Button, preferences } from "@broccoliapps/browser";
 import { useState } from "preact/hooks";
 import { route } from "preact-router";
-import { getUserSync } from "../api";
+import * as client from "../api";
 import { CurrencyPicker } from "../components";
 
 export const OnboardingPage = () => {
-  const user = getUserSync();
+  const user = client.getUserSync();
   const [currency, setCurrency] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

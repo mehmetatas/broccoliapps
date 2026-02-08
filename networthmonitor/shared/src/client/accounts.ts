@@ -1,19 +1,19 @@
 import {
-  deleteAccount as deleteAccountApi,
-  deleteHistoryItem as deleteHistoryItemApi,
-  getAccountBuckets as getAccountBucketsApi,
-  getAccountDetail as getAccountDetailApi,
-  getAccountHistory as getAccountHistoryApi,
-  getAccounts as getAccountsApi,
-  patchAccount as patchAccountApi,
-  postAccount as postAccountApi,
-  postHistoryItem as postHistoryItemApi,
-  putAccountBuckets as putAccountBucketsApi,
-} from "../api-contracts";
+  deleteAccountApi,
+  deleteHistoryItemApi,
+  getAccountBucketsApi,
+  getAccountDetailApi,
+  getAccountHistoryApi,
+  getAccountsApi,
+  patchAccountApi,
+  postAccountApi,
+  postHistoryItemApi,
+  putAccountBucketsApi,
+} from "../api";
 import { CACHE_KEYS, getCacheExpiry } from "./cache";
 import { getCache } from "./init";
 
-type DashboardResponse = Awaited<ReturnType<typeof import("../api-contracts").getDashboard.invoke>>;
+type DashboardResponse = Awaited<ReturnType<typeof import("../api").getDashboardApi.invoke>>;
 type Account = DashboardResponse["accounts"][number];
 type Bucket = DashboardResponse["buckets"][number];
 type AccountsResponse = Awaited<ReturnType<typeof getAccountsApi.invoke>>;

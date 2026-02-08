@@ -1,10 +1,10 @@
 import { HttpError } from "@broccoliapps/backend";
-import { getExchangeRates } from "@broccoliapps/nwm-shared";
+import { getExchangeRatesApi } from "@broccoliapps/nwm-shared";
 import { exchangeRates } from "../../db/currencyRates";
 import { api } from "../lambda";
 
 // GET /exchange-rates/:fromCurrency/:toCurrency - get historical exchange rates
-api.register(getExchangeRates, async (req, res) => {
+api.register(getExchangeRatesApi, async (req, res) => {
   const { fromCurrency, toCurrency, after } = req;
 
   if (fromCurrency === toCurrency) {

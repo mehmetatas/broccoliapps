@@ -1,4 +1,4 @@
-import { getDashboard as getDashboardApi } from "../api-contracts";
+import { getDashboardApi } from "../api";
 import { setAllAccountsInCache } from "./accounts";
 import { CACHE_KEYS, getCacheExpiry } from "./cache";
 import { getCache } from "./init";

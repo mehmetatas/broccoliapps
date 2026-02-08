@@ -1,11 +1,10 @@
+import { COMMON_CACHE_KEYS } from "@broccoliapps/shared";
 import { cache } from "./cache";
-
-const THEME_CACHE_KEY = "cache:theme";
 
 export type Theme = "system" | "light" | "dark";
 
 export const getStoredTheme = (): Theme => {
-  return cache.get<Theme>(THEME_CACHE_KEY) ?? "system";
+  return cache.get<Theme>(COMMON_CACHE_KEYS.theme) ?? "system";
 };
 
 export const applyTheme = (theme?: Theme): void => {
@@ -26,7 +25,7 @@ export const applyTheme = (theme?: Theme): void => {
 };
 
 export const setTheme = (theme: Theme): void => {
-  cache.set(THEME_CACHE_KEY, theme);
+  cache.set(COMMON_CACHE_KEYS.theme, theme);
   applyTheme(theme);
 };
 

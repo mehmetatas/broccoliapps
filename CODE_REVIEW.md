@@ -65,7 +65,7 @@ You are a senior staff engineer reviewing code in the BroccoliApps monorepo. Be 
 
 ### 5. API Contracts & Validation
 
-- [ ] Every endpoint has a contract in `app-shared/src/api-contracts/` with `.dto.ts` (Valibot schemas) and `.ts` (endpoint definitions).
+- [ ] Every endpoint has a contract in `app-shared/src/api/` with `.dto.ts` (Valibot schemas) and `.ts` (endpoint definitions).
 - [ ] Request/response types are derived via `v.InferOutput<>`, never hand-written duplicates.
 - [ ] Validation happens at the boundary (API handler), not scattered through business logic.
 - [ ] New fields added to DTOs have sensible defaults or are optional to avoid breaking existing clients.

@@ -1,11 +1,7 @@
-import type { AuthExchangeResponse, AuthUserDto } from "@broccoliapps/shared";
+import { type AuthExchangeResponse, type AuthUserDto, COMMON_CACHE_KEYS } from "@broccoliapps/shared";
 import { cache } from "./cache";
 
-export const AUTH_CACHE_KEYS = {
-  accessToken: "cache:accessToken",
-  refreshToken: "cache:refreshToken",
-  user: "cache:user",
-} as const;
+export const AUTH_CACHE_KEYS = COMMON_CACHE_KEYS;
 
 export const setAuthTokens = (response: AuthExchangeResponse): void => {
   cache.set(AUTH_CACHE_KEYS.accessToken, response.accessToken, response.accessTokenExpiresAt);

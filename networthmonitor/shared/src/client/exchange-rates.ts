@@ -1,4 +1,4 @@
-import { getExchangeRates as getExchangeRatesApi } from "../api-contracts";
+import { getExchangeRatesApi } from "../api";
 import { CACHE_KEYS } from "./cache";
 import { getCache } from "./init";
 

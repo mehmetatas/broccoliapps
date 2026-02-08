@@ -1,10 +1,10 @@
-import { getDashboard } from "@broccoliapps/nwm-shared";
+import { getDashboardApi } from "@broccoliapps/nwm-shared";
 import { accounts, historyItems } from "../../db/accounts";
 import { buckets } from "../../db/buckets";
 import { api } from "../lambda";
 
 // GET /dashboard - get all accounts, buckets, and histories in a single call
-api.register(getDashboard, async (_, res, ctx) => {
+api.register(getDashboardApi, async (_, res, ctx) => {
   const { userId } = await ctx.getUser();
 
   // Fetch accounts and buckets in parallel

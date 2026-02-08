@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import type { ProjectSummaryDto } from "../api-contracts";
-import { archiveProject, deleteProject, getProjects, invalidateProjectsCache, postProject } from "../client";
+import type { ProjectSummaryDto } from "../api";
+import * as client from "../client";
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<ProjectSummaryDto[]>([]);
@@ -14,7 +14,7 @@ export const useProjects = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await getProjects();
+      const data = await client.getProjects();
       const sorted = [...data.projects].sort((a, b) => a.name.localeCompare(b.name));
       setProjects(sorted);
     } catch (err) {
@@ -31,7 +31,7 @@ export const useProjects = () => {
 
   const create = useCallback(async (name: string) => {
     try {
-      const result = await postProject({ name });
+      const result = await client.postProject({ name });
       const newProject: ProjectSummaryDto = {
         ...result.project,
         openTaskCount: 0,
@@ -49,17 +49,17 @@ export const useProjects = () => {
   }, []);
 
   const archive = useCallback(async (id: string) => {
-    const result = await archiveProject(id);
+    const result = await client.archiveProject(id);
     setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, isArchived: result.project.isArchived, archivedAt: result.project.archivedAt } : p)));
   }, []);
 
   const remove = useCallback(async (id: string) => {
-    await deleteProject(id);
+    await client.deleteProject(id);
     setProjects((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
   const refresh = useCallback(() => {
-    invalidateProjectsCache();
+    client.invalidateProjectsCache();
     load();
   }, [load]);
 

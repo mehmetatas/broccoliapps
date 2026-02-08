@@ -4,6 +4,13 @@ export const CACHE_TTL = 3600000; // 1 hour in milliseconds
 
 export const getCacheExpiry = (): number => Date.now() + CACHE_TTL;
 
+export const COMMON_CACHE_KEYS = {
+  user: "cache:user",
+  accessToken: "cache:accessToken",
+  refreshToken: "cache:refreshToken",
+  theme: "cache:theme",
+} as const;
+
 /**
  * Query with cache-aside pattern: return cached value if present,
  * otherwise fetch, cache, and return.

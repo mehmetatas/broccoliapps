@@ -1,9 +1,9 @@
 import { db, HttpError } from "@broccoliapps/backend";
-import { getUser } from "@broccoliapps/nwm-shared";
+import { getUserApi } from "@broccoliapps/nwm-shared";
 import { api } from "../lambda";
 
 // GET /user - get current user profile
-api.register(getUser, async (_, res, ctx) => {
+api.register(getUserApi, async (_, res, ctx) => {
   const { userId } = await ctx.getUser();
   const user = await db.shared.users.get({ id: userId });
 
