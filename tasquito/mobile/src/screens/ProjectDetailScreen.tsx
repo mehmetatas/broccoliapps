@@ -216,7 +216,7 @@ const ProjectDetailContent = ({ navigation }: ContentProps) => {
       )}
 
       {/* Task form */}
-      {!isArchived && <TaskForm onSubmit={handleCreateTask} />}
+      {!isArchived && <TaskForm onSubmit={handleCreateTask} autoFocus={!isLoading && tasks.length === 0} />}
     </View>
   );
 

@@ -30,7 +30,7 @@ export const TaskForm = ({ onSubmit, disabled = false }: TaskFormProps) => {
   return (
     <div class="flex items-center gap-2">
       <Input
-        placeholder="New task"
+        placeholder="Create new task"
         value={title}
         onInput={(e) => setTitle((e.target as HTMLInputElement).value)}
         onKeyDown={handleKeyDown}

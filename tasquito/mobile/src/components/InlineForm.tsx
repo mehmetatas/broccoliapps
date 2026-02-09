@@ -50,8 +50,7 @@ export const InlineForm = ({
         style={[
           styles.inputContainer,
           {
-            backgroundColor: colors.inputBackground,
-            borderColor: error ? colors.error : colors.border,
+            borderBottomColor: error ? colors.error : colors.border,
           },
         ]}
       >
@@ -91,17 +90,15 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    height: 44,
-    borderWidth: 1,
-    borderRadius: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: 8,
   },
   input: {
     flex: 1,
-    height: 44,
-    paddingLeft: 14,
-    paddingRight: 8,
     fontSize: 16,
     fontFamily: "Nunito-Regular",
+    padding: 0,
+    margin: 0,
   },
   inputActions: {
     flexDirection: "row",

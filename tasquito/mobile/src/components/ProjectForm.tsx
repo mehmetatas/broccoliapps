@@ -44,7 +44,7 @@ export const ProjectForm = ({ onSubmit }: Props) => {
 
   return (
     <InlineForm
-      placeholder="New project"
+      placeholder="Create new project"
       maxLength={LIMITS.MAX_PROJECT_NAME_LENGTH}
       softLimit={LIMITS.MAX_PROJECT_NAME_LENGTH}
       value={name}

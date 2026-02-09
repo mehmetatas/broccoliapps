@@ -1,5 +1,5 @@
 import { LIMITS } from "@broccoliapps/tasquito-shared";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Keyboard, TextInput } from "react-native";
 import { InlineForm } from "./InlineForm";
 
@@ -9,12 +9,19 @@ export type TaskFormData = {
 
 type Props = {
   onSubmit: (data: TaskFormData) => void;
+  autoFocus?: boolean;
 };
 
-export const TaskForm = ({ onSubmit }: Props) => {
+export const TaskForm = ({ onSubmit, autoFocus }: Props) => {
   const [title, setTitle] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current?.focus();
+    }
+  }, [autoFocus]);
 
   const trimmed = title.trim();
   const canSubmit = trimmed.length > 0;
@@ -36,7 +43,7 @@ export const TaskForm = ({ onSubmit }: Props) => {
 
   return (
     <InlineForm
-      placeholder="New task"
+      placeholder="Create new task"
       maxLength={LIMITS.MAX_TASK_TITLE_LENGTH}
       softLimit={LIMITS.MAX_TASK_TITLE_LENGTH}
       value={title}
@@ -48,7 +55,7 @@ export const TaskForm = ({ onSubmit }: Props) => {
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
       inputRef={inputRef}
-      submitBehavior="blurAndSubmit"
+      submitBehavior="submit"
     />
   );
 };

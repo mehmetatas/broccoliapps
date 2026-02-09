@@ -1,5 +1,5 @@
 import { SwipeAction, useTheme } from "@broccoliapps/mobile";
-import type { ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
+import { LIMITS, type ProjectSummaryDto } from "@broccoliapps/tasquito-shared";
 import { Archive, ArchiveRestore, Trash2 } from "lucide-react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
@@ -16,7 +16,18 @@ export const ProjectCard = ({ project, onPress, onArchive, onUnarchive, onDelete
   const { colors } = useTheme();
   const isArchived = project.isArchived;
 
-  const summaryText = isArchived ? "Archived" : project.totalTaskCount === 0 ? "No tasks" : `${project.openTaskCount} of ${project.totalTaskCount} open`;
+  const daysLeft = (() => {
+    if (!project.archivedAt) {
+      return LIMITS.ARCHIVE_TTL_DAYS;
+    }
+    const elapsed = Math.floor((Date.now() - project.archivedAt) / (1000 * 60 * 60 * 24));
+    return Math.max(0, LIMITS.ARCHIVE_TTL_DAYS - elapsed);
+  })();
+  const summaryText = isArchived
+    ? `Deleting ${daysLeft < 1 ? "soon" : `in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`}`
+    : project.totalTaskCount === 0
+      ? "No tasks"
+      : `${project.openTaskCount} of ${project.totalTaskCount} open`;
 
   const cardContent = (
     <TouchableOpacity
@@ -36,48 +47,50 @@ export const ProjectCard = ({ project, onPress, onArchive, onUnarchive, onDelete
     </TouchableOpacity>
   );
 
-  const hasLeftAction = isArchived && onUnarchive;
-  const hasRightAction = (!isArchived && onArchive) || (isArchived && onDelete);
+  const hasRightAction = (!isArchived && onArchive) || (isArchived && (onUnarchive || onDelete));
 
-  if (hasLeftAction || hasRightAction) {
+  if (hasRightAction) {
     return (
       <ReanimatedSwipeable
-        renderLeftActions={
-          hasLeftAction
-            ? (_progress, translation, swipeableMethods) => (
-                <SwipeAction
-                  translation={translation}
-                  icon={ArchiveRestore}
-                  label="Unarchive"
-                  bgColor="#2b6cb0"
-                  onAction={onUnarchive}
-                  swipeableMethods={swipeableMethods}
-                />
-              )
-            : undefined
-        }
-        renderRightActions={
-          hasRightAction
-            ? (_progress, translation, swipeableMethods) => {
-                const isDeleteAction = isArchived && onDelete;
-                const Icon = isDeleteAction ? Trash2 : Archive;
-                const label = isDeleteAction ? "Delete" : "Archive";
-                const bgColor = isDeleteAction ? "#e53e3e" : "#dd6b20";
-                const onAction = isDeleteAction ? onDelete : onArchive;
-
-                return (
+        renderRightActions={(_progress, translation, swipeableMethods) => {
+          if (isArchived) {
+            return (
+              <View style={styles.rightActions}>
+                {onUnarchive && (
                   <SwipeAction
                     translation={translation}
-                    icon={Icon}
-                    label={label}
-                    bgColor={bgColor}
-                    onAction={onAction ?? (() => {})}
+                    icon={ArchiveRestore}
+                    label="Unarchive"
+                    bgColor="#2b6cb0"
+                    onAction={onUnarchive}
                     swipeableMethods={swipeableMethods}
                   />
-                );
-              }
-            : undefined
-        }
+                )}
+                {onDelete && (
+                  <SwipeAction
+                    translation={translation}
+                    icon={Trash2}
+                    label="Delete"
+                    bgColor="#e53e3e"
+                    onAction={onDelete}
+                    swipeableMethods={swipeableMethods}
+                  />
+                )}
+              </View>
+            );
+          }
+
+          return (
+            <SwipeAction
+              translation={translation}
+              icon={Archive}
+              label="Archive"
+              bgColor="#dd6b20"
+              onAction={onArchive ?? (() => {})}
+              swipeableMethods={swipeableMethods}
+            />
+          );
+        }}
         overshootLeft={false}
         overshootRight={false}
       >
@@ -90,6 +103,9 @@ export const ProjectCard = ({ project, onPress, onArchive, onUnarchive, onDelete
 };
 
 const styles = StyleSheet.create({
+  rightActions: {
+    flexDirection: "row",
+  },
   card: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     padding: 16,

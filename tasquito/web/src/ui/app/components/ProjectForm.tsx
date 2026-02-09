@@ -38,7 +38,7 @@ export const ProjectForm = ({ onSubmit, disabled = false }: ProjectFormProps) =>
   return (
     <div class="flex items-center gap-2">
       <Input
-        placeholder="New project name"
+        placeholder="Create new project"
         value={name}
         onInput={(e) => setName((e.target as HTMLInputElement).value)}
         onKeyDown={handleKeyDown}
