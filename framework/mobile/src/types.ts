@@ -1,4 +1,5 @@
 import type { AppId, AuthExchangeResponse } from "@broccoliapps/shared";
+import type { ImageSourcePropType } from "react-native";
 
 export type LoginColors = {
   background: string;
@@ -36,4 +37,5 @@ export type LoginProps = {
   appId: AppId;
   onLoginSuccess: (result: AuthExchangeResponse) => Promise<void>;
   colors?: Partial<LoginColors>;
+  brandingIcon?: ImageSourcePropType;
 };

@@ -53,6 +53,11 @@ export const useProjects = () => {
     setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, isArchived: result.project.isArchived, archivedAt: result.project.archivedAt } : p)));
   }, []);
 
+  const unarchive = useCallback(async (id: string) => {
+    const result = await client.unarchiveProject(id);
+    setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, isArchived: result.project.isArchived, archivedAt: undefined } : p)));
+  }, []);
+
   const remove = useCallback(async (id: string) => {
     await client.deleteProject(id);
     setProjects((prev) => prev.filter((p) => p.id !== id));
@@ -71,6 +76,7 @@ export const useProjects = () => {
     clearLimitError,
     create,
     archive,
+    unarchive,
     remove,
     refresh,
   };

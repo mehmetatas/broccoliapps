@@ -1,4 +1,4 @@
-import { SpinningLoader, SwipeAction, useTheme } from "@broccoliapps/mobile";
+import { CharacterLimitIndicator, SpinningLoader, SwipeAction, useTheme } from "@broccoliapps/mobile";
 import { LIMITS, type TaskDto } from "@broccoliapps/tasquito-shared";
 import { Circle, CircleCheck, Trash2 } from "lucide-react-native";
 import { useCallback, useRef, useState } from "react";
@@ -43,6 +43,9 @@ export const SubtaskItem = ({ subtask, taskId, isArchived, onDrag, isActive }: S
       return;
     }
     const trimmed = editingTitle.trim();
+    if (trimmed.length > LIMITS.MAX_SUBTASK_TITLE_LENGTH) {
+      return;
+    }
     setIsEditing(false);
     setEditingTitle("");
 
@@ -91,23 +94,26 @@ export const SubtaskItem = ({ subtask, taskId, isArchived, onDrag, isActive }: S
         </TouchableOpacity>
       )}
       {isEditing ? (
-        <TextInput
-          ref={editingTitleRef}
-          style={[styles.subtaskPreviewText, styles.subtaskTextInput, { color: colors.textSecondary }]}
-          value={editingTitle}
-          onChangeText={(text) => setEditingTitle(text.replace(/\n/g, " "))}
-          onKeyPress={(e) => {
-            if (e.nativeEvent.key === "Enter") {
-              e.preventDefault?.();
-              handleTitleSubmit();
-            }
-          }}
-          onBlur={handleTitleSubmit}
-          multiline
-          submitBehavior="blurAndSubmit"
-          maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
-          autoFocus
-        />
+        <View style={styles.subtaskEditContainer}>
+          <TextInput
+            ref={editingTitleRef}
+            style={[styles.subtaskPreviewText, styles.subtaskTextInput, { color: colors.textSecondary }]}
+            value={editingTitle}
+            onChangeText={(text) => setEditingTitle(text.replace(/\n/g, " "))}
+            onKeyPress={(e) => {
+              if (e.nativeEvent.key === "Enter") {
+                e.preventDefault?.();
+                handleTitleSubmit();
+              }
+            }}
+            onBlur={handleTitleSubmit}
+            multiline
+            submitBehavior="blurAndSubmit"
+            maxLength={Math.floor(LIMITS.MAX_SUBTASK_TITLE_LENGTH * 1.5)}
+            autoFocus
+          />
+          <CharacterLimitIndicator textLength={editingTitle.length} softLimit={LIMITS.MAX_SUBTASK_TITLE_LENGTH} />
+        </View>
       ) : (
         <TouchableOpacity
           style={styles.subtaskTextTouchable}
@@ -167,8 +173,10 @@ const styles = StyleSheet.create({
   subtaskTextTouchable: {
     flex: 1,
   },
-  subtaskTextInput: {
+  subtaskEditContainer: {
     flex: 1,
+  },
+  subtaskTextInput: {
     padding: 0,
     margin: 0,
   },

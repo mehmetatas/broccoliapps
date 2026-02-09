@@ -1,10 +1,20 @@
 import type { AuthUserDto } from "@broccoliapps/shared";
 import { Settings } from "lucide-preact";
+import type { ComponentChildren } from "preact";
 import { useRef, useState } from "preact/hooks";
 import { getAuthUser } from "../auth-cache";
 import { useClickOutside } from "../hooks/useClickOutside";
 
-export const UserMenu = () => {
+type UserMenuItem = {
+  label: string;
+  icon?: ComponentChildren;
+} & ({ href: string } | { onClick: () => void });
+
+type UserMenuProps = {
+  items?: UserMenuItem[];
+};
+
+export const UserMenu = ({ items }: UserMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -17,6 +27,8 @@ export const UserMenu = () => {
   }
 
   const userInitial = user.name?.charAt(0).toUpperCase() ?? user.email?.charAt(0).toUpperCase() ?? "U";
+
+  const itemClass = "flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700";
 
   return (
     <div class="relative" ref={menuRef}>
@@ -35,11 +47,28 @@ export const UserMenu = () => {
             <p class="text-xs text-neutral-500 dark:text-neutral-400 truncate">{user.email}</p>
           </div>
           <div class="py-1">
-            <a
-              href="/app/settings"
-              class="flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700"
-              onClick={() => setIsMenuOpen(false)}
-            >
+            {items?.map((item) =>
+              "href" in item ? (
+                <a key={item.label} href={item.href} class={itemClass} onClick={() => setIsMenuOpen(false)}>
+                  {item.icon}
+                  {item.label}
+                </a>
+              ) : (
+                <button
+                  key={item.label}
+                  type="button"
+                  class={`${itemClass} w-full text-left`}
+                  onClick={() => {
+                    item.onClick();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  {item.icon}
+                  {item.label}
+                </button>
+              ),
+            )}
+            <a href="/app/settings" class={itemClass} onClick={() => setIsMenuOpen(false)}>
               <Settings size={16} />
               Settings
             </a>

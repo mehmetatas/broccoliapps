@@ -20,7 +20,7 @@ export const TaskForm = ({ onSubmit }: Props) => {
   const canSubmit = trimmed.length > 0;
 
   const handleSubmit = () => {
-    if (!trimmed) {
+    if (!trimmed || trimmed.length > LIMITS.MAX_TASK_TITLE_LENGTH) {
       return;
     }
     onSubmit({ title: trimmed });
@@ -38,6 +38,7 @@ export const TaskForm = ({ onSubmit }: Props) => {
     <InlineForm
       placeholder="New task"
       maxLength={LIMITS.MAX_TASK_TITLE_LENGTH}
+      softLimit={LIMITS.MAX_TASK_TITLE_LENGTH}
       value={title}
       onChangeText={setTitle}
       onSubmit={handleSubmit}

@@ -1,5 +1,5 @@
-import { BottomModal, DatePickerModal, SpinningLoader, SwipeAction, useTheme } from "@broccoliapps/mobile";
-import { LIMITS, type TaskDto } from "@broccoliapps/tasquito-shared";
+import { BottomModal, CharacterLimitIndicator, DatePickerModal, SpinningLoader, SwipeAction, useTheme } from "@broccoliapps/mobile";
+import { formatDueDate, LIMITS, type TaskDto, type TaskMenuAction } from "@broccoliapps/tasquito-shared";
 import { Circle, CircleCheck, MoreHorizontal, Trash2 } from "lucide-react-native";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
@@ -11,17 +11,18 @@ import { TaskNote } from "./TaskNote";
 
 type TaskWithSubtasks = TaskDto & { subtasks: TaskDto[] };
 
+const MORE_MENU_LABELS: Partial<Record<TaskMenuAction, string>> = {
+  "add-subtask": "Add Subtask",
+  "due-date": "Set Due Date",
+  "add-note": "Add Note",
+};
+
 type Props = {
   task: TaskWithSubtasks;
   isArchived?: boolean;
   drag?: () => void;
   isActive?: boolean;
   onToggleStatus: () => void;
-};
-
-const formatDueDate = (dateStr: string): string => {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 
 export const TaskCard = ({ task, isArchived, drag, isActive, onToggleStatus }: Props) => {
@@ -63,8 +64,8 @@ export const TaskCard = ({ task, isArchived, drag, isActive, onToggleStatus }: P
       )}
       <View style={styles.content}>
         <View style={styles.titleRow}>
-          <View style={styles.titleWithDate}>
-            {state.isEditingTaskTitle ? (
+          {state.isEditingTaskTitle ? (
+            <View style={styles.titleEditContainer}>
               <TextInput
                 ref={state.taskTitleInputRef}
                 style={[styles.title, styles.titleInput, { color: colors.textPrimary }]}
@@ -79,31 +80,31 @@ export const TaskCard = ({ task, isArchived, drag, isActive, onToggleStatus }: P
                 onBlur={state.handleTaskTitleSubmit}
                 multiline
                 submitBehavior="blurAndSubmit"
-                maxLength={LIMITS.MAX_TASK_TITLE_LENGTH}
+                maxLength={state.taskTitleHardMaxLength}
                 autoFocus
               />
-            ) : (
-              <TouchableOpacity onPress={state.handleTaskTitlePress} activeOpacity={state.canEditTaskTitle ? 0.7 : 1} style={styles.titleTouchable}>
-                <Text style={[styles.title, { color: state.isDone ? colors.textMuted : colors.textPrimary }, state.isDone && styles.titleDone]}>
-                  {task.title}
-                </Text>
-              </TouchableOpacity>
-            )}
-            {task.dueDate && (
-              <TouchableOpacity
-                style={styles.dueDateBadge}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  state.handleDueDatePress();
-                }}
-                activeOpacity={state.canEditDueDate ? 0.7 : 1}
-                disabled={!state.canEditDueDate}
-              >
-                <Text style={styles.dueDateText}>{formatDueDate(task.dueDate)}</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
+              <CharacterLimitIndicator textLength={state.editingTaskTitle.length} softLimit={LIMITS.MAX_TASK_TITLE_LENGTH} />
+            </View>
+          ) : (
+            <TouchableOpacity onPress={state.handleTaskTitlePress} activeOpacity={state.canEditTaskTitle ? 0.7 : 1} style={styles.titleTouchable}>
+              <Text style={[styles.title, { color: state.isDone ? colors.textMuted : colors.textPrimary }, state.isDone && styles.titleDone]}>
+                {task.title}
+              </Text>
+            </TouchableOpacity>
+          )}
+          {task.dueDate && (
+            <TouchableOpacity
+              style={styles.dueDateBadge}
+              onPress={(e) => {
+                e.stopPropagation();
+                state.handleDueDatePress();
+              }}
+              activeOpacity={state.canEditDueDate ? 0.7 : 1}
+              disabled={!state.canEditDueDate}
+            >
+              <Text style={styles.dueDateText}>{formatDueDate(task.dueDate)}</Text>
+            </TouchableOpacity>
+          )}
           {state.canShowMoreMenu && (
             <TouchableOpacity
               onPress={(e) => {
@@ -141,31 +142,25 @@ export const TaskCard = ({ task, isArchived, drag, isActive, onToggleStatus }: P
     />
   );
 
+  const moreMenuHandlers: Partial<Record<TaskMenuAction, () => void>> = {
+    "add-subtask": state.handleAddSubtaskFromMenu,
+    "due-date": state.handleAddDueDateFromMenu,
+    "add-note": state.handleAddNoteFromMenu,
+  };
+
   const moreMenuModal = (
     <BottomModal visible={state.showMoreMenu} onClose={state.handleMoreMenuClose}>
       <View style={styles.menuContainer}>
-        {state.canAddSubtask && (
-          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.divider }]} onPress={state.handleAddSubtaskFromMenu} activeOpacity={0.6}>
-            <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Add Subtask</Text>
-          </TouchableOpacity>
-        )}
-        {!task.dueDate && state.canEditDueDate && (
+        {state.moreMenuActions.map((action) => (
           <TouchableOpacity
+            key={action}
             style={[styles.menuItem, { borderBottomColor: colors.divider }]}
-            onPress={() => {
-              state.handleMoreMenuClose();
-              state.handleDueDatePress();
-            }}
+            onPress={moreMenuHandlers[action]}
             activeOpacity={0.6}
           >
-            <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Add Due Date</Text>
+            <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>{MORE_MENU_LABELS[action]}</Text>
           </TouchableOpacity>
-        )}
-        {!task.note && state.canEditNote && (
-          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: colors.divider }]} onPress={state.handleAddNoteFromMenu} activeOpacity={0.6}>
-            <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Add Note</Text>
-          </TouchableOpacity>
-        )}
+        ))}
       </View>
     </BottomModal>
   );
@@ -240,13 +235,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 8,
   },
-  titleWithDate: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    flexWrap: "wrap",
-  },
   dueDateBadge: {
     backgroundColor: "#3b82f6",
     borderRadius: 4,
@@ -264,10 +252,12 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   titleTouchable: {
-    flexShrink: 1,
+    flex: 1,
+  },
+  titleEditContainer: {
+    flex: 1,
   },
   titleInput: {
-    flex: 1,
     padding: 0,
     margin: 0,
   },

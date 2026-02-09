@@ -31,6 +31,7 @@ export const Html = ({ title, description, devPort, layout: Layout, pageProps, s
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
         <title>{title}</title>
         {description && <meta name="description" content={description} />}
 

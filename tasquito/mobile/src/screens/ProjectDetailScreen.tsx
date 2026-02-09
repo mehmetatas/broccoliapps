@@ -1,4 +1,4 @@
-import { Modal, Toast, useModal, useTheme } from "@broccoliapps/mobile";
+import { CharacterLimitIndicator, Modal, Toast, useModal, useTheme } from "@broccoliapps/mobile";
 import type { TaskDto } from "@broccoliapps/tasquito-shared";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -9,7 +9,7 @@ import DraggableFlatList, { type RenderItemParams } from "react-native-draggable
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AnimatedCell } from "../components/AnimatedCell";
 import { TaskCard } from "../components/TaskCard";
-import { TaskCardSkeleton, TaskListSkeleton } from "../components/TaskCardSkeleton";
+import { TaskListSkeleton } from "../components/TaskCardSkeleton";
 import { TaskForm, type TaskFormData } from "../components/TaskForm";
 import { ProjectProvider, useProjectContext } from "../context/ProjectContext";
 import type { RootStackParamList } from "../navigation/types";
@@ -45,7 +45,6 @@ const ProjectDetailContent = ({ navigation }: ContentProps) => {
     error,
     limitError,
     clearLimitError,
-    pendingTaskCount,
     createTask,
     updateTaskStatus,
     updateName,
@@ -78,8 +77,11 @@ const ProjectDetailContent = ({ navigation }: ContentProps) => {
   };
 
   const handleNameSubmit = () => {
-    setIsEditingName(false);
     const trimmed = editedName.trim();
+    if (trimmed.length > LIMITS.MAX_PROJECT_NAME_LENGTH) {
+      return;
+    }
+    setIsEditingName(false);
     if (trimmed && trimmed !== project?.name) {
       updateName(trimmed);
     }
@@ -179,7 +181,7 @@ const ProjectDetailContent = ({ navigation }: ContentProps) => {
             onBlur={handleNameSubmit}
             multiline
             submitBehavior="blurAndSubmit"
-            maxLength={LIMITS.MAX_PROJECT_NAME_LENGTH}
+            maxLength={Math.floor(LIMITS.MAX_PROJECT_NAME_LENGTH * 1.5)}
             selectTextOnFocus
           />
         ) : (
@@ -193,6 +195,7 @@ const ProjectDetailContent = ({ navigation }: ContentProps) => {
           </TouchableOpacity>
         )}
       </View>
+      {isEditingName && <CharacterLimitIndicator textLength={editedName.length} softLimit={LIMITS.MAX_PROJECT_NAME_LENGTH} />}
 
       {/* Archived banner */}
       {isArchived && (
@@ -219,15 +222,6 @@ const ProjectDetailContent = ({ navigation }: ContentProps) => {
 
   const ListFooter = (
     <View>
-      {/* Pending task skeletons */}
-      {pendingTaskCount > 0 && (
-        <View>
-          {Array.from({ length: pendingTaskCount }).map((_, i) => (
-            <TaskCardSkeleton key={`pending-${i}`} />
-          ))}
-        </View>
-      )}
-
       {/* Done tasks */}
       {doneTasks.map((task) => (
         <AnimatedCell key={task.id} exiting={exitingTaskId === task.id} onExitDone={handleExitComplete}>
@@ -236,7 +230,7 @@ const ProjectDetailContent = ({ navigation }: ContentProps) => {
       ))}
 
       {/* Empty state */}
-      {!isLoading && tasks.length === 0 && pendingTaskCount === 0 && (
+      {!isLoading && tasks.length === 0 && (
         <View style={styles.emptyContainer}>
           <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>{isArchived ? "No tasks" : "No tasks yet"}</Text>
           {!isArchived && <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>Create your first task to get started.</Text>}

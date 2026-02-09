@@ -42,6 +42,8 @@ export const useDragAndDrop = <T extends DragItem>({ onReorder, disabled = false
         // Filter matched - drag is cancelled automatically
         // Do nothing here to allow default browser behavior (focus)
       },
+      delay: 300,
+      delayOnTouchOnly: true,
       forceFallback: true,
       animation: 150,
       ghostClass: "opacity-30",

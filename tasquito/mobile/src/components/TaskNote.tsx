@@ -1,8 +1,9 @@
-import { useTheme } from "@broccoliapps/mobile";
+import { CharacterLimitIndicator, useTheme } from "@broccoliapps/mobile";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
 import { Check, X } from "lucide-react-native";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Linking, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import InAppBrowser from "react-native-inappbrowser-reborn";
 import { useTask } from "../hooks/useTask";
 
 type TaskNoteProps = {
@@ -14,15 +15,93 @@ type TaskNoteProps = {
   onEditStarted?: () => void;
 };
 
+const MAX_PREVIEW_LINES = 10;
+const URL_REGEX = /https:\/\/\S+/g;
+const TRAILING_PUNCT = /[.,)\]]+$/;
+
+const openUrl = async (url: string, colors: { background: string; accent: string }) => {
+  try {
+    const available = await InAppBrowser.isAvailable();
+    if (available) {
+      await InAppBrowser.open(url, {
+        dismissButtonStyle: "close",
+        preferredBarTintColor: colors.background,
+        preferredControlTintColor: colors.accent,
+        readerMode: false,
+        animated: true,
+        modalPresentationStyle: "fullScreen",
+        modalTransitionStyle: "coverVertical",
+        modalEnabled: true,
+        enableBarCollapsing: false,
+      });
+    } else {
+      await Linking.openURL(url);
+    }
+  } catch {
+    await Linking.openURL(url);
+  }
+};
+
 export const TaskNote = ({ taskId, note, isArchived, isDone, editRequested, onEditStarted }: TaskNoteProps) => {
   const { colors } = useTheme();
   const { updateNote } = useTask(taskId);
+
+  const linkifyNote = useCallback(
+    (text: string): ReactNode[] => {
+      const nodes: ReactNode[] = [];
+      const lines = text.split("\n");
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]!;
+        let lastIndex = 0;
+        for (const match of line.matchAll(URL_REGEX)) {
+          const start = match.index;
+          let url = match[0];
+          const trailing = TRAILING_PUNCT.exec(url);
+          if (trailing) {
+            url = url.slice(0, -trailing[0].length);
+          }
+          if (start > lastIndex) {
+            nodes.push(line.slice(lastIndex, start));
+          }
+          const linkUrl = url;
+          nodes.push(
+            <Text key={`${i}-${start}`} onPress={() => openUrl(linkUrl, colors)} style={{ color: colors.accent, textDecorationLine: "underline" }}>
+              {url}
+            </Text>,
+          );
+          lastIndex = start + url.length;
+        }
+        if (lastIndex < line.length) {
+          nodes.push(line.slice(lastIndex));
+        }
+        if (i < lines.length - 1) {
+          nodes.push("\n");
+        }
+      }
+      return nodes;
+    },
+    [colors],
+  );
 
   const canEditNote = !isArchived && !isDone;
 
   const [isEditing, setIsEditing] = useState(false);
   const [editingNote, setEditingNote] = useState("");
+  const [expanded, setExpanded] = useState(false);
   const noteInputRef = useRef<TextInput>(null);
+
+  const isTruncatable = useMemo(() => {
+    if (!note) {
+      return false;
+    }
+    const lineCount = note.split("\n").length;
+    return lineCount > MAX_PREVIEW_LINES;
+  }, [note]);
+
+  // Reset expanded state when note changes
+  useEffect(() => {
+    setExpanded(false);
+  }, [note]);
 
   // Allow parent (more menu) to trigger editing
   useEffect(() => {
@@ -48,6 +127,9 @@ export const TaskNote = ({ taskId, note, isArchived, isDone, editRequested, onEd
       return;
     }
     const trimmed = editingNote.trim();
+    if (trimmed.length > LIMITS.MAX_TASK_NOTE_LENGTH) {
+      return;
+    }
     setIsEditing(false);
     setEditingNote("");
 
@@ -78,9 +160,10 @@ export const TaskNote = ({ taskId, note, isArchived, isDone, editRequested, onEd
           multiline
           textAlignVertical="top"
           scrollEnabled={false}
-          maxLength={LIMITS.MAX_TASK_NOTE_LENGTH}
+          maxLength={Math.floor(LIMITS.MAX_TASK_NOTE_LENGTH * 1.5)}
           autoFocus
         />
+        <CharacterLimitIndicator textLength={editingNote.length} softLimit={LIMITS.MAX_TASK_NOTE_LENGTH} />
         <View style={styles.noteActions}>
           <TouchableOpacity onPress={handleNoteDiscard} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <X size={18} color={colors.textMuted} />
@@ -94,9 +177,20 @@ export const TaskNote = ({ taskId, note, isArchived, isDone, editRequested, onEd
   }
 
   return (
-    <TouchableOpacity onPress={handleNotePress} activeOpacity={canEditNote ? 0.7 : 1}>
-      <Text style={[styles.note, { color: colors.textMuted }]}>{note}</Text>
-    </TouchableOpacity>
+    <View>
+      <Text
+        style={[styles.note, { color: colors.textMuted }]}
+        numberOfLines={!expanded && isTruncatable ? MAX_PREVIEW_LINES : undefined}
+        onPress={canEditNote ? handleNotePress : undefined}
+      >
+        {linkifyNote(note ?? "")}
+      </Text>
+      {isTruncatable && (
+        <TouchableOpacity onPress={() => setExpanded(!expanded)} hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}>
+          <Text style={[styles.toggleText, { color: colors.textMuted }]}>{expanded ? "Show less" : "Show more"}</Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 };
 
@@ -120,5 +214,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     gap: 16,
+  },
+  toggleText: {
+    fontSize: 13,
+    fontFamily: "Nunito-Regular",
+    marginTop: 4,
   },
 });

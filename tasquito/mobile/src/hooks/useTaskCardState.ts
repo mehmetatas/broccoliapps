@@ -1,4 +1,4 @@
-import { LIMITS, type TaskDto } from "@broccoliapps/tasquito-shared";
+import { getTaskCapabilities, getTaskMenuActions, LIMITS, type TaskDto } from "@broccoliapps/tasquito-shared";
 import { useCallback, useRef, useState } from "react";
 import { Platform, TextInput } from "react-native";
 
@@ -12,15 +12,10 @@ type UseTaskCardStateInput = {
 };
 
 export const useTaskCardState = ({ task, isArchived, updateTitle, updateDueDate }: UseTaskCardStateInput) => {
-  const isDone = task.status === "done";
-  const subtaskCount = task.subtasks.length;
-
-  // Capability flags
-  const canEditDueDate = !isArchived && !isDone;
-  const canEditNote = !isArchived && !isDone;
-  const canAddSubtask = !isArchived && !isDone && subtaskCount < LIMITS.MAX_SUBTASKS_PER_TASK;
-  const canShowMoreMenu = (!task.dueDate && canEditDueDate) || (!task.note && canEditNote) || canAddSubtask;
-  const canEditTaskTitle = !isArchived && !isDone;
+  const capabilities = getTaskCapabilities(task, !!isArchived);
+  const { isDone, canEditDueDate, canEditTitle: canEditTaskTitle } = capabilities;
+  const moreMenuActions = getTaskMenuActions(task, capabilities).filter((a) => a !== "delete");
+  const canShowMoreMenu = moreMenuActions.length > 0;
 
   // Task title editing state
   const [isEditingTaskTitle, setIsEditingTaskTitle] = useState(false);
@@ -50,11 +45,16 @@ export const useTaskCardState = ({ task, isArchived, updateTitle, updateDueDate 
     setTimeout(() => taskTitleInputRef.current?.focus(), 50);
   }, [canEditTaskTitle, task.title]);
 
+  const taskTitleHardMaxLength = Math.floor(LIMITS.MAX_TASK_TITLE_LENGTH * 1.5);
+
   const handleTaskTitleSubmit = useCallback(async () => {
     if (!isEditingTaskTitle) {
       return;
     }
     const trimmed = editingTaskTitle.trim();
+    if (trimmed.length > LIMITS.MAX_TASK_TITLE_LENGTH) {
+      return;
+    }
     setIsEditingTaskTitle(false);
     setEditingTaskTitle("");
 
@@ -134,6 +134,11 @@ export const useTaskCardState = ({ task, isArchived, updateTitle, updateDueDate 
     setSubtaskAddRequested(true);
   }, []);
 
+  const handleAddDueDateFromMenu = useCallback(() => {
+    setShowMoreMenu(false);
+    handleDueDatePress();
+  }, [handleDueDatePress]);
+
   const handleAddNoteFromMenu = useCallback(() => {
     setShowMoreMenu(false);
     setNoteEditRequested(true);
@@ -153,15 +158,17 @@ export const useTaskCardState = ({ task, isArchived, updateTitle, updateDueDate 
 
     // Capability flags
     canEditDueDate,
-    canEditNote,
-    canAddSubtask,
     canShowMoreMenu,
     canEditTaskTitle,
+
+    // More menu actions (shared)
+    moreMenuActions,
 
     // Task title editing
     isEditingTaskTitle,
     editingTaskTitle,
     setEditingTaskTitle,
+    taskTitleHardMaxLength,
     isSavingTaskTitle,
     taskTitleInputRef,
     handleTaskTitlePress,
@@ -190,6 +197,7 @@ export const useTaskCardState = ({ task, isArchived, updateTitle, updateDueDate 
     noteEditRequested,
     subtaskAddRequested,
     handleAddSubtaskFromMenu,
+    handleAddDueDateFromMenu,
     handleAddNoteFromMenu,
     handleNoteEditStarted,
     handleSubtaskAddStarted,

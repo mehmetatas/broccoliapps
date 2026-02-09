@@ -17,7 +17,7 @@
     "ios:install:release": "npm run build && cd ios && rm -rf Pods Podfile.lock build .xcuserdata && bundle exec pod install && cd - && react-native run-ios --mode Release --port 7082 --device",
     "kill:metro": "pkill -f 'react-native.*start|@react-native/community-cli-plugin.*start|metro' || true",
     "lint": "eslint .",
-    "start": "react-native start --port 7082",
+    "start": "react-native start --reset-cache --port 7082",
     "test": "jest --passWithNoTests"
   },
   "dependencies": {

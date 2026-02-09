@@ -18,7 +18,13 @@ export const LoginScreen = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
-      <Login title="Net Worth Monitor" slogan="Track your wealth, effortlessly" appId="networthmonitor" onLoginSuccess={onLoginSuccess} />
+      <Login
+        title="Net Worth Monitor"
+        slogan="Track your wealth, effortlessly"
+        appId="networthmonitor"
+        onLoginSuccess={onLoginSuccess}
+        brandingIcon={require("../../assets/broccoli-logo.png")}
+      />
     </SafeAreaView>
   );
 };

@@ -1,4 +1,4 @@
-import { SpinningLoader, useTheme } from "@broccoliapps/mobile";
+import { CharacterLimitIndicator, SpinningLoader, useTheme } from "@broccoliapps/mobile";
 import { LIMITS, type TaskDto } from "@broccoliapps/tasquito-shared";
 import { Circle, X } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -60,6 +60,9 @@ export const SubtaskSection = ({ task, isArchived, addRequested, onAddStarted }:
 
   const handleAddSubtaskSubmit = useCallback(() => {
     const trimmed = newSubtaskTitle.trim();
+    if (trimmed.length > LIMITS.MAX_SUBTASK_TITLE_LENGTH) {
+      return;
+    }
     setNewSubtaskTitle("");
 
     if (trimmed) {
@@ -118,24 +121,27 @@ export const SubtaskSection = ({ task, isArchived, addRequested, onAddStarted }:
         </View>
       )}
       {isAddingSubtask && canAddSubtask && (
-        <View style={styles.addSubtaskRow}>
-          <Circle size={18} color={colors.border} />
-          <TextInput
-            ref={newSubtaskInputRef}
-            style={[styles.addSubtaskInput, { color: colors.textSecondary }]}
-            value={newSubtaskTitle}
-            onChangeText={setNewSubtaskTitle}
-            onSubmitEditing={handleAddSubtaskSubmit}
-            placeholder="Add subtask"
-            placeholderTextColor={colors.textMuted}
-            returnKeyType="done"
-            submitBehavior="submit"
-            maxLength={LIMITS.MAX_SUBTASK_TITLE_LENGTH}
-            autoFocus
-          />
-          <TouchableOpacity onPress={handleAddSubtaskBlur} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <X size={16} color={colors.textMuted} />
-          </TouchableOpacity>
+        <View>
+          <View style={styles.addSubtaskRow}>
+            <Circle size={18} color={colors.border} />
+            <TextInput
+              ref={newSubtaskInputRef}
+              style={[styles.addSubtaskInput, { color: colors.textSecondary }]}
+              value={newSubtaskTitle}
+              onChangeText={setNewSubtaskTitle}
+              onSubmitEditing={handleAddSubtaskSubmit}
+              placeholder="Add subtask"
+              placeholderTextColor={colors.textMuted}
+              returnKeyType="done"
+              submitBehavior="submit"
+              maxLength={Math.floor(LIMITS.MAX_SUBTASK_TITLE_LENGTH * 1.5)}
+              autoFocus
+            />
+            <TouchableOpacity onPress={handleAddSubtaskBlur} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <X size={16} color={colors.textMuted} />
+            </TouchableOpacity>
+          </View>
+          <CharacterLimitIndicator textLength={newSubtaskTitle.length} softLimit={LIMITS.MAX_SUBTASK_TITLE_LENGTH} />
         </View>
       )}
       {doneSubtasks.length > 0 && (

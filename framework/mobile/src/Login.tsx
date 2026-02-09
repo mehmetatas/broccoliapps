@@ -1,8 +1,9 @@
 import { type AuthExchangeResponse, authExchange, globalConfig, sendMagicLink, verifyApple } from "@broccoliapps/shared";
 import { appleAuth } from "@invertase/react-native-apple-authentication";
 import { useState } from "react";
-import { ActivityIndicator, Linking, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, Linking, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import InAppBrowser from "react-native-inappbrowser-reborn";
+import { AppleIcon, EmailIcon, GoogleIcon } from "./icons";
 import { useLoginTheme } from "./theme";
 import type { LoginProps } from "./types";
 
@@ -19,7 +20,7 @@ const parseCodeFromUrl = (url: string): string | null => {
   }
 };
 
-export const Login = ({ title, slogan, appId, onLoginSuccess, colors: colorOverrides }: LoginProps) => {
+export const Login = ({ title, slogan, appId, onLoginSuccess, colors: colorOverrides, brandingIcon }: LoginProps) => {
   const { colors } = useLoginTheme(colorOverrides);
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
@@ -205,7 +206,10 @@ export const Login = ({ title, slogan, appId, onLoginSuccess, colors: colorOverr
             {loading === "google" ? (
               <ActivityIndicator color={colors.activityIndicator} />
             ) : (
-              <Text style={[styles.googleButtonText, { color: colors.googleButtonText }]}>Continue with Google</Text>
+              <>
+                <GoogleIcon size={20} />
+                <Text style={[styles.googleButtonText, { color: colors.googleButtonText }]}>Continue with Google</Text>
+              </>
             )}
           </TouchableOpacity>
 
@@ -213,7 +217,10 @@ export const Login = ({ title, slogan, appId, onLoginSuccess, colors: colorOverr
             {loading === "apple" ? (
               <ActivityIndicator color={colors.appleButtonText} />
             ) : (
-              <Text style={[styles.appleButtonText, { color: colors.appleButtonText }]}>Continue with Apple</Text>
+              <>
+                <AppleIcon size={20} color={colors.appleButtonText} />
+                <Text style={[styles.appleButtonText, { color: colors.appleButtonText }]}>Continue with Apple</Text>
+              </>
             )}
           </TouchableOpacity>
 
@@ -247,7 +254,14 @@ export const Login = ({ title, slogan, appId, onLoginSuccess, colors: colorOverr
             onPress={onEmailPress}
             disabled={loading !== null || !email.trim()}
           >
-            {loading === "email" ? <ActivityIndicator color="#fff" /> : <Text style={styles.emailButtonText}>Continue with Email</Text>}
+            {loading === "email" ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <>
+                <EmailIcon size={20} color="#fff" />
+                <Text style={styles.emailButtonText}>Continue with Email</Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -264,6 +278,11 @@ export const Login = ({ title, slogan, appId, onLoginSuccess, colors: colorOverr
           </Text>
         </Text>
       </View>
+
+      <TouchableOpacity style={styles.brandingButton} onPress={() => openInAppBrowser("https://www.broccoliapps.com")}>
+        {brandingIcon && <Image source={brandingIcon} style={styles.brandingImage} />}
+        <Text style={[styles.brandingText, { color: colors.textTertiary }]}>Broccoli Apps</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -300,6 +319,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   googleButton: {
+    flexDirection: "row",
+    gap: 8,
     height: 48,
     borderRadius: 8,
     borderWidth: 1,
@@ -311,6 +332,8 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito-SemiBold",
   },
   appleButton: {
+    flexDirection: "row",
+    gap: 8,
     height: 48,
     borderRadius: 8,
     justifyContent: "center",
@@ -343,6 +366,8 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito-Regular",
   },
   emailButton: {
+    flexDirection: "row",
+    gap: 8,
     height: 48,
     borderRadius: 8,
     justifyContent: "center",
@@ -377,5 +402,18 @@ const styles = StyleSheet.create({
   },
   link: {
     textDecorationLine: "underline",
+  },
+  brandingButton: {
+    alignItems: "center",
+    paddingBottom: 24,
+    gap: 0,
+  },
+  brandingImage: {
+    width: 40,
+    height: 40,
+  },
+  brandingText: {
+    fontSize: 11,
+    fontFamily: "Nunito-Medium",
   },
 });

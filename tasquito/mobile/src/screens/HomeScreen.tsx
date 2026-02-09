@@ -1,12 +1,11 @@
-import { Modal, Toast, useModal, useTheme } from "@broccoliapps/mobile";
+import { BottomModal, Toast, useTheme } from "@broccoliapps/mobile";
 import { type ProjectSummaryDto, useProjects } from "@broccoliapps/tasquito-shared";
 import { useFocusEffect } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Settings } from "lucide-react-native";
+import { EllipsisVertical } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FilterPills, type ProjectFilter } from "../components/FilterPills";
 import { ProjectCard } from "../components/ProjectCard";
 import { ProjectListSkeleton } from "../components/ProjectCardSkeleton";
 import { ProjectForm } from "../components/ProjectForm";
@@ -14,16 +13,10 @@ import type { RootStackParamList } from "../navigation/types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
-const emptyMessages: Record<ProjectFilter, string> = {
-  active: "No projects yet. Create one above to get started!",
-  archived: "No archived projects.",
-};
-
 export const HomeScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
-  const deleteModal = useModal<string>();
-  const [filter, setFilter] = useState<ProjectFilter>("active");
-  const { projects, isLoading, error, limitError, clearLimitError, create, archive, remove, refresh } = useProjects();
+  const [menuVisible, setMenuVisible] = useState(false);
+  const { projects, isLoading, error, limitError, clearLimitError, create, archive, refresh } = useProjects();
 
   const [isManualRefresh, setIsManualRefresh] = useState(false);
 
@@ -44,21 +37,16 @@ export const HomeScreen = ({ navigation }: Props) => {
     }, [refresh]),
   );
 
-  const filteredProjects = useMemo(() => {
-    return projects.filter((project) => {
-      if (filter === "active") {
-        return !project.isArchived;
-      }
-      return project.isArchived;
-    });
-  }, [projects, filter]);
+  const activeProjects = useMemo(() => {
+    return projects.filter((project) => !project.isArchived);
+  }, [projects]);
 
   const ListHeader = (
     <View style={styles.header}>
       <View style={styles.headerRow}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>Projects</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Settings")} activeOpacity={0.7} style={styles.settingsButton}>
-          <Settings size={24} color={colors.textMuted} />
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Tasquito</Text>
+        <TouchableOpacity onPress={() => setMenuVisible(true)} activeOpacity={0.7} style={styles.menuButton}>
+          <EllipsisVertical size={24} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
 
@@ -76,8 +64,6 @@ export const HomeScreen = ({ navigation }: Props) => {
           <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
         </View>
       )}
-
-      <FilterPills selected={filter} onSelect={setFilter} />
     </View>
   );
 
@@ -85,7 +71,7 @@ export const HomeScreen = ({ navigation }: Props) => {
     <ProjectListSkeleton />
   ) : (
     <View style={styles.emptyContainer}>
-      <Text style={[styles.emptyText, { color: colors.textMuted }]}>{emptyMessages[filter]}</Text>
+      <Text style={[styles.emptyText, { color: colors.textMuted }]}>No projects yet. Create one above to get started!</Text>
     </View>
   );
 
@@ -93,15 +79,10 @@ export const HomeScreen = ({ navigation }: Props) => {
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={Platform.OS === "android" ? ["top", "bottom"] : ["top"]}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <FlatList<ProjectSummaryDto>
-          data={filteredProjects}
+          data={activeProjects}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <ProjectCard
-              project={item}
-              onPress={() => navigation.navigate("ProjectDetail", { projectId: item.id })}
-              onArchive={!item.isArchived ? () => archive(item.id) : undefined}
-              onDelete={item.isArchived ? () => deleteModal.open(item.id) : undefined}
-            />
+            <ProjectCard project={item} onPress={() => navigation.navigate("ProjectDetail", { projectId: item.id })} onArchive={() => archive(item.id)} />
           )}
           ListHeaderComponent={ListHeader}
           ListEmptyComponent={ListEmpty}
@@ -119,19 +100,30 @@ export const HomeScreen = ({ navigation }: Props) => {
           keyboardShouldPersistTaps="handled"
         />
       </KeyboardAvoidingView>
-      <Modal
-        visible={deleteModal.isOpen}
-        onClose={deleteModal.close}
-        title="Delete Project"
-        confirmText="Delete"
-        confirmVariant="danger"
-        onConfirm={() => {
-          remove(deleteModal.data!);
-          deleteModal.close();
-        }}
-      >
-        <Text style={[styles.modalMessage, { color: colors.textPrimary }]}>This action cannot be undone. All tasks will be permanently deleted.</Text>
-      </Modal>
+      <BottomModal visible={menuVisible} onClose={() => setMenuVisible(false)}>
+        <View style={styles.menuContainer}>
+          <TouchableOpacity
+            style={[styles.menuItem, { borderBottomColor: colors.divider }]}
+            onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate("ArchivedProjects");
+            }}
+            activeOpacity={0.6}
+          >
+            <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Archived Projects</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.menuItem, { borderBottomColor: colors.divider }]}
+            onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate("Settings");
+            }}
+            activeOpacity={0.6}
+          >
+            <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Settings</Text>
+          </TouchableOpacity>
+        </View>
+      </BottomModal>
     </SafeAreaView>
   );
 };
@@ -161,7 +153,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontFamily: "Nunito-Bold",
   },
-  settingsButton: {
+  menuButton: {
     padding: 4,
   },
   errorContainer: {
@@ -181,9 +173,16 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito-Regular",
     textAlign: "center",
   },
-  modalMessage: {
-    fontSize: 15,
+  menuContainer: {
+    paddingBottom: 16,
+  },
+  menuItem: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  menuItemText: {
+    fontSize: 17,
     fontFamily: "Nunito-Regular",
-    lineHeight: 22,
   },
 });

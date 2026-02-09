@@ -1,7 +1,7 @@
 import { refreshToken, setTokenProvider } from "@broccoliapps/shared";
 import type { ComponentType } from "preact";
 import { render } from "preact";
-import { AUTH_CACHE_KEYS } from "./auth-cache";
+import { AUTH_CACHE_KEYS, signOut } from "./auth-cache";
 import { cache } from "./cache";
 import { applyTheme, getStoredTheme } from "./theme";
 
@@ -27,10 +27,15 @@ export const initSpaApp = (config: { app: ComponentType }): void => {
       if (!oldRefreshToken) {
         return undefined;
       }
-      const response = await refreshToken.invoke({ refreshToken: oldRefreshToken }, { skipAuth: true });
-      cache.set(AUTH_CACHE_KEYS.accessToken, response.accessToken, response.accessTokenExpiresAt);
-      cache.set(AUTH_CACHE_KEYS.refreshToken, response.refreshToken, response.refreshTokenExpiresAt);
-      return response.accessToken;
+      try {
+        const response = await refreshToken.invoke({ refreshToken: oldRefreshToken }, { skipAuth: true });
+        cache.set(AUTH_CACHE_KEYS.accessToken, response.accessToken, response.accessTokenExpiresAt);
+        cache.set(AUTH_CACHE_KEYS.refreshToken, response.refreshToken, response.refreshTokenExpiresAt);
+        return response.accessToken;
+      } catch {
+        signOut();
+        return undefined;
+      }
     },
   });
 

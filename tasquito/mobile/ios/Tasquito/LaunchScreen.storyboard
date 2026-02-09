@@ -16,53 +16,18 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <!-- Tasquito title label - big and centered -->
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tasquito" textAlignment="center" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="GJd-Yh-RWb">
-                                <rect key="frame" x="87.5" y="260" width="200" height="46"/>
-                                <fontDescription key="fontDescription" name="Nunito-Bold" family="Nunito" pointSize="38"/>
-                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <!-- Tasquito logo - big, below the title -->
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="TasquitoLogo" translatesAutoresizingMaskIntoConstraints="NO" id="tLg-Xx-L01">
-                                <rect key="frame" x="127.5" y="314" width="120" height="120"/>
+                                <rect key="frame" x="127.5" y="273.5" width="120" height="120"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="120" id="w1A-tL-001"/>
                                     <constraint firstAttribute="height" constant="120" id="h1A-tL-001"/>
                                 </constraints>
                             </imageView>
-                            <!-- Broccoli Apps logo - xs, near bottom -->
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="BroccoliAppsLogo" translatesAutoresizingMaskIntoConstraints="NO" id="bLg-Xx-001">
-                                <rect key="frame" x="171.5" y="580" width="32" height="32"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="32" id="w2A-bL-001"/>
-                                    <constraint firstAttribute="height" constant="32" id="h2A-bL-001"/>
-                                </constraints>
-                            </imageView>
-                            <!-- "by Broccoli Apps" label - xs, at bottom -->
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="by Broccoli Apps" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="baL-ab-001">
-                                <rect key="frame" x="137.5" y="616" width="100" height="14"/>
-                                <fontDescription key="fontDescription" name="Nunito-Medium" family="Nunito" pointSize="10"/>
-                                <color key="textColor" red="0.6" green="0.6" blue="0.6" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                         </subviews>
-                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" red="0.039216" green="0.039216" blue="0.039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <!-- Center group: Tasquito title + logo vertically centered -->
-                            <constraint firstItem="GJd-Yh-RWb" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="cx-title-001"/>
                             <constraint firstItem="tLg-Xx-L01" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="cx-logo-001"/>
-                            <constraint firstItem="tLg-Xx-L01" firstAttribute="top" secondItem="GJd-Yh-RWb" secondAttribute="bottom" constant="8" id="tl-gap-001"/>
-                            <!-- Position the title+logo group centered vertically -->
-                            <constraint firstItem="GJd-Yh-RWb" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="-40" id="cy-title-001"/>
-                            <!-- Bottom group: "by" + Broccoli logo + "Broccoli Apps" -->
-                            <constraint firstItem="byL-ab-001" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="cx-by-001"/>
-                            <constraint firstItem="bLg-Xx-001" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="cx-blogo-001"/>
-                            <constraint firstItem="baL-ab-001" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="cx-bname-001"/>
-                            <constraint firstItem="bLg-Xx-001" firstAttribute="top" secondItem="byL-ab-001" secondAttribute="bottom" constant="6" id="tl-by-blogo-001"/>
-                            <constraint firstItem="baL-ab-001" firstAttribute="top" secondItem="bLg-Xx-001" secondAttribute="bottom" constant="4" id="tl-blogo-bname-001"/>
-                            <!-- Pin Broccoli Apps name to safe area bottom -->
-                            <constraint firstItem="Bcu-3y-fUS" firstAttribute="bottom" secondItem="baL-ab-001" secondAttribute="bottom" constant="16" id="bt-bname-001"/>
+                            <constraint firstItem="tLg-Xx-L01" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="cy-logo-001"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
                     </view>
@@ -74,6 +39,5 @@
     </scenes>
     <resources>
         <image name="TasquitoLogo" width="128" height="128"/>
-        <image name="BroccoliAppsLogo" width="64" height="64"/>
     </resources>
 </document>

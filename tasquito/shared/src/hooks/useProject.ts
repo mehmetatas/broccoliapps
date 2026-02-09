@@ -12,6 +12,7 @@ type TaskCreateQueueItem = {
   note?: string;
   dueDate?: string;
   subtasks?: string[];
+  tempId: string;
 };
 
 type TaskStatusQueueItem = {
@@ -36,6 +37,7 @@ type SubtaskCreateQueueItem = {
   projectId: string;
   taskId: string;
   title: string;
+  tempId: string;
 };
 
 type SubtaskStatusQueueItem = {
@@ -62,8 +64,8 @@ export const useProject = (id: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [limitError, setLimitError] = useState<string | null>(null);
-  const [pendingTaskCount, setPendingTaskCount] = useState(0);
-  const [pendingSubtaskCounts, setPendingSubtaskCounts] = useState<Map<string, number>>(new Map());
+  const [pendingTaskIds, setPendingTaskIds] = useState<Set<string>>(new Set());
+  const [pendingSubtaskIds, setPendingSubtaskIds] = useState<Set<string>>(new Set());
 
   // Queue refs for sequential API calls
   const taskQueueRef = useRef<TaskQueueItem[]>([]);
@@ -96,8 +98,17 @@ export const useProject = (id: string) => {
     if (!project) {
       return;
     }
-    await client.patchProject({ id: project.id, name });
+    const originalName = project.name;
+
+    // Optimistic update
     setProject((prev) => (prev ? { ...prev, name } : null));
+
+    try {
+      await client.patchProject({ id: project.id, name });
+    } catch (err) {
+      console.error("Failed to update project name, reverting", err);
+      setProject((prev) => (prev ? { ...prev, name: originalName } : null));
+    }
   };
 
   const remove = async () => {
@@ -149,24 +160,39 @@ export const useProject = (id: string) => {
           subtasks: item.subtasks,
         })
         .then((result) => {
+          // Replace temp task with real one from server
           setProject((prev) => {
             if (!prev) {
               return null;
             }
             return {
               ...prev,
-              tasks: [{ ...result.task, subtasks: result.subtasks ?? [] }, ...prev.tasks],
+              tasks: prev.tasks.map((t) => (t.id === item.tempId ? { ...result.task, subtasks: result.subtasks ?? [] } : t)),
             };
           });
         })
         .catch((err) => {
           console.error("Failed to create task", err);
+          // Remove temp task on error
+          setProject((prev) => {
+            if (!prev) {
+              return null;
+            }
+            return {
+              ...prev,
+              tasks: prev.tasks.filter((t) => t.id !== item.tempId),
+            };
+          });
           if (err?.status === 403 && err?.message) {
             setLimitError(err.message);
           }
         })
         .finally(() => {
-          setPendingTaskCount((c) => c - 1);
+          setPendingTaskIds((prev) => {
+            const next = new Set(prev);
+            next.delete(item.tempId);
+            return next;
+          });
           isProcessingTaskRef.current = false;
           processTaskQueue();
         });
@@ -217,7 +243,38 @@ export const useProject = (id: string) => {
       return;
     }
 
-    setPendingTaskCount((c) => c + 1);
+    const tempId = `temp-${Date.now()}-${Math.random()}`;
+
+    setPendingTaskIds((prev) => new Set(prev).add(tempId));
+
+    // Optimistically add the task to the end of the todo list
+    const todoTasks = project.tasks.filter((t) => t.status === "todo");
+    const lastOrder = todoTasks.at(-1)?.sortOrder ?? null;
+    const sortOrder = generateKeyBetween(lastOrder, null);
+
+    setProject((prev) => {
+      if (!prev) {
+        return null;
+      }
+      return {
+        ...prev,
+        tasks: [
+          ...prev.tasks,
+          {
+            id: tempId,
+            projectId: project.id,
+            title: data.title,
+            status: "todo" as const,
+            note: data.note,
+            dueDate: data.dueDate,
+            sortOrder,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            subtasks: [],
+          },
+        ],
+      };
+    });
 
     taskQueueRef.current.push({
       type: "create",
@@ -226,6 +283,7 @@ export const useProject = (id: string) => {
       note: data.note,
       dueDate: data.dueDate,
       subtasks: data.subtasks,
+      tempId,
     });
 
     processTaskQueue();
@@ -268,7 +326,9 @@ export const useProject = (id: string) => {
     if (!project) {
       return;
     }
-    await client.patchTask({ projectId: project.id, id: taskId, title });
+    const originalTitle = project.tasks.find((t) => t.id === taskId)?.title;
+
+    // Optimistic update
     setProject((prev) => {
       if (!prev) {
         return null;
@@ -278,13 +338,30 @@ export const useProject = (id: string) => {
         tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, title } : t)),
       };
     });
+
+    try {
+      await client.patchTask({ projectId: project.id, id: taskId, title });
+    } catch (err) {
+      console.error("Failed to update task title, reverting", err);
+      setProject((prev) => {
+        if (!prev) {
+          return null;
+        }
+        return {
+          ...prev,
+          tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, title: originalTitle ?? t.title } : t)),
+        };
+      });
+    }
   };
 
   const updateTaskNote = async (taskId: string, note: string) => {
     if (!project) {
       return;
     }
-    await client.patchTask({ projectId: project.id, id: taskId, note });
+    const originalNote = project.tasks.find((t) => t.id === taskId)?.note;
+
+    // Optimistic update
     setProject((prev) => {
       if (!prev) {
         return null;
@@ -294,13 +371,30 @@ export const useProject = (id: string) => {
         tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, note } : t)),
       };
     });
+
+    try {
+      await client.patchTask({ projectId: project.id, id: taskId, note });
+    } catch (err) {
+      console.error("Failed to update task note, reverting", err);
+      setProject((prev) => {
+        if (!prev) {
+          return null;
+        }
+        return {
+          ...prev,
+          tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, note: originalNote ?? t.note } : t)),
+        };
+      });
+    }
   };
 
   const updateTaskDueDate = async (taskId: string, dueDate: string | undefined) => {
     if (!project) {
       return;
     }
-    await client.patchTask({ projectId: project.id, id: taskId, dueDate: dueDate ?? null });
+    const originalDueDate = project.tasks.find((t) => t.id === taskId)?.dueDate;
+
+    // Optimistic update
     setProject((prev) => {
       if (!prev) {
         return null;
@@ -310,6 +404,21 @@ export const useProject = (id: string) => {
         tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, dueDate } : t)),
       };
     });
+
+    try {
+      await client.patchTask({ projectId: project.id, id: taskId, dueDate: dueDate ?? null });
+    } catch (err) {
+      console.error("Failed to update due date, reverting", err);
+      setProject((prev) => {
+        if (!prev) {
+          return null;
+        }
+        return {
+          ...prev,
+          tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, dueDate: originalDueDate } : t)),
+        };
+      });
+    }
   };
 
   const removeTask = (taskId: string) => {
@@ -386,7 +495,9 @@ export const useProject = (id: string) => {
     if (!project) {
       return;
     }
-    await client.patchTask({ projectId: project.id, id: subtaskId, title });
+    const originalTitle = project.tasks.find((t) => t.id === taskId)?.subtasks.find((st) => st.id === subtaskId)?.title;
+
+    // Optimistic update
     setProject((prev) => {
       if (!prev) {
         return null;
@@ -396,6 +507,23 @@ export const useProject = (id: string) => {
         tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: t.subtasks.map((st) => (st.id === subtaskId ? { ...st, title } : st)) } : t)),
       };
     });
+
+    try {
+      await client.patchTask({ projectId: project.id, id: subtaskId, title });
+    } catch (err) {
+      console.error("Failed to update subtask title, reverting", err);
+      setProject((prev) => {
+        if (!prev) {
+          return null;
+        }
+        return {
+          ...prev,
+          tasks: prev.tasks.map((t) =>
+            t.id === taskId ? { ...t, subtasks: t.subtasks.map((st) => (st.id === subtaskId ? { ...st, title: originalTitle ?? st.title } : st)) } : t,
+          ),
+        };
+      });
+    }
   };
 
   const removeSubtask = (taskId: string, subtaskId: string) => {
@@ -452,31 +580,37 @@ export const useProject = (id: string) => {
       client
         .postSubtask(item.projectId, item.taskId, item.title)
         .then((result) => {
+          // Replace temp subtask with real one from server
           setProject((prev) => {
             if (!prev) {
               return null;
             }
             return {
               ...prev,
-              tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: [...t.subtasks, result.task] } : t)),
+              tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: t.subtasks.map((st) => (st.id === item.tempId ? result.task : st)) } : t)),
             };
           });
         })
         .catch((err) => {
           console.error("Failed to create subtask", err);
+          // Remove temp subtask on error
+          setProject((prev) => {
+            if (!prev) {
+              return null;
+            }
+            return {
+              ...prev,
+              tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: t.subtasks.filter((st) => st.id !== item.tempId) } : t)),
+            };
+          });
           if (err?.status === 403 && err?.message) {
             setLimitError(err.message);
           }
         })
         .finally(() => {
-          setPendingSubtaskCounts((prev) => {
-            const next = new Map(prev);
-            const current = next.get(taskId) ?? 0;
-            if (current <= 1) {
-              next.delete(taskId);
-            } else {
-              next.set(taskId, current - 1);
-            }
+          setPendingSubtaskIds((prev) => {
+            const next = new Set(prev);
+            next.delete(item.tempId);
             return next;
           });
           processingSubtasksRef.current.delete(taskId);
@@ -535,10 +669,42 @@ export const useProject = (id: string) => {
       return;
     }
 
-    setPendingSubtaskCounts((prev) => {
-      const next = new Map(prev);
-      next.set(taskId, (next.get(taskId) ?? 0) + 1);
-      return next;
+    const tempId = `temp-${Date.now()}-${Math.random()}`;
+
+    setPendingSubtaskIds((prev) => new Set(prev).add(tempId));
+
+    // Optimistically add the subtask to the task's subtasks
+    const parentTask = project.tasks.find((t) => t.id === taskId);
+    const lastOrder = parentTask?.subtasks.at(-1)?.sortOrder ?? null;
+    const sortOrder = generateKeyBetween(lastOrder, null);
+
+    setProject((prev) => {
+      if (!prev) {
+        return null;
+      }
+      return {
+        ...prev,
+        tasks: prev.tasks.map((t) =>
+          t.id === taskId
+            ? {
+                ...t,
+                subtasks: [
+                  ...t.subtasks,
+                  {
+                    id: tempId,
+                    projectId: project.id,
+                    parentId: taskId,
+                    title,
+                    status: "todo" as const,
+                    sortOrder,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                  },
+                ],
+              }
+            : t,
+        ),
+      };
     });
 
     if (!subtaskQueuesRef.current.has(taskId)) {
@@ -549,6 +715,7 @@ export const useProject = (id: string) => {
       projectId: project.id,
       taskId,
       title,
+      tempId,
     });
 
     processSubtaskQueue(taskId);
@@ -670,8 +837,8 @@ export const useProject = (id: string) => {
     error,
     limitError,
     clearLimitError,
-    pendingTaskCount,
-    pendingSubtaskCounts,
+    pendingTaskIds,
+    pendingSubtaskIds,
     // Project actions
     updateName,
     remove,

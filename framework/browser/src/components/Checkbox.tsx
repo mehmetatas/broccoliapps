@@ -8,9 +8,19 @@ type CheckboxProps = {
   label?: string;
   strikethrough?: boolean;
   size?: "sm" | "md";
+  class?: string;
 };
 
-export const Checkbox = ({ checked, onChange, disabled = false, loading = false, label, strikethrough = true, size = "md" }: CheckboxProps) => {
+export const Checkbox = ({
+  checked,
+  onChange,
+  disabled = false,
+  loading = false,
+  label,
+  strikethrough = true,
+  size = "md",
+  class: className,
+}: CheckboxProps) => {
   const iconSize = size === "sm" ? 16 : 20;
 
   return (
@@ -18,6 +28,7 @@ export const Checkbox = ({ checked, onChange, disabled = false, loading = false,
       class={`
         inline-flex items-center gap-2 cursor-pointer select-none
         ${disabled || loading ? "opacity-50 cursor-not-allowed" : ""}
+        ${className ?? ""}
       `.trim()}
     >
       <button

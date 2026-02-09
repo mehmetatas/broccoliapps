@@ -1,4 +1,4 @@
-import { useTheme } from "@broccoliapps/mobile";
+import { CharacterLimitIndicator, useTheme } from "@broccoliapps/mobile";
 import { Check, X } from "lucide-react-native";
 import type { RefObject } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -18,6 +18,7 @@ type InlineFormProps = {
   onBlur: () => void;
   inputRef?: RefObject<TextInput | null>;
   submitBehavior?: "blurAndSubmit" | "submit";
+  softLimit?: number;
 };
 
 export const InlineForm = ({
@@ -35,8 +36,13 @@ export const InlineForm = ({
   onBlur,
   inputRef,
   submitBehavior,
+  softLimit,
 }: InlineFormProps) => {
   const { colors } = useTheme();
+
+  const effectiveMaxLength = softLimit ? Math.floor(softLimit * 1.5) : maxLength;
+  const isOverSoftLimit = softLimit ? value.trim().length > softLimit : false;
+  const effectiveCanSubmit = canSubmit && !isOverSoftLimit;
 
   return (
     <View>
@@ -56,7 +62,7 @@ export const InlineForm = ({
           placeholderTextColor={colors.inputPlaceholder}
           value={value}
           onChangeText={onChangeText}
-          maxLength={maxLength}
+          maxLength={effectiveMaxLength}
           editable={!disabled}
           returnKeyType="done"
           onSubmitEditing={onSubmit}
@@ -69,12 +75,13 @@ export const InlineForm = ({
             <TouchableOpacity onPress={onCancel} hitSlop={8} activeOpacity={0.6}>
               <X size={18} color={colors.textMuted} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={onSubmit} hitSlop={8} activeOpacity={0.6} disabled={!canSubmit}>
-              <Check size={18} color={canSubmit ? colors.accent : colors.textMuted} />
+            <TouchableOpacity onPress={onSubmit} hitSlop={8} activeOpacity={0.6} disabled={!effectiveCanSubmit}>
+              <Check size={18} color={effectiveCanSubmit ? colors.accent : colors.textMuted} />
             </TouchableOpacity>
           </View>
         )}
       </View>
+      {softLimit && isFocused && <CharacterLimitIndicator textLength={value.length} softLimit={softLimit} />}
       {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
     </View>
   );

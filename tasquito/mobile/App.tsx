@@ -6,6 +6,7 @@ import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import type { RootStackParamList } from "./src/navigation/types";
+import { ArchivedProjectsScreen } from "./src/screens/ArchivedProjectsScreen";
 import { HomeScreen } from "./src/screens/HomeScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
 import { ProjectDetailScreen } from "./src/screens/ProjectDetailScreen";
@@ -22,6 +23,7 @@ const AppContent = () => {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} />
+          <Stack.Screen name="ArchivedProjects" component={ArchivedProjectsScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
         </Stack.Navigator>
       </NavigationContainer>

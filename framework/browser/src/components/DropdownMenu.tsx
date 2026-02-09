@@ -1,6 +1,7 @@
 import type { ComponentChildren } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 import { useClickOutside } from "../hooks/useClickOutside";
+import { useFlipPosition } from "../hooks/useFlipPosition";
 
 type DropdownMenuItem = {
   label: string;
@@ -18,6 +19,8 @@ type DropdownMenuProps = {
 
 export const DropdownMenu = ({ items, isOpen, onClose, align = "right" }: DropdownMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const flipped = useFlipPosition(menuRef, isOpen);
 
   useClickOutside(menuRef, onClose, isOpen);
 
@@ -41,7 +44,7 @@ export const DropdownMenu = ({ items, isOpen, onClose, align = "right" }: Dropdo
   return (
     <div
       ref={menuRef}
-      class={`absolute mt-1 w-48 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg z-50 py-1 ${
+      class={`absolute ${flipped ? "bottom-full mb-1" : "mt-1"} w-48 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg z-50 py-1 ${
         align === "right" ? "right-0" : "left-0"
       }`}
     >

@@ -20,7 +20,13 @@ export const LoginScreen = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
-      <Login title="Tasquito" slogan="Simple, fast task management" appId="tasquito" onLoginSuccess={onLoginSuccess} />
+      <Login
+        title="Tasquito"
+        slogan="Simple, fast task management"
+        appId="tasquito"
+        onLoginSuccess={onLoginSuccess}
+        brandingIcon={require("../../assets/broccoli-logo.png")}
+      />
     </SafeAreaView>
   );
 };

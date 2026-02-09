@@ -17,7 +17,7 @@ export const ProjectForm = ({ onSubmit }: Props) => {
   const canSubmit = trimmed.length > 0 && !isSubmitting;
 
   const handleSubmit = async () => {
-    if (!trimmed) {
+    if (!trimmed || trimmed.length > LIMITS.MAX_PROJECT_NAME_LENGTH) {
       return;
     }
 
@@ -46,6 +46,7 @@ export const ProjectForm = ({ onSubmit }: Props) => {
     <InlineForm
       placeholder="New project"
       maxLength={LIMITS.MAX_PROJECT_NAME_LENGTH}
+      softLimit={LIMITS.MAX_PROJECT_NAME_LENGTH}
       value={name}
       onChangeText={(text) => {
         setName(text);

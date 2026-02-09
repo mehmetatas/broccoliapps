@@ -1,4 +1,5 @@
 import { UserMenu } from "@broccoliapps/browser";
+import { Archive } from "lucide-preact";
 
 export const Header = () => {
   return (
@@ -9,7 +10,7 @@ export const Header = () => {
           Tasquito
         </a>
 
-        <UserMenu />
+        <UserMenu items={[{ label: "Archived", icon: <Archive size={16} />, href: "/app?archived=true" }]} />
       </div>
     </header>
   );
