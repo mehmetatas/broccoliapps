@@ -17,4 +17,5 @@ export { Skeleton } from "./Skeleton";
 export { Spinner } from "./Spinner";
 export { Textarea } from "./Textarea";
 export { ThemeSettings } from "./ThemeSettings";
+export { ToastContainer } from "./ToastContainer";
 export { UserMenu } from "./UserMenu";

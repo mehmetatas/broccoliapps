@@ -1,8 +1,6 @@
 import { EditableText } from "@broccoliapps/browser";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
-import { useState } from "preact/hooks";
-
-const MAX_PREVIEW_LINES = 5;
+import { useEffect, useRef, useState } from "preact/hooks";
 
 type TaskNoteProps = {
   note: string | undefined;
@@ -17,6 +15,16 @@ export const TaskNote = ({ note, isArchived, isDone, editRequested, onEditStarte
   const [isEditing, setIsEditing] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [isTruncated, setIsTruncated] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || isEditing || expanded) {
+      return;
+    }
+    setIsTruncated(el.scrollHeight > el.clientHeight);
+  });
 
   const handleSave = (value: string) => {
     setSaving(true);
@@ -27,18 +35,11 @@ export const TaskNote = ({ note, isArchived, isDone, editRequested, onEditStarte
     return null;
   }
 
-  const lineCount = note?.split("\n").length ?? 0;
-  const isTruncatable = !isEditing && lineCount > MAX_PREVIEW_LINES;
+  const clamp = !isEditing && !expanded && !!note;
 
   return (
     <div class="mt-2 pl-7">
-      <div
-        style={
-          !expanded && isTruncatable
-            ? { WebkitLineClamp: MAX_PREVIEW_LINES, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }
-            : undefined
-        }
-      >
+      <div ref={containerRef} class={clamp ? "line-clamp-5" : undefined}>
         <EditableText
           value={note ?? ""}
           onSave={handleSave}
@@ -59,7 +60,7 @@ export const TaskNote = ({ note, isArchived, isDone, editRequested, onEditStarte
           onEditEnded={() => setIsEditing(false)}
         />
       </div>
-      {isTruncatable && (
+      {isTruncated && !isEditing && (
         <button type="button" onClick={() => setExpanded(!expanded)} class="text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 mt-1">
           {expanded ? "Show less" : "Show more"}
         </button>

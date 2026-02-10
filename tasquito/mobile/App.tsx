@@ -1,4 +1,4 @@
-import { AuthGate, AuthProvider, ThemeProvider, useTheme } from "@broccoliapps/mobile";
+import { AuthGate, AuthProvider, ThemeProvider, ToastContainer, useTheme } from "@broccoliapps/mobile";
 import { initClient } from "@broccoliapps/tasquito-shared";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -27,6 +27,7 @@ const AppContent = () => {
           <Stack.Screen name="Settings" component={SettingsScreen} />
         </Stack.Navigator>
       </NavigationContainer>
+      <ToastContainer />
     </AuthGate>
   );
 };

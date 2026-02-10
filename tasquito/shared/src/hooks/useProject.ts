@@ -2,6 +2,7 @@ import { generateKeyBetween } from "fractional-indexing";
 import { useEffect, useRef, useState } from "react";
 import type { ProjectWithTasksDto, TaskDto, TaskStatus } from "../api";
 import * as client from "../client";
+import { LIMIT_MESSAGES, LIMITS } from "../limits";
 
 type TaskWithSubtasks = TaskDto & { subtasks: TaskDto[] };
 
@@ -225,6 +226,9 @@ export const useProject = (id: string) => {
               tasks: prev.tasks.map((t) => (t.id === item.taskId ? { ...t, status: item.originalStatus } : t)),
             };
           });
+          if (err?.status === 403 && err?.message) {
+            setLimitError(err.message);
+          }
         })
         .finally(() => {
           isProcessingTaskRef.current = false;
@@ -333,6 +337,15 @@ export const useProject = (id: string) => {
       return;
     }
     const originalStatus = originalTask.status;
+
+    // Check open task limit when reopening a parent task
+    if (status === "todo" && originalStatus !== "todo" && !originalTask.parentId) {
+      const openParentCount = project.tasks.filter((t) => !t.parentId && t.status === "todo").length;
+      if (openParentCount >= LIMITS.MAX_OPEN_TASKS_PER_PROJECT) {
+        setLimitError(LIMIT_MESSAGES.OPEN_TASK);
+        return;
+      }
+    }
 
     // Optimistic update
     setProject((prev) => {
@@ -527,6 +540,15 @@ export const useProject = (id: string) => {
       return;
     }
     const originalStatus = originalSubtask.status;
+
+    // Check open subtask limit when reopening
+    if (status === "todo" && originalStatus !== "todo" && parentTask) {
+      const openSubtaskCount = parentTask.subtasks.filter((st) => st.status === "todo").length;
+      if (openSubtaskCount >= LIMITS.MAX_OPEN_SUBTASKS_PER_TASK) {
+        setLimitError(LIMIT_MESSAGES.OPEN_SUBTASK);
+        return;
+      }
+    }
 
     // Optimistic update
     setProject((prev) => {
@@ -734,6 +756,9 @@ export const useProject = (id: string) => {
               ),
             };
           });
+          if (err?.status === 403 && err?.message) {
+            setLimitError(err.message);
+          }
         })
         .finally(() => {
           processingSubtasksRef.current.delete(taskId);

@@ -225,6 +225,25 @@ api.register(patchTaskApi, async (req, res, ctx) => {
     throw new HttpError(404, "Task not found");
   }
 
+  // Check open limits when reopening a task (status changing to "todo")
+  if (req.status === "todo" && task.status !== "todo") {
+    if (!task.parentId) {
+      // Reopening a parent task — check open task limit
+      const allTasks = await tasks.query({ userId, projectId: req.projectId }).all();
+      const openParentCount = allTasks.filter((t) => !t.parentId && t.status === "todo").length;
+      if (openParentCount >= LIMITS.MAX_OPEN_TASKS_PER_PROJECT) {
+        throw new HttpError(403, LIMIT_MESSAGES.OPEN_TASK);
+      }
+    } else {
+      // Reopening a subtask — check open subtask limit
+      const siblings = await tasks.query.byParent({ userId, projectId: req.projectId }, { parentId: task.parentId }).all();
+      const openSubtaskCount = siblings.filter((t) => t.status === "todo").length;
+      if (openSubtaskCount >= LIMITS.MAX_OPEN_SUBTASKS_PER_TASK) {
+        throw new HttpError(403, LIMIT_MESSAGES.OPEN_SUBTASK);
+      }
+    }
+  }
+
   const updatedTask = {
     ...task,
     ...(req.title !== undefined && { title: req.title }),

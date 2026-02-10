@@ -1,11 +1,20 @@
-import { EmptyState, Skeleton } from "@broccoliapps/browser";
+import { EmptyState, Skeleton, useToast } from "@broccoliapps/browser";
 import { useProjects } from "@broccoliapps/tasquito-shared";
 import { CheckSquare } from "lucide-preact";
+import { useEffect } from "preact/hooks";
 import { route } from "preact-router";
 import { PageHeader, ProjectCard, ProjectForm } from "../components";
 
 export const HomePage = () => {
   const { projects, isLoading, error, limitError, clearLimitError, create, remove, unarchive } = useProjects();
+  const toast = useToast();
+
+  useEffect(() => {
+    if (limitError) {
+      toast.warning(limitError);
+      clearLimitError();
+    }
+  }, [limitError, clearLimitError, toast]);
 
   const isArchived = new URLSearchParams(window.location.search).get("archived") === "true";
   const filtered = projects.filter((p) => (isArchived ? !!p.isArchived : !p.isArchived));
@@ -33,16 +42,6 @@ export const HomePage = () => {
 
   return (
     <div class="space-y-4">
-      {/* Limit error banner */}
-      {limitError && (
-        <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-3 flex items-start gap-3">
-          <p class="text-sm text-orange-800 dark:text-orange-200 flex-1">{limitError}</p>
-          <button type="button" onClick={clearLimitError} class="text-orange-600 dark:text-orange-400 hover:text-orange-800 text-sm font-medium shrink-0">
-            Dismiss
-          </button>
-        </div>
-      )}
-
       {/* Create project form or archived header */}
       {isArchived ? (
         <PageHeader title={<h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Archived projects</h2>} backHref="/" />

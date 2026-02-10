@@ -1,7 +1,7 @@
-import { ArchiveConfirmModal, Button, DeleteConfirmModal, EditableText, EmptyState, Skeleton, useDragAndDrop, useModal } from "@broccoliapps/browser";
+import { ArchiveConfirmModal, Button, DeleteConfirmModal, EditableText, EmptyState, Skeleton, useDragAndDrop, useModal, useToast } from "@broccoliapps/browser";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
 import { Archive, ArchiveRestore, CheckSquare, ChevronRight, Trash2 } from "lucide-preact";
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { route } from "preact-router";
 import { PageHeader, TaskCard, TaskForm } from "../components";
 import { ProjectProvider, useProjectContext } from "../context/ProjectContext";
@@ -41,10 +41,18 @@ const ProjectDetailContent = () => {
     batchRemoveTasks,
   } = useProjectContext();
 
+  const toast = useToast();
   const archiveModal = useModal();
   const deleteModal = useModal();
   const deleteDoneModal = useModal();
   const [doneExpanded, setDoneExpanded] = useState(false);
+
+  useEffect(() => {
+    if (limitError) {
+      toast.warning(limitError);
+      clearLimitError();
+    }
+  }, [limitError, clearLimitError, toast]);
 
   const isArchived = !!project?.isArchived;
 
@@ -148,16 +156,6 @@ const ProjectDetailContent = () => {
 
       {/* Archived banner */}
       {isArchived && archivedBanner()}
-
-      {/* Limit error */}
-      {limitError && (
-        <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-3 flex items-start gap-3">
-          <p class="text-sm text-orange-800 dark:text-orange-200 flex-1">{limitError}</p>
-          <button type="button" onClick={clearLimitError} class="text-orange-600 dark:text-orange-400 hover:text-orange-800 text-sm font-medium shrink-0">
-            Dismiss
-          </button>
-        </div>
-      )}
 
       {/* Task form */}
       {!isArchived && <TaskForm onSubmit={createTask} />}

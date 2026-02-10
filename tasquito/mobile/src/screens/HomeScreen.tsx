@@ -1,4 +1,4 @@
-import { BottomModal, Toast, useTheme } from "@broccoliapps/mobile";
+import { BottomModal, useTheme, useToast } from "@broccoliapps/mobile";
 import { type ProjectSummaryDto, useProjects } from "@broccoliapps/tasquito-shared";
 import { useFocusEffect } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -15,8 +15,16 @@ type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
 export const HomeScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
+  const toast = useToast();
   const [menuVisible, setMenuVisible] = useState(false);
   const { projects, isLoading, error, limitError, clearLimitError, create, archive, refresh } = useProjects();
+
+  useEffect(() => {
+    if (limitError) {
+      toast.warning(limitError);
+      clearLimitError();
+    }
+  }, [limitError, clearLimitError, toast]);
 
   const [isManualRefresh, setIsManualRefresh] = useState(false);
 
@@ -56,8 +64,6 @@ export const HomeScreen = ({ navigation }: Props) => {
           navigation.navigate("ProjectDetail", { projectId: project.id });
         }}
       />
-
-      {limitError && <Toast variant="warning" message={limitError} onDismiss={clearLimitError} />}
 
       {error && (
         <View style={styles.errorContainer}>

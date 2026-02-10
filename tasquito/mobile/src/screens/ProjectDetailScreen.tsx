@@ -1,9 +1,9 @@
-import { CharacterLimitIndicator, Modal, Toast, useModal, useTheme } from "@broccoliapps/mobile";
+import { CharacterLimitIndicator, Modal, useModal, useTheme, useToast } from "@broccoliapps/mobile";
 import type { TaskDto } from "@broccoliapps/tasquito-shared";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Archive, ArchiveRestore, ChevronDown, ChevronLeft, ChevronRight, Trash2 } from "lucide-react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import DraggableFlatList, { type RenderItemParams } from "react-native-draggable-flatlist";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -33,6 +33,7 @@ type ContentProps = {
 
 const ProjectDetailContent = ({ navigation }: ContentProps) => {
   const { colors } = useTheme();
+  const toast = useToast();
   const archiveModal = useModal();
   const deleteModal = useModal();
   const deleteDoneModal = useModal();
@@ -56,6 +57,13 @@ const ProjectDetailContent = ({ navigation }: ContentProps) => {
     batchRemoveTasks,
     refresh,
   } = useProjectContext();
+
+  useEffect(() => {
+    if (limitError) {
+      toast.warning(limitError);
+      clearLimitError();
+    }
+  }, [limitError, clearLimitError, toast]);
 
   const isArchived = project?.isArchived ?? false;
   const [doneExpanded, setDoneExpanded] = useState(false);
@@ -202,14 +210,12 @@ const ProjectDetailContent = ({ navigation }: ContentProps) => {
 
       {/* Archived banner */}
       {isArchived && (
-        <Toast
-          variant="warning"
-          message={`Archived — will be deleted ${daysUntilDeletion < 1 ? "soon" : `in ${daysUntilDeletion} day${daysUntilDeletion !== 1 ? "s" : ""}`}`}
-        />
+        <View style={styles.archivedBanner}>
+          <Text style={styles.archivedBannerText}>
+            Archived — will be deleted {daysUntilDeletion < 1 ? "soon" : `in ${daysUntilDeletion} day${daysUntilDeletion !== 1 ? "s" : ""}`}
+          </Text>
+        </View>
       )}
-
-      {/* Limit error banner */}
-      {limitError && <Toast variant="warning" message={limitError} onDismiss={clearLimitError} />}
 
       {/* General error */}
       {error && (
@@ -454,6 +460,21 @@ const styles = StyleSheet.create({
   deleteAllText: {
     fontSize: 12,
     fontFamily: "Nunito-SemiBold",
+  },
+  archivedBanner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: "#fef3c7",
+    borderColor: "#fbbf24",
+  },
+  archivedBannerText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: "Nunito-Regular",
+    color: "#92400e",
   },
   modalMessage: {
     fontSize: 15,

@@ -1,8 +1,8 @@
 import { CharacterLimitIndicator, useTheme } from "@broccoliapps/mobile";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
 import { Check, X } from "lucide-react-native";
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Linking, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { Linking, type NativeSyntheticEvent, StyleSheet, Text, TextInput, type TextLayoutEventData, TouchableOpacity, View } from "react-native";
 import InAppBrowser from "react-native-inappbrowser-reborn";
 import { useTask } from "../hooks/useTask";
 
@@ -88,19 +88,19 @@ export const TaskNote = ({ taskId, note, isArchived, isDone, editRequested, onEd
   const [isEditing, setIsEditing] = useState(false);
   const [editingNote, setEditingNote] = useState("");
   const [expanded, setExpanded] = useState(false);
+  const [isTruncatable, setIsTruncatable] = useState(() => !!note && note.split("\n").length > MAX_PREVIEW_LINES);
   const noteInputRef = useRef<TextInput>(null);
 
-  const isTruncatable = useMemo(() => {
-    if (!note) {
-      return false;
+  const handleTextLayout = useCallback((e: NativeSyntheticEvent<TextLayoutEventData>) => {
+    if (e.nativeEvent.lines.length >= MAX_PREVIEW_LINES) {
+      setIsTruncatable(true);
     }
-    const lineCount = note.split("\n").length;
-    return lineCount > MAX_PREVIEW_LINES;
-  }, [note]);
+  }, []);
 
-  // Reset expanded state when note changes
+  // Reset state when note changes
   useEffect(() => {
     setExpanded(false);
+    setIsTruncatable(!!note && note.split("\n").length > MAX_PREVIEW_LINES);
   }, [note]);
 
   // Allow parent (more menu) to trigger editing
@@ -180,7 +180,8 @@ export const TaskNote = ({ taskId, note, isArchived, isDone, editRequested, onEd
     <View>
       <Text
         style={[styles.note, { color: colors.textMuted }]}
-        numberOfLines={!expanded && isTruncatable ? MAX_PREVIEW_LINES : undefined}
+        numberOfLines={!expanded ? MAX_PREVIEW_LINES : undefined}
+        onTextLayout={!expanded ? handleTextLayout : undefined}
         onPress={canEditNote ? handleNotePress : undefined}
       >
         {linkifyNote(note ?? "")}
