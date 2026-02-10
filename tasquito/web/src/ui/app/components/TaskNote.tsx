@@ -2,7 +2,7 @@ import { EditableText } from "@broccoliapps/browser";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
 import { useState } from "preact/hooks";
 
-const MAX_PREVIEW_LINES = 10;
+const MAX_PREVIEW_LINES = 5;
 
 type TaskNoteProps = {
   note: string | undefined;

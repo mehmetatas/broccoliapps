@@ -15,7 +15,7 @@ type TaskNoteProps = {
   onEditStarted?: () => void;
 };
 
-const MAX_PREVIEW_LINES = 10;
+const MAX_PREVIEW_LINES = 5;
 const URL_REGEX = /https:\/\/\S+/g;
 const TRAILING_PUNCT = /[.,)\]]+$/;
 

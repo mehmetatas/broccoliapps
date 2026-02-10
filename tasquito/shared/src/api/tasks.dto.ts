@@ -105,3 +105,17 @@ export const deleteTaskResponse = {
   projectCounts: projectCountsSchema,
 };
 export type DeleteTaskResponse = v.InferOutput<v.ObjectSchema<typeof deleteTaskResponse, undefined>>;
+
+// ============================================================================
+// POST /projects/:projectId/tasks/batch-delete - batch delete tasks
+// ============================================================================
+export const batchDeleteTasksRequest = {
+  projectId: v.string(),
+  ids: v.pipe(v.array(v.string()), v.minLength(1)),
+};
+export type BatchDeleteTasksRequest = v.InferOutput<v.ObjectSchema<typeof batchDeleteTasksRequest, undefined>>;
+
+export const batchDeleteTasksResponse = {
+  projectCounts: projectCountsSchema,
+};
+export type BatchDeleteTasksResponse = v.InferOutput<v.ObjectSchema<typeof batchDeleteTasksResponse, undefined>>;

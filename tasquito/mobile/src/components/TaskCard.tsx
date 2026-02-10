@@ -118,7 +118,13 @@ export const TaskCard = ({ task, isArchived, drag, isActive, onToggleStatus }: P
           )}
         </View>
 
-        <SubtaskSection task={task} isArchived={isArchived} addRequested={state.subtaskAddRequested} onAddStarted={state.handleSubtaskAddStarted} />
+        <SubtaskSection
+          task={task}
+          isArchived={isArchived}
+          canAddSubtask={state.canAddSubtask}
+          addRequested={state.subtaskAddRequested}
+          onAddStarted={state.handleSubtaskAddStarted}
+        />
 
         <TaskNote
           taskId={task.id}

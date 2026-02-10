@@ -1,6 +1,7 @@
 import { ArchiveConfirmModal, Button, DeleteConfirmModal, EditableText, EmptyState, Skeleton, useDragAndDrop, useModal } from "@broccoliapps/browser";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
-import { Archive, ArchiveRestore, CheckSquare, Trash2 } from "lucide-preact";
+import { Archive, ArchiveRestore, CheckSquare, ChevronRight, Trash2 } from "lucide-preact";
+import { useState } from "preact/hooks";
 import { route } from "preact-router";
 import { PageHeader, TaskCard, TaskForm } from "../components";
 import { ProjectProvider, useProjectContext } from "../context/ProjectContext";
@@ -37,10 +38,13 @@ const ProjectDetailContent = () => {
     unarchive,
     createTask,
     reorderTask,
+    batchRemoveTasks,
   } = useProjectContext();
 
   const archiveModal = useModal();
   const deleteModal = useModal();
+  const deleteDoneModal = useModal();
+  const [doneExpanded, setDoneExpanded] = useState(false);
 
   const isArchived = !!project?.isArchived;
 
@@ -172,9 +176,31 @@ const ProjectDetailContent = () => {
           {/* Done tasks */}
           {doneTasks.length > 0 && (
             <div>
-              {doneTasks.map((task) => (
-                <TaskCard key={task.id} task={task} isArchived={isArchived} pending={pendingTaskIds.has(task.id)} pendingSubtaskIds={pendingSubtaskIds} />
-              ))}
+              <div class="flex items-center py-1">
+                <button
+                  type="button"
+                  onClick={() => setDoneExpanded((prev) => !prev)}
+                  class="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300"
+                >
+                  <ChevronRight size={16} class={`transition-transform ${doneExpanded ? "rotate-90" : ""}`} />
+                  Done ({doneTasks.length})
+                </button>
+                {doneExpanded && (
+                  <button
+                    type="button"
+                    onClick={() => deleteDoneModal.open()}
+                    class="ml-auto flex items-center gap-1 p-1 text-xs text-neutral-400 hover:text-red-500 dark:text-neutral-500 dark:hover:text-red-400 transition-colors"
+                    aria-label="Delete all done tasks"
+                  >
+                    <Trash2 size={14} />
+                    Delete All
+                  </button>
+                )}
+              </div>
+              {doneExpanded &&
+                doneTasks.map((task) => (
+                  <TaskCard key={task.id} task={task} isArchived={isArchived} pending={pendingTaskIds.has(task.id)} pendingSubtaskIds={pendingSubtaskIds} />
+                ))}
             </div>
           )}
         </>
@@ -189,6 +215,16 @@ const ProjectDetailContent = () => {
         itemName={project.name}
       />
       <DeleteConfirmModal isOpen={deleteModal.isOpen} onClose={deleteModal.close} onConfirm={handleDelete} title="Delete Project" itemName={project.name} />
+      <DeleteConfirmModal
+        isOpen={deleteDoneModal.isOpen}
+        onClose={deleteDoneModal.close}
+        onConfirm={() => {
+          batchRemoveTasks(doneTasks.map((t) => t.id));
+          deleteDoneModal.close();
+        }}
+        title="Delete Done Tasks"
+        itemName={`${doneTasks.length} done task${doneTasks.length !== 1 ? "s" : ""}`}
+      />
     </div>
   );
 };

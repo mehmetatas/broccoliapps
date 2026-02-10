@@ -1,4 +1,4 @@
-import { deleteTaskApi, getTaskApi, getTasksApi, patchTaskApi, postSubtaskApi, postTaskApi, type TaskDto } from "../api";
+import { batchDeleteTasksApi, deleteTaskApi, getTaskApi, getTasksApi, patchTaskApi, postSubtaskApi, postTaskApi, type TaskDto } from "../api";
 import { CACHE_KEYS, getCacheExpiry } from "./cache";
 import { getCache } from "./init";
 import { setProjectCountsInCache } from "./projects";
@@ -101,6 +101,17 @@ export const patchTask = async (...args: Parameters<typeof patchTaskApi.invoke>)
 export const deleteTask = async (projectId: string, id: string): Promise<void> => {
   const result = await deleteTaskApi.invoke({ projectId, id });
   removeTaskFromCache(projectId, id);
+  if (result.projectCounts) {
+    setProjectCountsInCache(projectId, result.projectCounts.openTaskCount, result.projectCounts.totalTaskCount);
+  }
+};
+
+// POST /projects/:projectId/tasks/batch-delete - batch delete tasks with cache update
+export const batchDeleteTasks = async (projectId: string, ids: string[]): Promise<void> => {
+  const result = await batchDeleteTasksApi.invoke({ projectId, ids });
+  for (const id of ids) {
+    removeTaskFromCache(projectId, id);
+  }
   if (result.projectCounts) {
     setProjectCountsInCache(projectId, result.projectCounts.openTaskCount, result.projectCounts.totalTaskCount);
   }

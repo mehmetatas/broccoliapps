@@ -13,7 +13,7 @@ type UseTaskCardStateInput = {
 
 export const useTaskCardState = ({ task, isArchived, updateTitle, updateDueDate }: UseTaskCardStateInput) => {
   const capabilities = getTaskCapabilities(task, !!isArchived);
-  const { isDone, canEditDueDate, canEditTitle: canEditTaskTitle } = capabilities;
+  const { isDone, canEditDueDate, canEditTitle: canEditTaskTitle, canAddSubtask } = capabilities;
   const moreMenuActions = getTaskMenuActions(task, capabilities).filter((a) => a !== "delete");
   const canShowMoreMenu = moreMenuActions.length > 0;
 
@@ -157,6 +157,7 @@ export const useTaskCardState = ({ task, isArchived, updateTitle, updateDueDate 
     isDone,
 
     // Capability flags
+    canAddSubtask,
     canEditDueDate,
     canShowMoreMenu,
     canEditTaskTitle,

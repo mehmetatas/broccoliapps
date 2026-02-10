@@ -24,7 +24,7 @@ export const ProjectCard = ({ project, onDelete, onUnarchive }: ProjectCardProps
     ? `Deleting ${daysLeft < 1 ? "soon" : `in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`}`
     : project.totalTaskCount === 0
       ? "No tasks"
-      : `${project.openTaskCount} of ${project.totalTaskCount} open`;
+      : `${project.openTaskCount} open tasks`;
 
   return (
     <div class="group flex items-center border-b border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 transition-colors">

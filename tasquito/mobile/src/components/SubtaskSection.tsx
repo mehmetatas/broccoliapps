@@ -1,6 +1,6 @@
-import { CharacterLimitIndicator, SpinningLoader, useTheme } from "@broccoliapps/mobile";
+import { CharacterLimitIndicator, Modal, SpinningLoader, useModal, useTheme } from "@broccoliapps/mobile";
 import { LIMITS, type TaskDto } from "@broccoliapps/tasquito-shared";
-import { Circle, X } from "lucide-react-native";
+import { ChevronDown, ChevronRight, Circle, Trash2, X } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import DraggableFlatList, { type RenderItemParams } from "react-native-draggable-flatlist";
@@ -12,6 +12,7 @@ type TaskWithSubtasks = TaskDto & { subtasks: TaskDto[] };
 type SubtaskSectionProps = {
   task: TaskWithSubtasks;
   isArchived?: boolean;
+  canAddSubtask?: boolean;
   addRequested?: boolean;
   onAddStarted?: () => void;
 };
@@ -22,15 +23,17 @@ const sortBySortOrder = (a: TaskDto, b: TaskDto) => {
   return aOrder < bOrder ? -1 : aOrder > bOrder ? 1 : 0;
 };
 
-export const SubtaskSection = ({ task, isArchived, addRequested, onAddStarted }: SubtaskSectionProps) => {
+export const SubtaskSection = ({ task, isArchived, canAddSubtask: canAddSubtaskProp, addRequested, onAddStarted }: SubtaskSectionProps) => {
   const { colors } = useTheme();
-  const { reorderSubtask, createSubtask } = useTask(task.id);
+  const { reorderSubtask, createSubtask, batchRemoveSubtasks } = useTask(task.id);
+  const deleteDoneModal = useModal();
 
   const isDone = task.status === "done";
   const subtaskCount = task.subtasks.length;
-  const canAddSubtask = !isArchived && !isDone && subtaskCount < LIMITS.MAX_SUBTASKS_PER_TASK;
+  const canAddSubtask = canAddSubtaskProp ?? false;
   const canDragSubtasks = !isArchived && !isDone;
 
+  const [doneExpanded, setDoneExpanded] = useState(false);
   const [isAddingSubtask, setIsAddingSubtask] = useState(false);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [pendingSubtaskTitle, setPendingSubtaskTitle] = useState<string | null>(null);
@@ -57,6 +60,14 @@ export const SubtaskSection = ({ task, isArchived, addRequested, onAddStarted }:
       setTimeout(() => newSubtaskInputRef.current?.focus(), 50);
     }
   }, [addRequested, canAddSubtask, isAddingSubtask, onAddStarted]);
+
+  // Auto-close add form when limit is reached
+  useEffect(() => {
+    if (isAddingSubtask && !canAddSubtask) {
+      setIsAddingSubtask(false);
+      setNewSubtaskTitle("");
+    }
+  }, [isAddingSubtask, canAddSubtask]);
 
   const handleAddSubtaskSubmit = useCallback(() => {
     const trimmed = newSubtaskTitle.trim();
@@ -145,12 +156,44 @@ export const SubtaskSection = ({ task, isArchived, addRequested, onAddStarted }:
         </View>
       )}
       {doneSubtasks.length > 0 && (
-        <View style={styles.doneSubtasksContainer}>
-          {doneSubtasks.map((subtask) => (
-            <SubtaskItem key={subtask.id} subtask={subtask} taskId={task.id} isArchived={isArchived} />
-          ))}
+        <View>
+          <View style={styles.doneHeader}>
+            <TouchableOpacity onPress={() => setDoneExpanded((prev) => !prev)} style={styles.doneToggle} activeOpacity={0.7}>
+              {doneExpanded ? <ChevronDown size={14} color={colors.textMuted} /> : <ChevronRight size={14} color={colors.textMuted} />}
+              <Text style={[styles.doneToggleText, { color: colors.textMuted }]}>Done ({doneSubtasks.length})</Text>
+            </TouchableOpacity>
+            {doneExpanded && !isDone && (
+              <TouchableOpacity onPress={() => deleteDoneModal.open()} style={styles.deleteAllButton} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Trash2 size={12} color={colors.textMuted} />
+                <Text style={[styles.deleteAllText, { color: colors.textMuted }]}>Delete All</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          {doneExpanded && (
+            <View style={styles.doneSubtasksContainer}>
+              {doneSubtasks.map((subtask) => (
+                <SubtaskItem key={subtask.id} subtask={subtask} taskId={task.id} isArchived={isArchived} />
+              ))}
+            </View>
+          )}
         </View>
       )}
+
+      <Modal
+        visible={deleteDoneModal.isOpen}
+        onClose={deleteDoneModal.close}
+        title="Delete Done Subtasks"
+        confirmText="Delete"
+        confirmVariant="danger"
+        onConfirm={() => {
+          batchRemoveSubtasks(doneSubtasks.map((st) => st.id));
+          deleteDoneModal.close();
+        }}
+      >
+        <Text style={{ color: colors.textPrimary, fontSize: 15, fontFamily: "Nunito-Regular" }}>
+          Are you sure you want to delete {doneSubtasks.length} done subtask{doneSubtasks.length !== 1 ? "s" : ""}? This action cannot be undone.
+        </Text>
+      </Modal>
     </View>
   );
 };
@@ -186,5 +229,29 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito-Regular",
     padding: 0,
     margin: 0,
+  },
+  doneHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  doneToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingVertical: 4,
+  },
+  doneToggleText: {
+    fontSize: 12,
+    fontFamily: "Nunito-SemiBold",
+  },
+  deleteAllButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  deleteAllText: {
+    fontSize: 11,
+    fontFamily: "Nunito-SemiBold",
   },
 });

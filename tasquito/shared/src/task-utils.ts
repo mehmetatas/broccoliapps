@@ -20,7 +20,10 @@ export const getTaskCapabilities = (task: TaskDto & { subtasks: TaskDto[] }, isA
     canEditTitle: canEdit,
     canEditDueDate: canEdit,
     canEditNote: canEdit,
-    canAddSubtask: canEdit && task.subtasks.length < LIMITS.MAX_SUBTASKS_PER_TASK,
+    canAddSubtask:
+      canEdit &&
+      task.subtasks.length < LIMITS.MAX_SUBTASKS_PER_TASK &&
+      task.subtasks.filter((st) => st.status === "todo").length < LIMITS.MAX_OPEN_SUBTASKS_PER_TASK,
     canDelete: !isArchived,
   };
 };

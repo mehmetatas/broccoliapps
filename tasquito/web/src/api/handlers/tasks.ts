@@ -1,6 +1,16 @@
 import { HttpError } from "@broccoliapps/backend";
 import { random } from "@broccoliapps/shared";
-import { deleteTaskApi, getTaskApi, getTasksApi, LIMIT_MESSAGES, LIMITS, patchTaskApi, postSubtaskApi, postTaskApi } from "@broccoliapps/tasquito-shared";
+import {
+  batchDeleteTasksApi,
+  deleteTaskApi,
+  getTaskApi,
+  getTasksApi,
+  LIMIT_MESSAGES,
+  LIMITS,
+  patchTaskApi,
+  postSubtaskApi,
+  postTaskApi,
+} from "@broccoliapps/tasquito-shared";
 import { generateKeyBetween } from "fractional-indexing";
 import { projects } from "../../db/projects";
 import { type Task, tasks } from "../../db/tasks";
@@ -47,19 +57,23 @@ api.register(postTaskApi, async (req, res, ctx) => {
   // Get existing tasks to determine sortOrder
   const existingTasks = await tasks.query({ userId, projectId: req.projectId }).all();
 
-  // Check task limit (parent tasks only)
-  const parentTaskCount = existingTasks.filter((t) => !t.parentId).length;
-  if (parentTaskCount >= LIMITS.MAX_TASKS_PER_PROJECT) {
-    throw new HttpError(403, LIMIT_MESSAGES.TASK);
+  // Check task limits (parent tasks only)
+  const parentTasks = existingTasks.filter((t) => !t.parentId);
+  if (parentTasks.length >= LIMITS.MAX_TASKS_PER_PROJECT) {
+    throw new HttpError(403, LIMIT_MESSAGES.MAX_TASK);
+  }
+  const openTaskCount = parentTasks.filter((t) => t.status === "todo").length;
+  if (openTaskCount >= LIMITS.MAX_OPEN_TASKS_PER_PROJECT) {
+    throw new HttpError(403, LIMIT_MESSAGES.OPEN_TASK);
   }
 
   // Check inline subtask count limit
   if (req.subtasks && req.subtasks.length > LIMITS.MAX_SUBTASKS_PER_TASK) {
-    throw new HttpError(403, LIMIT_MESSAGES.SUBTASK);
+    throw new HttpError(403, LIMIT_MESSAGES.MAX_SUBTASK);
   }
 
-  const parentTasks = existingTasks.filter((t) => !t.parentId && t.status === status);
-  const sortedTasks = parentTasks.sort((a, b) => {
+  const sameStatusTasks = existingTasks.filter((t) => !t.parentId && t.status === status);
+  const sortedTasks = sameStatusTasks.sort((a, b) => {
     const aOrder = a.sortOrder ?? "";
     const bOrder = b.sortOrder ?? "";
     return aOrder < bOrder ? -1 : aOrder > bOrder ? 1 : 0;
@@ -137,13 +151,16 @@ api.register(postSubtaskApi, async (req, res, ctx) => {
   }
 
   // Get existing subtasks to determine sortOrder and check limit
-  const allTasks = await tasks.query({ userId, projectId: req.projectId }).all();
-  const existingSubtasks = allTasks.filter((t) => t.parentId === req.taskId);
+  const existingSubtasks = await tasks.query.byParent({ userId, projectId: req.projectId }, { parentId: req.taskId }).all();
 
-  // Check subtask limit (use stored count if available, fall back to queried count)
+  // Check subtask limits (use stored count if available, fall back to queried count)
   const currentSubtaskCount = parentTask.subtaskCount ?? existingSubtasks.length;
   if (currentSubtaskCount >= LIMITS.MAX_SUBTASKS_PER_TASK) {
-    throw new HttpError(403, LIMIT_MESSAGES.SUBTASK);
+    throw new HttpError(403, LIMIT_MESSAGES.MAX_SUBTASK);
+  }
+  const openSubtaskCount = existingSubtasks.filter((t) => t.status === "todo").length;
+  if (openSubtaskCount >= LIMITS.MAX_OPEN_SUBTASKS_PER_TASK) {
+    throw new HttpError(403, LIMIT_MESSAGES.OPEN_SUBTASK);
   }
 
   const sortedSubtasks = existingSubtasks.sort((a, b) => {
@@ -242,10 +259,12 @@ api.register(deleteTaskApi, async (req, res, ctx) => {
 
   // If this is a parent task, delete all subtasks first
   if (!task.parentId) {
-    const allTasks = await tasks.query({ userId, projectId: req.projectId }).all();
-    const subtasks = allTasks.filter((t) => t.parentId === task.id);
+    const pk = { userId, projectId: req.projectId };
+    const subtasks = await tasks.query.byParent(pk, { parentId: task.id }).all();
 
-    await Promise.all(subtasks.map((subtask) => tasks.delete({ userId, projectId: req.projectId }, { id: subtask.id })));
+    if (subtasks.length > 0) {
+      await tasks.batchDelete(subtasks.map((subtask) => ({ pk, sk: { id: subtask.id } })));
+    }
   }
 
   // Delete the task
@@ -267,6 +286,70 @@ api.register(deleteTaskApi, async (req, res, ctx) => {
       });
     }
   }
+
+  return res.ok({ projectCounts });
+});
+
+// POST /projects/:projectId/tasks/batch-delete - batch delete tasks (parents and/or subtasks)
+api.register(batchDeleteTasksApi, async (req, res, ctx) => {
+  const { userId } = await ctx.getUser();
+  const pk = { userId, projectId: req.projectId };
+
+  // Fetch only the requested tasks instead of all tasks in the project
+  const requestedTasks = await tasks.batchGet(req.ids.map((id) => ({ pk, sk: { id } })));
+
+  // Split into parent tasks and subtasks
+  const parentTasks = requestedTasks.filter((t) => !t.parentId);
+  const subtasksToDelete = requestedTasks.filter((t) => t.parentId);
+
+  // For parent tasks: find their subtasks for cascade deletion
+  const parentIds = new Set(parentTasks.map((t) => t.id));
+  const cascadeSubtasks: Task[] = [];
+  if (parentIds.size > 0) {
+    const results = await Promise.all([...parentIds].map((parentId) => tasks.query.byParent(pk, { parentId }).all()));
+    for (const result of results) {
+      cascadeSubtasks.push(...result);
+    }
+  }
+
+  // For subtasks: update parent's subtaskCount (skip parents that are also being deleted)
+  const subtasksByParent = new Map<string, Task[]>();
+  for (const subtask of subtasksToDelete) {
+    if (subtask.parentId && !parentIds.has(subtask.parentId)) {
+      const list = subtasksByParent.get(subtask.parentId) ?? [];
+      list.push(subtask);
+      subtasksByParent.set(subtask.parentId, list);
+    }
+  }
+
+  if (subtasksByParent.size > 0) {
+    const parentTasksToUpdate = await tasks.batchGet([...subtasksByParent.keys()].map((id) => ({ pk, sk: { id } })));
+    await Promise.all(
+      parentTasksToUpdate.map((parent) => {
+        const count = subtasksByParent.get(parent.id)?.length ?? 0;
+        return tasks.put({
+          ...parent,
+          subtaskCount: Math.max(0, (parent.subtaskCount ?? 0) - count),
+          updatedAt: Date.now(),
+        });
+      }),
+    );
+  }
+
+  // Collect all keys to delete
+  const allKeysToDelete = [...parentTasks, ...subtasksToDelete, ...cascadeSubtasks].map((t) => ({
+    pk,
+    sk: { id: t.id },
+  }));
+
+  if (allKeysToDelete.length > 0) {
+    await tasks.batchDelete(allKeysToDelete);
+  }
+
+  // Project count deltas only count parent tasks
+  const deltaOpen = -parentTasks.filter((t) => t.status === "todo").length;
+  const deltaTotal = -parentTasks.length;
+  const projectCounts = await updateProjectCounts(userId, req.projectId, deltaOpen, deltaTotal);
 
   return res.ok({ projectCounts });
 });

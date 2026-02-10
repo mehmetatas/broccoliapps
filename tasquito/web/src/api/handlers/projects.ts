@@ -26,11 +26,14 @@ const ensureSortOrder = (task: Task): Task & { sortOrder: string } => ({
 api.register(postProjectApi, async (req, res, ctx) => {
   const { userId } = await ctx.getUser();
 
-  // Check active project limit
+  // Check project limits
   const userProjects = await projects.query({ userId }).all();
+  if (userProjects.length >= LIMITS.MAX_PROJECTS) {
+    throw new HttpError(403, LIMIT_MESSAGES.MAX_PROJECT);
+  }
   const activeCount = userProjects.filter((p) => !p.isArchived).length;
   if (activeCount >= LIMITS.MAX_ACTIVE_PROJECTS) {
-    throw new HttpError(403, LIMIT_MESSAGES.PROJECT);
+    throw new HttpError(403, LIMIT_MESSAGES.ACTIVE_PROJECT);
   }
 
   const projectId = random.id();
@@ -188,7 +191,10 @@ api.register(deleteProjectApi, async (req, res, ctx) => {
 
   // Delete all tasks in this project
   const projectTasks = await tasks.query({ userId, projectId: project.id }).all();
-  await Promise.all(projectTasks.map((task) => tasks.delete({ userId, projectId: project.id }, { id: task.id })));
+  if (projectTasks.length > 0) {
+    const pk = { userId, projectId: project.id };
+    await tasks.batchDelete(projectTasks.map((task) => ({ pk, sk: { id: task.id } })));
+  }
 
   // Delete the project
   await projects.delete({ userId }, { id: req.id });
@@ -219,14 +225,9 @@ api.register(archiveProjectApi, async (req, res, ctx) => {
 
   // Set TTL on all tasks in this project
   const projectTasks = await tasks.query({ userId, projectId: project.id }).all();
-  await Promise.all(
-    projectTasks.map((task) =>
-      tasks.put({
-        ...task,
-        ttl: archiveTtl,
-      }),
-    ),
-  );
+  if (projectTasks.length > 0) {
+    await tasks.batchPut(projectTasks.map((task) => ({ ...task, ttl: archiveTtl })));
+  }
 
   return res.ok({
     project: {
@@ -253,7 +254,7 @@ api.register(unarchiveProjectApi, async (req, res, ctx) => {
   const userProjects = await projects.query({ userId }).all();
   const activeCount = userProjects.filter((p) => !p.isArchived && p.id !== req.id).length;
   if (activeCount >= LIMITS.MAX_ACTIVE_PROJECTS) {
-    throw new HttpError(403, LIMIT_MESSAGES.PROJECT);
+    throw new HttpError(403, LIMIT_MESSAGES.ACTIVE_PROJECT);
   }
 
   const now = Date.now();
@@ -269,14 +270,9 @@ api.register(unarchiveProjectApi, async (req, res, ctx) => {
 
   // Remove TTL from all tasks in this project
   const projectTasks = await tasks.query({ userId, projectId: project.id }).all();
-  await Promise.all(
-    projectTasks.map((task) =>
-      tasks.put({
-        ...task,
-        ttl: undefined,
-      }),
-    ),
-  );
+  if (projectTasks.length > 0) {
+    await tasks.batchPut(projectTasks.map((task) => ({ ...task, ttl: undefined })));
+  }
 
   return res.ok({
     project: {

@@ -15,8 +15,19 @@ type TaskCardProps = {
 };
 
 export const TaskCard = ({ task, isArchived, pending, pendingSubtaskIds }: TaskCardProps) => {
-  const { updateStatus, updateTitle, updateNote, updateDueDate, remove, toggleSubtask, updateSubtaskTitle, removeSubtask, createSubtask, reorderSubtask } =
-    useTask(task.id);
+  const {
+    updateStatus,
+    updateTitle,
+    updateNote,
+    updateDueDate,
+    remove,
+    toggleSubtask,
+    updateSubtaskTitle,
+    removeSubtask,
+    batchRemoveSubtasks,
+    createSubtask,
+    reorderSubtask,
+  } = useTask(task.id);
   const [savingTitle, setSavingTitle] = useState(false);
 
   const handleSaveTitle = (title: string) => {
@@ -90,12 +101,14 @@ export const TaskCard = ({ task, isArchived, pending, pendingSubtaskIds }: TaskC
         subtasks={task.subtasks}
         isArchived={isArchived}
         isDone={state.isDone}
+        canAddSubtask={state.capabilities.canAddSubtask}
         pendingSubtaskIds={pendingSubtaskIds}
         addingSubtask={state.subtaskAddRequested}
         onAddingSubtaskChange={state.setSubtaskAddRequested}
         onToggle={toggleSubtask}
         onEditTitle={updateSubtaskTitle}
         onDelete={removeSubtask}
+        onBatchDelete={batchRemoveSubtasks}
         onCreate={createSubtask}
         onReorder={reorderSubtask}
       />

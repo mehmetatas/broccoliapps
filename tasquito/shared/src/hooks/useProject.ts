@@ -30,7 +30,14 @@ type TaskDeleteQueueItem = {
   taskToRestore: TaskWithSubtasks;
 };
 
-type TaskQueueItem = TaskCreateQueueItem | TaskStatusQueueItem | TaskDeleteQueueItem;
+type TaskBatchDeleteQueueItem = {
+  type: "batch-delete";
+  projectId: string;
+  taskIds: string[];
+  tasksToRestore: TaskWithSubtasks[];
+};
+
+type TaskQueueItem = TaskCreateQueueItem | TaskStatusQueueItem | TaskDeleteQueueItem | TaskBatchDeleteQueueItem;
 
 type SubtaskCreateQueueItem = {
   type: "create";
@@ -57,7 +64,15 @@ type SubtaskDeleteQueueItem = {
   subtaskToRestore: TaskDto;
 };
 
-type SubtaskQueueItem = SubtaskCreateQueueItem | SubtaskStatusQueueItem | SubtaskDeleteQueueItem;
+type SubtaskBatchDeleteQueueItem = {
+  type: "batch-delete";
+  projectId: string;
+  taskId: string;
+  subtaskIds: string[];
+  subtasksToRestore: TaskDto[];
+};
+
+type SubtaskQueueItem = SubtaskCreateQueueItem | SubtaskStatusQueueItem | SubtaskDeleteQueueItem | SubtaskBatchDeleteQueueItem;
 
 export const useProject = (id: string) => {
   const [project, setProject] = useState<ProjectWithTasksDto | null>(null);
@@ -227,6 +242,25 @@ export const useProject = (id: string) => {
             return {
               ...prev,
               tasks: [...prev.tasks, item.taskToRestore],
+            };
+          });
+        })
+        .finally(() => {
+          isProcessingTaskRef.current = false;
+          processTaskQueue();
+        });
+    } else if (item.type === "batch-delete") {
+      client
+        .batchDeleteTasks(item.projectId, item.taskIds)
+        .catch((err) => {
+          console.error("Failed to batch delete tasks, restoring", err);
+          setProject((prev) => {
+            if (!prev) {
+              return null;
+            }
+            return {
+              ...prev,
+              tasks: [...prev.tasks, ...item.tasksToRestore],
             };
           });
         })
@@ -452,6 +486,35 @@ export const useProject = (id: string) => {
     processTaskQueue();
   };
 
+  const batchRemoveTasks = (taskIds: string[]) => {
+    if (!project || taskIds.length === 0) {
+      return;
+    }
+
+    const idsToDelete = new Set(taskIds);
+    const tasksToRestore = project.tasks.filter((t) => idsToDelete.has(t.id));
+
+    // Optimistic update
+    setProject((prev) => {
+      if (!prev) {
+        return null;
+      }
+      return {
+        ...prev,
+        tasks: prev.tasks.filter((t) => !idsToDelete.has(t.id)),
+      };
+    });
+
+    taskQueueRef.current.push({
+      type: "batch-delete",
+      projectId: project.id,
+      taskIds,
+      tasksToRestore,
+    });
+
+    processTaskQueue();
+  };
+
   // Subtask actions
   const updateSubtaskStatus = (taskId: string, subtaskId: string, status: TaskStatus) => {
     if (!project) {
@@ -562,6 +625,40 @@ export const useProject = (id: string) => {
     processSubtaskQueue(taskId);
   };
 
+  const batchRemoveSubtasks = (taskId: string, subtaskIds: string[]) => {
+    if (!project || subtaskIds.length === 0) {
+      return;
+    }
+
+    const parentTask = project.tasks.find((t) => t.id === taskId);
+    const idsToDelete = new Set(subtaskIds);
+    const subtasksToRestore = parentTask?.subtasks.filter((st) => idsToDelete.has(st.id)) ?? [];
+
+    // Optimistic update
+    setProject((prev) => {
+      if (!prev) {
+        return null;
+      }
+      return {
+        ...prev,
+        tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: t.subtasks.filter((st) => !idsToDelete.has(st.id)) } : t)),
+      };
+    });
+
+    if (!subtaskQueuesRef.current.has(taskId)) {
+      subtaskQueuesRef.current.set(taskId, []);
+    }
+    subtaskQueuesRef.current.get(taskId)!.push({
+      type: "batch-delete",
+      projectId: project.id,
+      taskId,
+      subtaskIds,
+      subtasksToRestore,
+    });
+
+    processSubtaskQueue(taskId);
+  };
+
   // Process subtask queue for a specific task sequentially
   const processSubtaskQueue = (taskId: string) => {
     if (processingSubtasksRef.current.has(taskId)) {
@@ -654,6 +751,25 @@ export const useProject = (id: string) => {
             return {
               ...prev,
               tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: [...t.subtasks, item.subtaskToRestore] } : t)),
+            };
+          });
+        })
+        .finally(() => {
+          processingSubtasksRef.current.delete(taskId);
+          processSubtaskQueue(taskId);
+        });
+    } else if (item.type === "batch-delete") {
+      client
+        .batchDeleteTasks(item.projectId, item.subtaskIds)
+        .catch((err) => {
+          console.error("Failed to batch delete subtasks, restoring", err);
+          setProject((prev) => {
+            if (!prev) {
+              return null;
+            }
+            return {
+              ...prev,
+              tasks: prev.tasks.map((t) => (t.id === taskId ? { ...t, subtasks: [...t.subtasks, ...item.subtasksToRestore] } : t)),
             };
           });
         })
@@ -851,11 +967,13 @@ export const useProject = (id: string) => {
     updateTaskNote,
     updateTaskDueDate,
     removeTask,
+    batchRemoveTasks,
     reorderTask,
     // Subtask actions
     updateSubtaskStatus,
     updateSubtaskTitle,
     removeSubtask,
+    batchRemoveSubtasks,
     createSubtask,
     reorderSubtask,
     // Refresh

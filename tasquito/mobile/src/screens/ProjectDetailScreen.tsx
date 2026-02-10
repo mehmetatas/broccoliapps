@@ -2,7 +2,7 @@ import { CharacterLimitIndicator, Modal, Toast, useModal, useTheme } from "@broc
 import type { TaskDto } from "@broccoliapps/tasquito-shared";
 import { LIMITS } from "@broccoliapps/tasquito-shared";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Archive, ArchiveRestore, ChevronLeft, Trash2 } from "lucide-react-native";
+import { Archive, ArchiveRestore, ChevronDown, ChevronLeft, ChevronRight, Trash2 } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import DraggableFlatList, { type RenderItemParams } from "react-native-draggable-flatlist";
@@ -35,6 +35,7 @@ const ProjectDetailContent = ({ navigation }: ContentProps) => {
   const { colors } = useTheme();
   const archiveModal = useModal();
   const deleteModal = useModal();
+  const deleteDoneModal = useModal();
   const [exitingTaskId, setExitingTaskId] = useState<string | null>(null);
   const pendingToggle = useRef<{ taskId: string; newStatus: "todo" | "done" } | null>(null);
 
@@ -52,10 +53,12 @@ const ProjectDetailContent = ({ navigation }: ContentProps) => {
     archive,
     unarchive,
     remove,
+    batchRemoveTasks,
     refresh,
   } = useProjectContext();
 
   const isArchived = project?.isArchived ?? false;
+  const [doneExpanded, setDoneExpanded] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState("");
   const nameInputRef = useRef<TextInput>(null);
@@ -223,11 +226,28 @@ const ProjectDetailContent = ({ navigation }: ContentProps) => {
   const ListFooter = (
     <View>
       {/* Done tasks */}
-      {doneTasks.map((task) => (
-        <AnimatedCell key={task.id} exiting={exitingTaskId === task.id} onExitDone={handleExitComplete}>
-          <TaskCard task={task} isArchived={isArchived} onToggleStatus={() => handleToggleStatus(task)} />
-        </AnimatedCell>
-      ))}
+      {doneTasks.length > 0 && (
+        <View>
+          <View style={styles.doneHeader}>
+            <TouchableOpacity onPress={() => setDoneExpanded((prev) => !prev)} style={styles.doneToggle} activeOpacity={0.7}>
+              {doneExpanded ? <ChevronDown size={16} color={colors.textMuted} /> : <ChevronRight size={16} color={colors.textMuted} />}
+              <Text style={[styles.doneToggleText, { color: colors.textMuted }]}>Done ({doneTasks.length})</Text>
+            </TouchableOpacity>
+            {doneExpanded && (
+              <TouchableOpacity onPress={() => deleteDoneModal.open()} style={styles.deleteAllButton} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Trash2 size={14} color={colors.textMuted} />
+                <Text style={[styles.deleteAllText, { color: colors.textMuted }]}>Delete All</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          {doneExpanded &&
+            doneTasks.map((task) => (
+              <AnimatedCell key={task.id} exiting={exitingTaskId === task.id} onExitDone={handleExitComplete}>
+                <TaskCard task={task} isArchived={isArchived} onToggleStatus={() => handleToggleStatus(task)} />
+              </AnimatedCell>
+            ))}
+        </View>
+      )}
 
       {/* Empty state */}
       {!isLoading && tasks.length === 0 && (
@@ -307,6 +327,21 @@ const ProjectDetailContent = ({ navigation }: ContentProps) => {
         }}
       >
         <Text style={[styles.modalMessage, { color: colors.textPrimary }]}>This action cannot be undone. All tasks will be permanently deleted.</Text>
+      </Modal>
+      <Modal
+        visible={deleteDoneModal.isOpen}
+        onClose={deleteDoneModal.close}
+        title="Delete Done Tasks"
+        confirmText="Delete"
+        confirmVariant="danger"
+        onConfirm={() => {
+          deleteDoneModal.close();
+          batchRemoveTasks(doneTasks.map((t) => t.id));
+        }}
+      >
+        <Text style={[styles.modalMessage, { color: colors.textPrimary }]}>
+          {doneTasks.length} done task{doneTasks.length !== 1 ? "s" : ""} will be permanently deleted.
+        </Text>
       </Modal>
     </>
   );
@@ -395,6 +430,30 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "Nunito-Regular",
     textAlign: "center",
+  },
+  doneHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  doneToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingVertical: 8,
+  },
+  doneToggleText: {
+    fontSize: 14,
+    fontFamily: "Nunito-SemiBold",
+  },
+  deleteAllButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  deleteAllText: {
+    fontSize: 12,
+    fontFamily: "Nunito-SemiBold",
   },
   modalMessage: {
     fontSize: 15,

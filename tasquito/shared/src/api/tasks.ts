@@ -1,5 +1,7 @@
 import { api } from "@broccoliapps/shared";
 import {
+  batchDeleteTasksRequest,
+  batchDeleteTasksResponse,
   deleteTaskRequest,
   deleteTaskResponse,
   getTaskRequest,
@@ -31,3 +33,8 @@ export const patchTaskApi = api("PATCH", "/projects/:projectId/tasks/:id").withR
 
 // DELETE /projects/:projectId/tasks/:id - delete task (cascades to subtasks)
 export const deleteTaskApi = api("DELETE", "/projects/:projectId/tasks/:id").withRequest(deleteTaskRequest).withResponse(deleteTaskResponse);
+
+// POST /projects/:projectId/tasks/batch-delete - batch delete tasks
+export const batchDeleteTasksApi = api("POST", "/projects/:projectId/tasks/batch-delete")
+  .withRequest(batchDeleteTasksRequest)
+  .withResponse(batchDeleteTasksResponse);

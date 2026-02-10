@@ -66,6 +66,13 @@ export const useTask = (taskId: string) => {
     [ctx.removeSubtask, taskId],
   );
 
+  const batchRemoveSubtasks = useCallback(
+    (subtaskIds: string[]) => {
+      ctx.batchRemoveSubtasks(taskId, subtaskIds);
+    },
+    [ctx.batchRemoveSubtasks, taskId],
+  );
+
   const reorderSubtask = useCallback(
     (subtaskId: string, afterId: string | null, beforeId: string | null) => {
       ctx.reorderSubtask(taskId, subtaskId, afterId, beforeId);
@@ -89,6 +96,7 @@ export const useTask = (taskId: string) => {
     toggleSubtask,
     updateSubtaskTitle,
     removeSubtask,
+    batchRemoveSubtasks,
     reorderSubtask,
     createSubtask,
   };

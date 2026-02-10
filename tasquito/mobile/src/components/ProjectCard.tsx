@@ -27,7 +27,7 @@ export const ProjectCard = ({ project, onPress, onArchive, onUnarchive, onDelete
     ? `Deleting ${daysLeft < 1 ? "soon" : `in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`}`
     : project.totalTaskCount === 0
       ? "No tasks"
-      : `${project.openTaskCount} of ${project.totalTaskCount} open`;
+      : `${project.openTaskCount} open tasks`;
 
   const cardContent = (
     <TouchableOpacity

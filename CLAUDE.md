@@ -117,6 +117,8 @@ npm run deploy:tasquito:web
 
 **Backend structure:** `src/api/` for Lambda handlers, `src/domains/` for business logic, `src/jobs/` for scheduled EventBridge tasks, `src/events/` for async SQS handlers.
 
+**DynamoDB best practices:** Prefer GSI queries (e.g., `tasks.query.byParent(pk, { parentId })`) over querying all items then filtering in JS. Use `batchDelete`/`batchPut` for bulk operations instead of `Promise.all` with individual `delete`/`put` calls.
+
 ## File Naming
 
 - **Components:** PascalCase (`TaskCard.tsx`, `ProjectForm.tsx`)
