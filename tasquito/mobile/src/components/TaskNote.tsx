@@ -85,23 +85,10 @@ export const TaskNote = ({ taskId, note, isArchived, isDone, editRequested, onEd
 
   const canEditNote = !isArchived && !isDone;
 
+  const [isTruncated, setIsTruncated] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingNote, setEditingNote] = useState("");
-  const [expanded, setExpanded] = useState(false);
-  const [isTruncatable, setIsTruncatable] = useState(() => !!note && note.split("\n").length > MAX_PREVIEW_LINES);
   const noteInputRef = useRef<TextInput>(null);
-
-  const handleTextLayout = useCallback((e: NativeSyntheticEvent<TextLayoutEventData>) => {
-    if (e.nativeEvent.lines.length >= MAX_PREVIEW_LINES) {
-      setIsTruncatable(true);
-    }
-  }, []);
-
-  // Reset state when note changes
-  useEffect(() => {
-    setExpanded(false);
-    setIsTruncatable(!!note && note.split("\n").length > MAX_PREVIEW_LINES);
-  }, [note]);
 
   // Allow parent (more menu) to trigger editing
   useEffect(() => {
@@ -180,17 +167,13 @@ export const TaskNote = ({ taskId, note, isArchived, isDone, editRequested, onEd
     <View>
       <Text
         style={[styles.note, { color: colors.textMuted }]}
-        numberOfLines={!expanded ? MAX_PREVIEW_LINES : undefined}
-        onTextLayout={!expanded ? handleTextLayout : undefined}
+        numberOfLines={MAX_PREVIEW_LINES}
+        onTextLayout={(e: NativeSyntheticEvent<TextLayoutEventData>) => setIsTruncated(e.nativeEvent.lines.length >= MAX_PREVIEW_LINES)}
         onPress={canEditNote ? handleNotePress : undefined}
       >
         {linkifyNote(note ?? "")}
       </Text>
-      {isTruncatable && (
-        <TouchableOpacity onPress={() => setExpanded(!expanded)} hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}>
-          <Text style={[styles.toggleText, { color: colors.textMuted }]}>{expanded ? "Show less" : "Show more"}</Text>
-        </TouchableOpacity>
-      )}
+      {isTruncated && <Text style={[styles.ellipsis, { color: colors.textMuted }]}>...</Text>}
     </View>
   );
 };
@@ -216,9 +199,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     gap: 16,
   },
-  toggleText: {
-    fontSize: 13,
+  ellipsis: {
+    fontSize: 15,
     fontFamily: "Nunito-Regular",
-    marginTop: 4,
+    lineHeight: 20,
   },
 });
