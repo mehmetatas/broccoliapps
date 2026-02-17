@@ -47,6 +47,12 @@ s2C08cImZ0wGUMydDBfTGjm9Z4zU2tFNH9gH3R013SMT2N5+u5j6jHX+VKxAvhAl
 -----END PUBLIC KEY-----
 `.trim(),
     },
+    serophin: {
+      baseUrl: isDev ? "http://localhost:8083" : "https://www.serophin.com",
+      mobileScheme: "serophin",
+      appleAudience: "com.broccoliapps.serophin.ios",
+      publicKey: "TODO",
+    },
   },
 };
 

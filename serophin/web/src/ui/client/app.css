@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@source "../../../../../framework/browser/src";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+.dark {
+  color-scheme: dark;
+}
+
+/* Base styles */
+body {
+  font-family: "Nunito", system-ui, sans-serif;
+}
+
+a:not(:disabled),
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

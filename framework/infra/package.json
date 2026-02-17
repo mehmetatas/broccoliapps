@@ -18,7 +18,8 @@
   },
   "scripts": {
     "build": "npm run clean && tsc",
-    "clean": "rm -rf dist/"
+    "clean": "rm -rf dist/",
+    "create-ssl": "f() { cdk deploy --all --require-approval never --profile appi --app \"tsx src/ssl.ts $1 $2\"; }; f"
   },
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.967.0",

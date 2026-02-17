@@ -129,6 +129,7 @@ npm run deploy:tasquito:web
 
 ## Rules
 
+- **NEVER run scripts** - Do not execute any shell scripts (*.sh files) or custom scripts via Bash. Only the user runs scripts.
 - **NEVER run install/deploy commands** for mobile apps (e.g. `android:install:release`, `react-native run-android`, `react-native run-ios`). These overwrite the version currently on the device. Only the user installs apps on devices.
 - **NEVER run deploy commands** for web apps (e.g. `deploy:nwm`, `deploy:tasquito`). These overwrite the version currently in production. Only the user deploys web app/backend to AWS.
 - **NEVER execute AWS CLI write commands** You may run aws cli read commands using `--profile appi --region us-west-2` when you need to check AWS resources.

@@ -50,6 +50,7 @@ const formatAppName = (app: AppId): string => {
     "broccoliapps-com": "Broccoli Apps",
     networthmonitor: "Net Worth Monitor",
     tasquito: "Tasquito",
+    serophin: "Serophin",
   };
   return names[app] ?? app;
 };

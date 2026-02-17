@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import * as cdk from "aws-cdk-lib";
 import { aws_certificatemanager as acm, aws_route53 as route53 } from "aws-cdk-lib";
 
@@ -36,3 +37,13 @@ export const createSslCert = (awsAccount: string, domain: string) => {
 
   app.synth();
 };
+
+// CLI: invoked by CDK via --app "tsx src/ssl.ts <awsAccount> <domain>"
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const [awsAccount, domain] = process.argv.slice(2);
+  if (!awsAccount || !domain) {
+    console.error("Usage: npm run create-ssl <awsAccount> <domain>");
+    process.exit(1);
+  }
+  createSslCert(awsAccount, domain);
+}

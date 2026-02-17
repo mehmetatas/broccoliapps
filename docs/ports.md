@@ -11,3 +11,7 @@
 | Vite                  | 5082 |
 | Metro                 | 7082 |
 | Web                   | 8082 |
+| **Serophin**          |
+| Vite                  | 5083 |
+| Metro                 | 7083 |
+| Web                   | 8083 |

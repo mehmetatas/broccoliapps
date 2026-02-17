@@ -130,14 +130,12 @@ export const buildApp = async (options: BuildAppOptions): Promise<void> => {
     const srcDir = path.join(rootDir, staticDir);
     const destDir = path.join(rootDir, "dist/static");
 
-    fs.mkdirSync(destDir, { recursive: true });
+    fs.cpSync(srcDir, destDir, { recursive: true });
 
-    const files = fs.readdirSync(srcDir);
-    for (const file of files) {
-      const srcPath = path.join(srcDir, file);
-      const destPath = path.join(destDir, file);
-      fs.copyFileSync(srcPath, destPath);
-      console.log(`  static/${file} → dist/static/${file}`);
+    const entries = fs.readdirSync(srcDir);
+    for (const entry of entries) {
+      const stat = fs.statSync(path.join(srcDir, entry));
+      console.log(`  static/${entry}${stat.isDirectory() ? "/" : ""} → dist/static/${entry}`);
     }
   };
 
