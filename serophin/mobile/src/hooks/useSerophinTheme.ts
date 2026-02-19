@@ -1,9 +1,15 @@
 import { useTheme as useBaseTheme } from "@broccoliapps/mobile";
 
 export const useTheme = () => {
-  const { colors, isDark } = useBaseTheme();
+  const { colors } = useBaseTheme();
   return {
-    colors: { ...colors, background: isDark ? "#162028" : "#F0E8E0" },
-    isDark,
+    colors: {
+      ...colors,
+      background: "transparent",
+      backgroundSecondary: "rgba(255, 255, 255, 0.2)",
+      backgroundTertiary: "rgba(255, 255, 255, 0.12)",
+      border: "rgba(255, 255, 255, 0.3)",
+      divider: "rgba(255, 255, 255, 0.25)",
+    },
   };
 };

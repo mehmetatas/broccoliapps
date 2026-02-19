@@ -65,7 +65,7 @@ export const TaskNote = ({ taskId, note, isArchived, isDone, editRequested, onEd
           }
           const linkUrl = url;
           nodes.push(
-            <Text key={`${i}-${start}`} onPress={() => openUrl(linkUrl, colors)} style={{ color: colors.accent, textDecorationLine: "underline" }}>
+            <Text key={`${i}-${start}`} onPress={() => openUrl(linkUrl, colors)} style={[styles.link, { color: colors.accent }]}>
               {url}
             </Text>,
           );
@@ -203,5 +203,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "Nunito-Regular",
     lineHeight: 20,
+  },
+  link: {
+    textDecorationLine: "underline",
   },
 });

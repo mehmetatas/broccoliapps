@@ -1,4 +1,4 @@
-import { cloneElement, isValidElement, type ReactElement, type ReactNode, useCallback, useRef } from "react";
+import { cloneElement, isValidElement, type ReactElement, type ReactNode, useCallback, useEffect, useRef } from "react";
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "./theme";
 
@@ -12,14 +12,30 @@ export type PillsProps<T extends string> = {
   items: PillItem<T>[];
   selected: T;
   onSelect: (value: T) => void;
+  transparent?: boolean;
 };
 
-export const Pills = <T extends string>({ items, selected, onSelect }: PillsProps<T>) => {
+export const Pills = <T extends string>({ items, selected, onSelect, transparent }: PillsProps<T>) => {
   const { colors } = useTheme();
   const listRef = useRef<FlatList<PillItem<T>>>(null);
 
+  const userInteractedRef = useRef(false);
+
+  useEffect(() => {
+    if (userInteractedRef.current) {
+      return;
+    }
+    const idx = items.findIndex((item) => item.value === selected);
+    if (idx > 0) {
+      requestAnimationFrame(() => {
+        listRef.current?.scrollToIndex({ index: idx, animated: false, viewPosition: 0.5 });
+      });
+    }
+  }, [items, selected]);
+
   const handleSelect = useCallback(
     (value: T, index: number) => {
+      userInteractedRef.current = true;
       onSelect(value);
       listRef.current?.scrollToIndex({
         index,
@@ -38,7 +54,7 @@ export const Pills = <T extends string>({ items, selected, onSelect }: PillsProp
           style={[
             styles.pill,
             {
-              backgroundColor: isSelected ? colors.accent : colors.backgroundSecondary,
+              backgroundColor: isSelected ? colors.accent : transparent ? "transparent" : colors.backgroundSecondary,
               borderColor: isSelected ? colors.accent : colors.border,
             },
           ]}
@@ -51,7 +67,7 @@ export const Pills = <T extends string>({ items, selected, onSelect }: PillsProp
               style={[
                 styles.pillText,
                 {
-                  color: isSelected ? "#ffffff" : colors.textSecondary,
+                  color: isSelected ? "#ffffff" : colors.textPrimary,
                 },
               ]}
             >
@@ -73,6 +89,11 @@ export const Pills = <T extends string>({ items, selected, onSelect }: PillsProp
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}
+      onScrollToIndexFailed={(info) => {
+        requestAnimationFrame(() => {
+          listRef.current?.scrollToIndex({ index: info.index, animated: false, viewPosition: 0.5 });
+        });
+      }}
     />
   );
 };

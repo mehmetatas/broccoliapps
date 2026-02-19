@@ -68,12 +68,7 @@ export const SubtaskItem = ({ subtask, taskId, isArchived, onDrag, isActive }: S
       : undefined;
 
   const content = (
-    <View
-      style={[
-        styles.subtaskPreviewRow,
-        isActive && { backgroundColor: colors.backgroundTertiary, borderRadius: 6, marginHorizontal: -4, paddingHorizontal: 4 },
-      ]}
-    >
+    <View style={[styles.subtaskPreviewRow, isActive && styles.subtaskActiveRow, isActive && { backgroundColor: colors.backgroundTertiary }]}>
       {isSaving ? (
         <View style={styles.subtaskIcon}>
           <SpinningLoader size={18} color={colors.textMuted} />
@@ -161,6 +156,11 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 8,
     paddingVertical: 4,
+  },
+  subtaskActiveRow: {
+    borderRadius: 6,
+    marginHorizontal: -4,
+    paddingHorizontal: 4,
   },
   subtaskIcon: {
     marginTop: 2,

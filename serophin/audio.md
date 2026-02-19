@@ -99,3 +99,9 @@ Style tag: `deep drone, ambient, meditative, no percussion, no drums, no beat, i
 | 8 | layered drones building slowly, crescendo then fade |
 | 9 | two drones a fifth apart, harmonic tension, meditative |
 | 10 | wind-like low drone, hollow, vast, desolate landscape |
+
+## Voice generation on Eleven labs
+
+```
+A 35 year old British man with a warm, approachable voice. He speaks slowly and deliberately, like he's chatting with a close friend over a cup of tea — candid, easygoing, and genuine. His tone is calm and relaxing but never distant or formal; there's a natural friendliness and warmth that makes you feel like he's talking just to you. The delivery is unhurried and meditative, with a soft, measured cadence and natural pauses. Think of a likeable, down-to-earth narrator who's genuinely interested in what he's telling you — not reading from a script, but sharing something fascinating he just discovered. Relaxed, conversational, intimate, and soothing.
+```

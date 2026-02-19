@@ -8,33 +8,33 @@ export const useTask = (taskId: string) => {
     (status: "todo" | "done") => {
       ctx.updateTaskStatus(taskId, status);
     },
-    [ctx.updateTaskStatus, taskId],
+    [ctx, taskId],
   );
 
   const updateTitle = useCallback(
     (title: string) => {
       return ctx.updateTaskTitle(taskId, title);
     },
-    [ctx.updateTaskTitle, taskId],
+    [ctx, taskId],
   );
 
   const updateNote = useCallback(
     (note: string) => {
       return ctx.updateTaskNote(taskId, note);
     },
-    [ctx.updateTaskNote, taskId],
+    [ctx, taskId],
   );
 
   const updateDueDate = useCallback(
     (date: string | undefined) => {
       ctx.updateTaskDueDate(taskId, date);
     },
-    [ctx.updateTaskDueDate, taskId],
+    [ctx, taskId],
   );
 
   const remove = useCallback(() => {
     ctx.removeTask(taskId);
-  }, [ctx.removeTask, taskId]);
+  }, [ctx, taskId]);
 
   const toggleSubtask = useCallback(
     (subtaskId: string) => {
@@ -49,42 +49,42 @@ export const useTask = (taskId: string) => {
       const newStatus = subtask.status === "todo" ? "done" : "todo";
       ctx.updateSubtaskStatus(taskId, subtaskId, newStatus);
     },
-    [ctx.tasks, ctx.updateSubtaskStatus, taskId],
+    [ctx, taskId],
   );
 
   const updateSubtaskTitle = useCallback(
     (subtaskId: string, title: string) => {
       return ctx.updateSubtaskTitle(taskId, subtaskId, title);
     },
-    [ctx.updateSubtaskTitle, taskId],
+    [ctx, taskId],
   );
 
   const removeSubtask = useCallback(
     (subtaskId: string) => {
       ctx.removeSubtask(taskId, subtaskId);
     },
-    [ctx.removeSubtask, taskId],
+    [ctx, taskId],
   );
 
   const batchRemoveSubtasks = useCallback(
     (subtaskIds: string[]) => {
       ctx.batchRemoveSubtasks(taskId, subtaskIds);
     },
-    [ctx.batchRemoveSubtasks, taskId],
+    [ctx, taskId],
   );
 
   const reorderSubtask = useCallback(
     (subtaskId: string, afterId: string | null, beforeId: string | null) => {
       ctx.reorderSubtask(taskId, subtaskId, afterId, beforeId);
     },
-    [ctx.reorderSubtask, taskId],
+    [ctx, taskId],
   );
 
   const createSubtask = useCallback(
     (title: string) => {
       ctx.createSubtask(taskId, title);
     },
-    [ctx.createSubtask, taskId],
+    [ctx, taskId],
   );
 
   return {

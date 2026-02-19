@@ -1,10 +1,20 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { PreferencesDto } from "../data/types";
 
 const STORAGE_KEY = "serophin:preferences";
 
-export const usePreferences = () => {
+type PreferencesContextValue = {
+  preferences: PreferencesDto;
+  isLoading: boolean;
+  error: string | null;
+  update: (updates: Partial<PreferencesDto>) => void;
+  refresh: () => void;
+};
+
+export const PreferencesContext = createContext<PreferencesContextValue | null>(null);
+
+export const usePreferencesProvider = () => {
   const [preferences, setPreferences] = useState<PreferencesDto>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,4 +58,12 @@ export const usePreferences = () => {
     update,
     refresh,
   };
+};
+
+export const usePreferences = () => {
+  const ctx = useContext(PreferencesContext);
+  if (!ctx) {
+    throw new Error("usePreferences must be used within a PreferencesProvider");
+  }
+  return ctx;
 };

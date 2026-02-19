@@ -13,7 +13,7 @@ export const DurationPicker = ({ options, selected, onSelect, suffix = "min" }: 
     () =>
       options.map((option) => ({
         value: String(option),
-        label: `${option} ${suffix}`,
+        label: option === 0 ? "No limit" : `${option} ${suffix}`,
       })),
     [options, suffix],
   );
@@ -22,5 +22,5 @@ export const DurationPicker = ({ options, selected, onSelect, suffix = "min" }: 
     onSelect(Number(value));
   };
 
-  return <Pills items={items} selected={String(selected)} onSelect={handleSelect} />;
+  return <Pills items={items} selected={String(selected)} onSelect={handleSelect} transparent />;
 };

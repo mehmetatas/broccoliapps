@@ -19,11 +19,15 @@
     "dev:client": "vite",
     "build:lambda": "rm -rf dist cdk.out && npm run typecheck && tsx scripts/build/main.ts",
     "invalidate": "aws cloudfront create-invalidation --distribution-id E2Z3ZUJ6VO3H70 --paths \"/*\" --profile appi --no-cli-pager",
-    "deploy": "export AWS_PROFILE=appi && npm run build:lambda && npx cdk deploy --profile appi --require-approval never && npm run invalidate"
+    "s3:sync:audio": "aws s3 sync static/audio s3://serophin-static/static/audio --cache-control \"max-age=31536000\" --delete --profile appi",
+    "s3:sync:static": "aws s3 sync dist/static s3://serophin-static/static --cache-control \"max-age=31536000\" --delete --profile appi",
+    "deploy": "export AWS_PROFILE=appi && npm run build:lambda && npx cdk deploy --profile appi --require-approval never && npm run s3:sync:static && npm run invalidate",
+    "tts": "tsx scripts/tts/main.ts"
   },
   "devDependencies": {
     "@broccoliapps/dev-tools": "*",
     "@broccoliapps/infra": "*",
+    "@elevenlabs/elevenlabs-js": "^2.36.0",
     "@preact/preset-vite": "^2.10.2",
     "@tailwindcss/postcss": "^4.1.11",
     "@types/aws-lambda": "^8.10.159",

@@ -19,7 +19,8 @@
     "dev:client": "vite",
     "build:lambda": "rm -rf dist cdk.out && npm run typecheck && tsx scripts/build/main.ts",
     "invalidate": "aws cloudfront create-invalidation --distribution-id E3GOSNQI3FTB08 --paths \"/*\" --profile appi --no-cli-pager",
-    "deploy": "export AWS_PROFILE=appi && npm run build:lambda && npx cdk deploy --profile appi --require-approval never && npm run invalidate"
+    "s3:sync": "aws s3 sync dist/static s3://networthmonitor-static/static --cache-control \"max-age=31536000\" --delete --profile appi",
+    "deploy": "export AWS_PROFILE=appi && npm run build:lambda && npx cdk deploy --profile appi --require-approval never && npm run s3:sync && npm run invalidate"
   },
   "devDependencies": {
     "@broccoliapps/dev-tools": "*",

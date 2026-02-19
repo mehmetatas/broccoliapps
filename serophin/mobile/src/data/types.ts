@@ -1,17 +1,17 @@
 // Theme
 export type Theme = "system" | "dark" | "light";
 
-// Guidance Level (0 = none, 1 = low, 2 = medium, 3 = high, 4 = full)
-export type GuidanceLevel = 0 | 1 | 2 | 3 | 4;
+// Guidance Level (0 = silent, 1 = bell, 2 = gentle, 3 = guided)
+export type GuidanceLevel = 0 | 1 | 2 | 3;
+
+// Breathing Phases
+export type BreathingPhase = "inhale" | "hold" | "exhale" | "holdAfter";
 
 // Breathing Patterns
 export type BreathingPattern = "4-7-8" | "box" | "4-4" | "4-6";
 
 // Background Sound IDs
-export type BackgroundSound = "none" | "rain" | "waves" | "forest" | "wind" | "fire" | "birds" | "thunder";
-
-// Sleep Sound IDs
-export type SleepSound = "rain" | "waves" | "forest" | "wind" | "fire" | "whitenoise" | "brownnoise" | "pinknoise";
+export type BackgroundSound = "none" | "ambient" | "piano" | "bowls" | "waves" | "rain" | "forest" | "brownnoise" | "pinknoise" | "whitenoise";
 
 // User Preferences
 export type PreferencesDto = {
@@ -23,9 +23,8 @@ export type PreferencesDto = {
   breathingDuration?: number; // minutes
   breathingSound?: BackgroundSound;
   breathingHaptics?: boolean;
-  sleepSound?: SleepSound;
+  sleepSound?: BackgroundSound;
   sleepDuration?: number; // minutes
-  sleepBackgroundSound?: BackgroundSound;
 };
 
 // Course Lesson

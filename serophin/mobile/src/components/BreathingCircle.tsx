@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import ReactNativeHapticFeedback from "react-native-haptic-feedback";
+import BackgroundTimer from "react-native-background-timer";
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import type { BreathingPhase } from "../data/types";
+import { useHaptics } from "../hooks/useHaptics";
 import { useTheme } from "../hooks/useSerophinTheme";
-
-type BreathingPhase = "inhale" | "hold" | "exhale" | "holdAfter";
 
 type PatternTiming = {
   inhale: number;
@@ -31,23 +31,18 @@ const MAX_SCALE = 1.0;
 
 export const BreathingCircle = ({ pattern, isActive, haptics }: Props) => {
   const { colors } = useTheme();
+  const { phase: triggerHaptic } = useHaptics(haptics);
   const [phase, setPhase] = useState<BreathingPhase>("inhale");
   const scale = useSharedValue(MIN_SCALE);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timeoutRef = useRef<number | null>(null);
   const isMountedRef = useRef(true);
 
   const clearTimeouts = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+    if (timeoutRef.current !== null) {
+      BackgroundTimer.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
   }, []);
-
-  const triggerHaptic = useCallback(() => {
-    if (haptics) {
-      ReactNativeHapticFeedback.trigger("impactLight");
-    }
-  }, [haptics]);
 
   const runPhase = useCallback(
     (currentPhase: BreathingPhase) => {
@@ -56,7 +51,7 @@ export const BreathingCircle = ({ pattern, isActive, haptics }: Props) => {
       }
 
       setPhase(currentPhase);
-      triggerHaptic();
+      triggerHaptic(currentPhase);
 
       const getNextPhase = (): BreathingPhase => {
         switch (currentPhase) {
@@ -94,7 +89,7 @@ export const BreathingCircle = ({ pattern, isActive, haptics }: Props) => {
       }
       // hold and holdAfter: no scale change
 
-      timeoutRef.current = setTimeout(() => {
+      timeoutRef.current = BackgroundTimer.setTimeout(() => {
         runPhase(getNextPhase());
       }, duration);
     },

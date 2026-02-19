@@ -1,6 +1,6 @@
 import { type AuthExchangeResponse, Login, useAuth, useTheme } from "@broccoliapps/mobile";
 import * as client from "@broccoliapps/tasquito-shared";
-import { StatusBar } from "react-native";
+import { StatusBar, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export const LoginScreen = () => {
@@ -18,7 +18,7 @@ export const LoginScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <Login
         title="Tasquito"
@@ -30,3 +30,9 @@ export const LoginScreen = () => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

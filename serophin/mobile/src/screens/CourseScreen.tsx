@@ -1,8 +1,8 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ChevronDown, ChevronLeft, ChevronRight, Lock } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { GradientBackground } from "../components/GradientBackground";
 import { COURSE_LEVELS, COURSE_PRICE_USD, getCourseData, getLevelDescription, getLevelTitle } from "../data/course-data";
 import { usePurchase } from "../hooks/usePurchase";
 import { useTheme } from "../hooks/useSerophinTheme";
@@ -34,7 +34,7 @@ export const CourseScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={Platform.OS === "android" ? ["top", "bottom"] : ["top"]}>
+    <GradientBackground>
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} activeOpacity={0.7}>
@@ -119,14 +119,11 @@ export const CourseScreen = ({ navigation }: Props) => {
           })}
         </ScrollView>
       </View>
-    </SafeAreaView>
+    </GradientBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-  },
   container: {
     flex: 1,
   },

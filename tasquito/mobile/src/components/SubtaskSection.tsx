@@ -190,7 +190,7 @@ export const SubtaskSection = ({ task, isArchived, canAddSubtask: canAddSubtaskP
           deleteDoneModal.close();
         }}
       >
-        <Text style={{ color: colors.textPrimary, fontSize: 15, fontFamily: "Nunito-Regular" }}>
+        <Text style={[styles.modalText, { color: colors.textPrimary }]}>
           Are you sure you want to delete {doneSubtasks.length} done subtask{doneSubtasks.length !== 1 ? "s" : ""}? This action cannot be undone.
         </Text>
       </Modal>
@@ -253,5 +253,9 @@ const styles = StyleSheet.create({
   deleteAllText: {
     fontSize: 11,
     fontFamily: "Nunito-SemiBold",
+  },
+  modalText: {
+    fontSize: 15,
+    fontFamily: "Nunito-Regular",
   },
 });

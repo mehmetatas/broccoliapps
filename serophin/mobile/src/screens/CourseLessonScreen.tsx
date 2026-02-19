@@ -1,8 +1,8 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ChevronLeft, Lock, Pause, Play } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { GradientBackground } from "../components/GradientBackground";
 import { getCourseData, getLevelTitle, LESSON_DURATION_MINUTES } from "../data/course-data";
 import { usePurchase } from "../hooks/usePurchase";
 import { useTheme } from "../hooks/useSerophinTheme";
@@ -64,7 +64,7 @@ export const CourseLessonScreen = ({ navigation, route }: Props) => {
   // If no course access, show locked state
   if (!hasCourseAccess) {
     return (
-      <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={Platform.OS === "android" ? ["top", "bottom"] : ["top"]}>
+      <GradientBackground>
         <View style={styles.container}>
           <View style={styles.header}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} activeOpacity={0.7}>
@@ -83,12 +83,12 @@ export const CourseLessonScreen = ({ navigation, route }: Props) => {
             </TouchableOpacity>
           </View>
         </View>
-      </SafeAreaView>
+      </GradientBackground>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={Platform.OS === "android" ? ["top", "bottom"] : ["top"]}>
+    <GradientBackground>
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} activeOpacity={0.7}>
@@ -120,14 +120,11 @@ export const CourseLessonScreen = ({ navigation, route }: Props) => {
           </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+    </GradientBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-  },
   container: {
     flex: 1,
   },

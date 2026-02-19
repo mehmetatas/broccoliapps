@@ -16,7 +16,6 @@ import {
   aws_route53 as route53,
   aws_route53_targets as route53targets,
   aws_s3 as s3,
-  aws_s3_deployment as s3deploy,
   aws_scheduler as scheduler,
   aws_ses as ses,
 } from "aws-cdk-lib";
@@ -222,9 +221,8 @@ class AppBuilder {
     return this;
   }
 
-  private configureStaticBucket(pathPattern: string, distPath: string) {
+  private configureStaticBucket(pathPattern: string) {
     const name = this.nameFromPath(pathPattern);
-    const isDefaultOrigin = pathPattern === "/*";
 
     const bucket = new s3.Bucket(this.stack, this.resourceName(`${name}-bucket`), {
       bucketName: this.resourceName(name),
@@ -233,18 +231,7 @@ class AppBuilder {
       autoDeleteObjects: !this.isProd(),
     });
 
-    // Deploy static files to S3
-    // If this is the default origin (static-only site), deploy to root
-    // Otherwise, deploy under prefix stripped from pathPattern
-    const prefix = isDefaultOrigin ? undefined : pathPattern.replace(/^\//, "").replace(/\/\*$/, "");
-    const deployment = new s3deploy.BucketDeployment(this.stack, this.resourceName(`${name}-deploy`), {
-      sources: [s3deploy.Source.asset(distPath)],
-      destinationBucket: bucket,
-      destinationKeyPrefix: prefix,
-      cacheControl: [s3deploy.CacheControl.maxAge(cdk.Duration.days(365))],
-    });
-
-    return { bucket, deployment, pathPattern };
+    return { bucket, pathPattern };
   }
 
   private configureLambda(
@@ -740,23 +727,16 @@ class AppBuilder {
       lambdas.push({ pathPattern: origin.pathPattern, fn });
     }
 
-    // Configure all S3 origins
-    const s3Buckets: Array<{ pathPattern: string; bucket: s3.Bucket; deployment: s3deploy.BucketDeployment }> = [];
+    // Configure all S3 origins (bucket only — files are synced via `aws s3 sync` in deploy scripts)
+    const s3Buckets: Array<{ pathPattern: string; bucket: s3.Bucket }> = [];
     for (const origin of this.s3Origins) {
-      const { bucket, deployment, pathPattern } = this.configureStaticBucket(origin.pathPattern, origin.distPath);
-      s3Buckets.push({ pathPattern, bucket, deployment });
-    }
-
-    // Add dependencies: Lambda origins depend on S3 deployments
-    for (const { fn } of lambdas) {
-      for (const { deployment } of s3Buckets) {
-        fn.node.addDependency(deployment);
-      }
+      const { bucket, pathPattern } = this.configureStaticBucket(origin.pathPattern);
+      s3Buckets.push({ pathPattern, bucket });
     }
 
     const distribution = this.configureCloudFront({
       lambdas,
-      s3Buckets: s3Buckets.map(({ pathPattern, bucket }) => ({ pathPattern, bucket })),
+      s3Buckets,
     });
 
     if (distribution) {
