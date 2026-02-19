@@ -366,8 +366,8 @@ export const useBackgroundSound = ({ sound, isActive, durationMinutes }: Options
       }
     };
 
-    const scheduleCrossfade = (path: string) => {
-      const delay = (AUDIO_DURATION - CROSSFADE_DURATION) * 1000;
+    const scheduleCrossfade = (path: string, alreadyPlayed = 0) => {
+      const delay = (AUDIO_DURATION - CROSSFADE_DURATION - alreadyPlayed) * 1000;
       crossfadeScheduleRef.current = BackgroundTimer.setTimeout(() => {
         startCrossfade(path);
       }, delay);
@@ -412,9 +412,9 @@ export const useBackgroundSound = ({ sound, isActive, durationMinutes }: Options
               currentPlayerRef.current.setVolume(1.0 * dm());
             }
 
-            // Schedule next crossfade
+            // Schedule next crossfade (new player already played CROSSFADE_DURATION during the fade)
             if (sessionActiveRef.current && !cancelled) {
-              scheduleCrossfade(path);
+              scheduleCrossfade(path, CROSSFADE_DURATION);
             }
           } else {
             oldPlayer?.setVolume((1 - progress) * dm());
