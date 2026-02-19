@@ -22,7 +22,7 @@
     "s3:sync:audio": "aws s3 sync static/audio s3://serophin-static/static/audio --cache-control \"max-age=31536000\" --delete --profile appi",
     "s3:sync:static": "aws s3 sync dist/static s3://serophin-static/static --cache-control \"max-age=31536000\" --delete --profile appi",
     "deploy": "export AWS_PROFILE=appi && npm run build:lambda && npx cdk deploy --profile appi --require-approval never && npm run s3:sync:static && npm run invalidate",
-    "tts": "tsx scripts/tts/main.ts"
+    "tts": "tsx scripts/tts/main.ts && npm run s3:sync:audio && npm run invalidate"
   },
   "devDependencies": {
     "@broccoliapps/dev-tools": "*",

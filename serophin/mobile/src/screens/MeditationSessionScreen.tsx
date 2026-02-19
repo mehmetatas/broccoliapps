@@ -6,7 +6,7 @@ import { GradientBackground } from "../components/GradientBackground";
 import { SessionTimer } from "../components/SessionTimer";
 import { DEFAULTS, GUIDANCE_LEVELS } from "../data/defaults";
 import { gentleSchedule, guidedSchedule } from "../data/guidanceSchedule";
-import { preDownloadGuidanceAudio } from "../hooks/audioCache";
+import { ensureAudioFile, preDownloadGuidanceAudio } from "../hooks/audioCache";
 import { useBackgroundSound } from "../hooks/useBackgroundSound";
 import { useBellSchedule } from "../hooks/useBellSchedule";
 import { useGuidanceAudio } from "../hooks/useGuidanceAudio";
@@ -49,13 +49,42 @@ export const MeditationSessionScreen = ({ navigation }: Props) => {
     };
   }, [needsCues, guidanceLevel, duration]);
 
-  const { duck, unduck } = useBackgroundSound({ sound, isActive: cuesReady, durationMinutes: duration });
+  // Pre-download background sound file
+  const needsSound = sound !== "none";
+  const [soundReady, setSoundReady] = useState(!needsSound);
+
+  useEffect(() => {
+    if (!needsSound) {
+      setSoundReady(true);
+      return;
+    }
+    let cancelled = false;
+    ensureAudioFile(`${sound}.m4a`)
+      .then(() => {
+        if (!cancelled) {
+          setSoundReady(true);
+        }
+      })
+      .catch((e) => {
+        console.warn("MeditationSession: background sound download failed", e);
+        if (!cancelled) {
+          setSoundReady(true);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [needsSound, sound]);
+
+  const sessionReady = cuesReady && soundReady;
+
+  const { duck, unduck } = useBackgroundSound({ sound, isActive: sessionReady, durationMinutes: duration });
   const endDoubleBell = guidanceLevel <= 1 && sound === "none";
   const { skipForward: bellSkipForward } = useBellSchedule(guidanceLevel === 1, duration, endDoubleBell);
   const { skipForward: guidanceSkipForward } = useGuidanceAudio({
     guidanceLevel,
     durationMinutes: duration,
-    isActive: cuesReady,
+    isActive: sessionReady,
     onDuck: duck,
     onUnduck: unduck,
   });
@@ -78,7 +107,7 @@ export const MeditationSessionScreen = ({ navigation }: Props) => {
     [bellSkipForward, guidanceSkipForward],
   );
 
-  if (!cuesReady) {
+  if (!sessionReady) {
     return (
       <GradientBackground>
         <View style={styles.container}>

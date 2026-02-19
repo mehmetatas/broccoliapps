@@ -132,6 +132,7 @@ export const useBackgroundSound = ({ sound, isActive, durationMinutes }: Options
     if (Math.abs(start - target) < 0.01) {
       duckMultiplierRef.current = target;
       currentPlayerRef.current?.setVolume(target);
+      nextPlayerRef.current?.setVolume(target);
       return;
     }
     let step = 0;
@@ -140,6 +141,7 @@ export const useBackgroundSound = ({ sound, isActive, durationMinutes }: Options
       const t = Math.min(1, step / DUCK_STEPS);
       duckMultiplierRef.current = start + (target - start) * t;
       currentPlayerRef.current?.setVolume(duckMultiplierRef.current);
+      nextPlayerRef.current?.setVolume(duckMultiplierRef.current);
       if (step >= DUCK_STEPS) {
         if (duckTimerRef.current !== null) {
           BackgroundTimer.clearInterval(duckTimerRef.current);
@@ -430,6 +432,10 @@ export const useBackgroundSound = ({ sound, isActive, durationMinutes }: Options
         BackgroundTimer.clearTimeout(crossfadeScheduleRef.current);
         crossfadeScheduleRef.current = null;
       }
+      if (crossfadeTimerRef.current !== null) {
+        BackgroundTimer.clearInterval(crossfadeTimerRef.current);
+        crossfadeTimerRef.current = null;
+      }
 
       let elapsed = 0;
       const totalTicks = (fadeoutSeconds * 1000) / TICK_MS;
@@ -451,6 +457,10 @@ export const useBackgroundSound = ({ sound, isActive, durationMinutes }: Options
             BackgroundTimer.clearInterval(fadeoutTimerRef.current);
             fadeoutTimerRef.current = null;
           }
+          stopAndRelease(currentPlayerRef.current);
+          currentPlayerRef.current = null;
+          stopAndRelease(nextPlayerRef.current);
+          nextPlayerRef.current = null;
         }
       }, TICK_MS);
     };
